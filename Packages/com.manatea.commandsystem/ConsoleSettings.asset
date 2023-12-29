@@ -1,0 +1,36 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: de1bf1f3cd263334abd5b7fb14f9da17, type: 3}
+  m_Name: ConsoleSettings
+  m_EditorClassIdentifier: 
+  _hideGameObject: 1
+  _disableInBuild: 0
+  _defaultFontSize: 16
+  _font: {fileID: 0}
+  _autocompleteCommands: 1
+  _autocompleteParameters: 1
+  _showParameters: 1
+  _highlightActiveParameter: 1
+  _tintParameterTypes: 1
+  _consoleKey: 284
+  _modifierShift: 0
+  _modifierControl: 0
+  _modifierAlt: 0
+  _logLevel: 1
+  _colorText: {r: 1, g: 1, b: 1, a: 1}
+  _colorBg: {r: 0, g: 0, b: 0, a: 0.75}
+  _colorSelection: {r: 0.25, g: 0.25, b: 0.25, a: 0.75}
+  _paramColorBool: {r: 0.92, g: 0.35, b: 0.23, a: 1}
+  _paramColorInt: {r: 0.4, g: 0.85, b: 0.08, a: 1}
+  _paramColorFloat: {r: 0.08, g: 0.9, b: 0.75, a: 1}
+  _paramColorEnum: {r: 0.16, g: 0.35, b: 0.97, a: 1}
+  _paramColorString: {r: 0.85, g: 0.3, b: 0.92, a: 1}

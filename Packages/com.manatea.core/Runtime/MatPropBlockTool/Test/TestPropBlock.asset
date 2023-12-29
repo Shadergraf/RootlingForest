@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6d077cf7f379f1e47a9aae5c0d0f87c5, type: 3}
+  m_Name: TestPropBlock
+  m_EditorClassIdentifier: 
+  colorProps:
+  - name: _Tint
+    propertyType: 0
+    constValue: {r: 1, g: 0.9858491, b: 0.9858491, a: 1}
+    generator: {fileID: 11400000, guid: 11b80f2e37d5fe148ad951d611d7c2d5, type: 2}
+  floatProps: []
+  intProps: []
+  matrixProps: []
+  textureProps: []
+  vectorProps: []

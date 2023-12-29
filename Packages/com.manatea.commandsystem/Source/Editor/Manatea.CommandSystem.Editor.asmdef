@@ -1,0 +1,18 @@
+{
+    "name": "Manatea.CommandSystem.Editor",
+    "rootNamespace": "",
+    "references": [
+        "GUID:d7fdb6ea84720db45a661c3eeef05357"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
