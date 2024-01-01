@@ -7,7 +7,7 @@ namespace Manatea.CommandSystem
     /// </summary>
     public class ConsoleGUISettings : ScriptableObject
     {
-        [SerializeField, Tooltip("Hides the GameObject that the console window is attached to.")]
+        [SerializeField, Tooltip("Hides the manager GameObject that the console window is attached to.")]
         private bool _hideGameObject = true;
         [SerializeField, Tooltip("Disables the console window in build by adding the \"CONSOLE_DISABLE\" define symbol.")]
         private bool _disableInBuild = false;

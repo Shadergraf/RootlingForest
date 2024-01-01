@@ -152,8 +152,8 @@ Rigidbody:
   m_GameObject: {fileID: 4226559076182182294}
   serializedVersion: 4
   m_Mass: 1
-  m_Drag: 0
-  m_AngularDrag: 0
+  m_Drag: 0.5
+  m_AngularDrag: 0.5
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
   m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
@@ -182,14 +182,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5266fe543a7f7d64388b4cde3b2c86bf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Speed: 60
-  MaxMoveSpeed: 2
+  Speed: 110
+  AirSpeed: 15
   GroundDetectionDistance: 0.15
-  GroundDrag: 0
-  AirDrag: 0
-  JumpForce: 2
-  GroundingAttractionForce: 20
-  FeetDrag: 8
+  JumpForce: 8
+  FeetDrag: 20
+  MaxSlopeAngle: 46
+  StationaryFriction: 1
+  MovementFriction: 0.1
+  StepHeight: 1.75
+  SkinThickness: 0.05
 --- !u!1 &4824895105632388978
 GameObject:
   m_ObjectHideFlags: 0

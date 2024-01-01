@@ -15,6 +15,10 @@ namespace Manatea.AdventureRoots.Cameras
         private void OnEnable()
         {
             m_LastTarget = transform.position;
+
+            if (Target)
+                m_LastTarget = Target.transform.position;
+            transform.position = m_LastTarget;
         }
 
         private void Update()

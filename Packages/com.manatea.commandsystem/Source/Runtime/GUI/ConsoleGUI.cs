@@ -16,7 +16,6 @@ namespace Manatea.CommandSystem
         { get; set; }
         private static Dictionary<string, MethodInfo> CachedCommandList;
 
-
         /// <summary>
         /// Called when the console window was opened.
         /// </summary>
@@ -36,7 +35,8 @@ namespace Manatea.CommandSystem
         private bool dirty;
 
         private int fontSize => Mathf.Max(ConsoleGUISettings.FontSize, 1);
-        private int CharacterWidth => (int)(fontSize * 0.75f);
+        private int LineHeight => fontSize + 3;
+        private int CharacterWidth => (int)(fontSize * 0.75);
         private bool DisplayCurrentCommand => ConsoleGUISettings.AutocompleteCommands && CommandMethod != null && CommandMethod.GetParameters().Length > 0;
 
         private bool consoleVisible = false;
@@ -234,7 +234,7 @@ namespace Manatea.CommandSystem
 
 
 
-            GUI.Label(new Rect(0, Screen.height - fontSize, CharacterWidth, fontSize), ">");
+            GUI.Label(new Rect(0, Screen.height - LineHeight, CharacterWidth, LineHeight), ">");
 
             if (Event.current.type == EventType.Repaint)
                 commandErrorAnimation = Mathf.Max(commandErrorAnimation - Time.unscaledDeltaTime, 0);
@@ -242,7 +242,7 @@ namespace Manatea.CommandSystem
 
             const string CommandTextField = "CommandTextField";
             GUI.SetNextControlName(CommandTextField);
-            string newCommandInput = GUI.TextField(new Rect(CharacterWidth, Screen.height - fontSize, Screen.width - CharacterWidth, fontSize), CommandInput);
+            string newCommandInput = GUI.TextField(new Rect(CharacterWidth, Screen.height - LineHeight, Screen.width - CharacterWidth, LineHeight), CommandInput);
             CommandInputTextEditor = (TextEditor)GUIUtility.GetStateObject(typeof(TextEditor), GUIUtility.keyboardControl);
             if (CommandInput != newCommandInput || dirty)
             {
@@ -254,10 +254,10 @@ namespace Manatea.CommandSystem
 
 
 
-            Rect FullAutoWindow = new Rect(CharacterWidth, 0, Screen.width - CharacterWidth, Screen.height - fontSize);
-            float AutocompleteHeight = AutocompleteObjects.Count * fontSize;
-            Rect AutocompleteWindow = new Rect(CharacterWidth, 0, Screen.width - CharacterWidth, Mathf.Min(AutocompleteHeight, Screen.height - fontSize));
-            AutocompleteWindow.y = Screen.height - fontSize - AutocompleteWindow.height;
+            Rect FullAutoWindow = new Rect(CharacterWidth, 0, Screen.width - CharacterWidth, Screen.height - LineHeight);
+            float AutocompleteHeight = AutocompleteObjects.Count * LineHeight;
+            Rect AutocompleteWindow = new Rect(CharacterWidth, 0, Screen.width - CharacterWidth, Mathf.Min(AutocompleteHeight, Screen.height - LineHeight));
+            AutocompleteWindow.y = Screen.height - LineHeight - AutocompleteWindow.height;
             GUILayout.BeginArea(FullAutoWindow);
 
             GUILayout.FlexibleSpace();
@@ -285,7 +285,7 @@ namespace Manatea.CommandSystem
                         commandSpacer += ProcessedCommand[i] + " ";
                     }
                 }
-                GUILayout.Label(commandSpacer, GUILayout.Height(fontSize), GUILayout.ExpandWidth(false));
+                GUILayout.Label(commandSpacer, GUILayout.Height(LineHeight), GUILayout.ExpandWidth(false));
                 GUI.color = Color.white;
                 GUILayout.BeginVertical();
 
@@ -310,7 +310,7 @@ namespace Manatea.CommandSystem
             // Display current command
             if (DisplayCurrentCommand)
             {
-                GUILayout.Label(GetAutocompleteFormatting(CommandMethod), GUILayout.Height(fontSize));
+                GUILayout.Label(GetAutocompleteFormatting(CommandMethod), GUILayout.Height(LineHeight));
             }
 
             GUILayout.EndArea();
@@ -324,14 +324,14 @@ namespace Manatea.CommandSystem
             if (element is MethodInfo)
             {
                 MethodInfo methodInfo = (MethodInfo)element;
-                if (GUILayout.Button(GetAutocompleteFormatting(methodInfo), GUILayout.Height(fontSize)))
+                if (GUILayout.Button(GetAutocompleteFormatting(methodInfo), GUILayout.Height(LineHeight)))
                 {
                     SelectAutocompleteObject(methodInfo);
                 }
             }
             else
             {
-                if (GUILayout.Button(element.ToString(), GUILayout.Height(fontSize)))
+                if (GUILayout.Button(element.ToString(), GUILayout.Height(LineHeight)))
                 {
                     SelectAutocompleteObject(element);
                 }
@@ -629,10 +629,10 @@ namespace Manatea.CommandSystem
                         AutocompleteSelectedId = (int)Mathf.Repeat(AutocompleteSelectedId + autocompleteCursorDelta, AutocompleteObjects.Count);
                         AutocompleteSelectedObject = AutocompleteObjects[AutocompleteSelectedId];
 
-                        float limit = (AutocompleteObjects.Count - AutocompleteSelectedId - 1) * fontSize;
+                        float limit = (AutocompleteObjects.Count - AutocompleteSelectedId - 1) * LineHeight;
                         if (limit < AutocompletePosition.y)
                             AutocompletePosition.y = limit;
-                        limit = (AutocompleteObjects.Count - AutocompleteSelectedId - 1) * fontSize - (Screen.height - fontSize * (DisplayCurrentCommand ? 3 : 2));
+                        limit = (AutocompleteObjects.Count - AutocompleteSelectedId - 1) * LineHeight - (Screen.height - LineHeight * (DisplayCurrentCommand ? 3 : 2));
                         if (limit > AutocompletePosition.y)
                             AutocompletePosition.y = limit;
                     }
