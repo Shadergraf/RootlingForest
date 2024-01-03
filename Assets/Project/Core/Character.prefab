@@ -182,8 +182,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5266fe543a7f7d64388b4cde3b2c86bf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  Collider: {fileID: 1729428418819654932}
   Speed: 110
-  AirSpeed: 15
+  AirSpeed: 20
   GroundDetectionDistance: 0.15
   JumpForce: 8
   FeetDrag: 20
@@ -191,6 +192,7 @@ MonoBehaviour:
   StationaryFriction: 1
   MovementFriction: 0.1
   StepHeight: 1.75
+  DashForce: 10
   SkinThickness: 0.05
 --- !u!1 &4824895105632388978
 GameObject:

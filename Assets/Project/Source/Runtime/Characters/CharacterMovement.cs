@@ -10,6 +10,7 @@ namespace Manatea.AdventureRoots
     [RequireComponent(typeof(Rigidbody))]
     public class CharacterMovement : MonoBehaviour
     {
+        public Collider Collider;
         public float Speed = 1;
         public float AirSpeed = 1;
         public float GroundDetectionDistance = 0.01f;
@@ -19,11 +20,11 @@ namespace Manatea.AdventureRoots
         public float StationaryFriction = 1;
         public float MovementFriction = 0.1f;
         public float StepHeight = 0.4f;
+        public float DashForce = 10;
 
         public float SkinThickness = 0.05f;
 
 
-        private CapsuleCollider m_CapsuleCollider;
         private Rigidbody m_RigidBody;
 
         private Vector3 m_ScheduledMove;
@@ -39,33 +40,24 @@ namespace Manatea.AdventureRoots
 
         private void Start()
         {
-            m_CapsuleCollider = GetComponent<CapsuleCollider>();
             m_RigidBody = GetComponent<Rigidbody>();
 
             m_PhysicsMaterial = new PhysicMaterial();
             m_PhysicsMaterial.frictionCombine = PhysicMaterialCombine.Minimum;
-            m_CapsuleCollider.material = m_PhysicsMaterial;
+            Collider.material = m_PhysicsMaterial;
         }
 
-        private void Update()
+        public void Move(Vector3 moveVector)
         {
-            Vector3 inputVector = Vector3.zero;
-            if (InputSystem.GetDevice<Keyboard>().dKey.isPressed)
-                inputVector += Vector3.right;
-            if (InputSystem.GetDevice<Keyboard>().aKey.isPressed)
-                inputVector += Vector3.left;
-            if (InputSystem.GetDevice<Keyboard>().wKey.isPressed)
-                inputVector += Vector3.forward;
-            if (InputSystem.GetDevice<Keyboard>().sKey.isPressed)
-                inputVector += Vector3.back;
-            if (inputVector != Vector3.zero)
-                inputVector.Normalize();
-
-            m_ScheduledMove = inputVector;
-
-
-            if (InputSystem.GetDevice<Keyboard>().spaceKey.wasPressedThisFrame)
-                m_ScheduledJump = true;
+            m_ScheduledMove = moveVector;
+        }
+        public void Jump()
+        {
+            m_ScheduledJump = true;
+        }
+        public void ReleaseJump()
+        {
+            m_ScheduledJump = false;
         }
 
         private void FixedUpdate()
@@ -80,7 +72,7 @@ namespace Manatea.AdventureRoots
 
             // Ground detection
             bool groundDetected = DetectGround(out RaycastHit groundHitResult, out RaycastHit preciseGroundHitResult);
-            Vector3 feetPos = transform.position - transform.up * m_CapsuleCollider.height / 2;
+            Vector3 feetPos = Collider.ClosestPointOnBounds(transform.position + Physics.gravity * 10000);
 
 
             m_IsGrounded = groundDetected;
@@ -129,10 +121,10 @@ namespace Manatea.AdventureRoots
                     }
                     else
                     {
-                        if (Vector3.Dot(contactMove, preciseGroundHitResult.normal) > 0)
-                            contactMove = Vector3.ProjectOnPlane(contactMove, preciseGroundHitResult.normal);
+                        if (Vector3.Dot(contactMove, groundHitResult.normal) > 0)
+                            contactMove = Vector3.ProjectOnPlane(contactMove, groundHitResult.normal);
                         else
-                            contactMove = Vector3.ProjectOnPlane(contactMove - Physics.gravity * dt, preciseGroundHitResult.normal);
+                            contactMove = Vector3.ProjectOnPlane(contactMove - Physics.gravity * dt, groundHitResult.normal);
                     }
 
                     m_RigidBody.AddForce(contactMove * Speed, ForceMode.Acceleration);
@@ -150,9 +142,19 @@ namespace Manatea.AdventureRoots
             if (m_ScheduledJump && m_IsGrounded)
             {
                 m_RigidBody.velocity = Vector3.ProjectOnPlane(m_RigidBody.velocity, Physics.gravity.normalized);
-                m_RigidBody.AddForce(-Physics.gravity.normalized * JumpForce, ForceMode.VelocityChange);
+                Vector3 jumpForce = -Physics.gravity.normalized * JumpForce;
+                m_RigidBody.AddForce(jumpForce, ForceMode.VelocityChange);
                 m_ScheduledJump = false;
                 m_ForceAirborneTimer = 0.05f;
+
+                for (int i = 0; i < m_GroundColliderCount; i++)
+                {
+                    if (m_GroundColliders[i] && m_GroundColliders[i].attachedRigidbody)
+                    {
+                        m_GroundColliders[i].attachedRigidbody.AddForceAtPosition(-m_RigidBody.velocity, feetPos, ForceMode.Impulse);
+                        m_GroundColliders[i].attachedRigidbody.AddForceAtPosition(-m_RigidBody.GetAccumulatedForce(), feetPos, ForceMode.Force);
+                    }
+                }
             }
 
             float frictionTarget = MMath.LerpClamped(StationaryFriction, MovementFriction, contactMove.magnitude); ;
@@ -164,44 +166,74 @@ namespace Manatea.AdventureRoots
             Debug.DrawLine(transform.position, transform.position + contactMove, Color.green, dt, false);
         }
 
+        private int m_GroundColliderCount = 0;
+        private Collider[] m_GroundColliders = new Collider[8];
 
         private RaycastHit[] m_GroundHits = new RaycastHit[8];
         private bool DetectGround(out RaycastHit groundHitResult, out RaycastHit preciseGroundHitResult)
         {
-            float capsuleHalfHeightWithoutHemisphere = m_CapsuleCollider.height / 2 - m_CapsuleCollider.radius;
             groundHitResult = new RaycastHit();
             preciseGroundHitResult = new RaycastHit();
 
             int layerMask = LayerMask.GetMask(LayerMask.LayerToName(gameObject.layer));
             Ray ray = new Ray();
-            ray.origin = transform.TransformPoint(m_CapsuleCollider.center - Vector3.up * capsuleHalfHeightWithoutHemisphere);
-            ray.direction = Vector3.down;
-            float radius = m_CapsuleCollider.radius - SkinThickness;
             float distance = GroundDetectionDistance + SkinThickness;
 
-            DebugHelper.DrawWireSphere(ray.origin, radius, Color.red, Time.fixedDeltaTime, false);
-            DebugHelper.DrawWireSphere(ray.GetPoint(distance), radius, Color.red, Time.fixedDeltaTime, false);
-            int hits = Physics.SphereCastNonAlloc(ray, radius, m_GroundHits, distance, layerMask);
+            int hits = 0;
+            if (Collider is CapsuleCollider)
+            {
+                CapsuleCollider capsuleCollider = (CapsuleCollider)Collider;
+                float scaledRadius = capsuleCollider.radius * MMath.Max(Vector3.ProjectOnPlane(transform.localScale, capsuleCollider.direction == 0 ? Vector3.right : (capsuleCollider.direction == 1 ? Vector3.up : Vector3.forward)));
+                float scaledHeight = MMath.Max(capsuleCollider.height, capsuleCollider.radius * 2) * (capsuleCollider.direction == 0 ? transform.localScale.x : (capsuleCollider.direction == 1 ? transform.localScale.y : transform.localScale.z));
+
+                float capsuleHalfHeightWithoutHemisphereScaled = scaledHeight / 2 - scaledRadius;
+                ray.origin = transform.TransformPoint(capsuleCollider.center) - transform.TransformDirection(Vector2.up) * capsuleHalfHeightWithoutHemisphereScaled;
+                ray.direction = Vector3.down;
+                float raycastRadius = scaledRadius - SkinThickness;
+                hits = Physics.SphereCastNonAlloc(ray, raycastRadius, m_GroundHits, distance, layerMask);
+
+                DebugHelper.DrawWireSphere(ray.origin, raycastRadius, Color.red, Time.fixedDeltaTime, false);
+                DebugHelper.DrawWireSphere(ray.GetPoint(distance), raycastRadius, Color.red, Time.fixedDeltaTime, false);
+                DebugHelper.DrawWireSphere(ray.GetPoint(groundHitResult.distance), raycastRadius, Color.green, Time.fixedDeltaTime, false);
+            }
+            else if (Collider is SphereCollider)
+            {
+                SphereCollider sphereCollider = (SphereCollider)Collider;
+                ray.origin = transform.TransformPoint(sphereCollider.center);
+                ray.direction = Vector3.down;
+                float scaledRadius = sphereCollider.radius * MMath.Max(transform.localScale);
+                float radius = scaledRadius - SkinThickness;
+                hits = Physics.SphereCastNonAlloc(ray, radius, m_GroundHits, distance, layerMask);
+
+                DebugHelper.DrawWireSphere(ray.origin, radius, Color.red, Time.fixedDeltaTime, false);
+                DebugHelper.DrawWireSphere(ray.GetPoint(distance), radius, Color.red, Time.fixedDeltaTime, false);
+                DebugHelper.DrawWireSphere(ray.GetPoint(groundHitResult.distance), radius, Color.green, Time.fixedDeltaTime, false);
+            }
+
             if (hits == 0)
                 return false;
 
             groundHitResult.distance = float.PositiveInfinity;
+            m_GroundColliderCount = 0;
             for (int i = 0; i < hits; i++)
             {
-                if (m_GroundHits[i].distance < groundHitResult.distance && m_GroundHits[i].collider.gameObject != gameObject)
-                {
-                    groundHitResult = m_GroundHits[i];
-                }
+                if (m_GroundHits[i].distance > groundHitResult.distance)
+                    continue;
+                if (m_GroundHits[i].collider.gameObject == gameObject)
+                    continue;
+
+                groundHitResult = m_GroundHits[i];
+                m_GroundColliders[i] = groundHitResult.collider;
+                m_GroundColliderCount++;
             }
             if (groundHitResult.distance == float.PositiveInfinity)
                 return false;
 
-            DebugHelper.DrawWireSphere(ray.GetPoint(groundHitResult.distance), radius, Color.green, Time.fixedDeltaTime, false);
+            bool preciseHit = Physics.Raycast(groundHitResult.point + Vector3.up * 0.0001f + groundHitResult.normal * 0.001f, -groundHitResult.normal, out preciseGroundHitResult, 0.1f, layerMask);
+            if (!preciseHit)
+                preciseHit = Physics.Raycast(groundHitResult.point - Vector3.up * 0.0001f + groundHitResult.normal * 0.001f, -groundHitResult.normal, out preciseGroundHitResult, 0.1f, layerMask);
 
-            bool preciseHit = Physics.Raycast(groundHitResult.point + Vector3.up * 0.0005f + groundHitResult.normal * 0.001f, -groundHitResult.normal, out preciseGroundHitResult, radius, layerMask);
-            Debug.Assert(preciseHit);
-
-            return true;
+            return preciseHit;
         }
 
         private void OnGUI()
