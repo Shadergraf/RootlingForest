@@ -62,6 +62,9 @@ namespace Manatea.AdventureRoots
 
         private void FixedUpdate()
         {
+            Debug.Assert(Collider, "No collider setup!", gameObject);
+            Debug.Assert(m_RigidBody, "No rigidbody attached!", gameObject);
+
             UpdatePhysics(Time.fixedDeltaTime);
         }
 
@@ -72,7 +75,7 @@ namespace Manatea.AdventureRoots
 
             // Ground detection
             bool groundDetected = DetectGround(out RaycastHit groundHitResult, out RaycastHit preciseGroundHitResult);
-            Vector3 feetPos = Collider.ClosestPointOnBounds(transform.position + Physics.gravity * 10000);
+            Vector3 feetPos = Collider.ClosestPoint(transform.position + Physics.gravity * 10000);
 
 
             m_IsGrounded = groundDetected;
@@ -176,7 +179,6 @@ namespace Manatea.AdventureRoots
             preciseGroundHitResult = new RaycastHit();
 
             int layerMask = LayerMask.GetMask(LayerMask.LayerToName(gameObject.layer));
-            Ray ray = new Ray();
             float distance = GroundDetectionDistance + SkinThickness;
 
             int hits = 0;
@@ -187,18 +189,19 @@ namespace Manatea.AdventureRoots
                 float scaledHeight = MMath.Max(capsuleCollider.height, capsuleCollider.radius * 2) * (capsuleCollider.direction == 0 ? transform.localScale.x : (capsuleCollider.direction == 1 ? transform.localScale.y : transform.localScale.z));
 
                 float capsuleHalfHeightWithoutHemisphereScaled = scaledHeight / 2 - scaledRadius;
-                ray.origin = transform.TransformPoint(capsuleCollider.center) - transform.TransformDirection(Vector2.up) * capsuleHalfHeightWithoutHemisphereScaled;
-                ray.direction = Vector3.down;
+                Vector3 p1 = transform.TransformPoint(capsuleCollider.center) + transform.TransformDirection(Vector2.up) * capsuleHalfHeightWithoutHemisphereScaled;
+                Vector3 p2 = transform.TransformPoint(capsuleCollider.center) - transform.TransformDirection(Vector2.up) * capsuleHalfHeightWithoutHemisphereScaled;
                 float raycastRadius = scaledRadius - SkinThickness;
-                hits = Physics.SphereCastNonAlloc(ray, raycastRadius, m_GroundHits, distance, layerMask);
+                hits = Physics.CapsuleCastNonAlloc(p1, p2, raycastRadius, Vector3.down, m_GroundHits, distance, layerMask);
 
-                DebugHelper.DrawWireSphere(ray.origin, raycastRadius, Color.red, Time.fixedDeltaTime, false);
-                DebugHelper.DrawWireSphere(ray.GetPoint(distance), raycastRadius, Color.red, Time.fixedDeltaTime, false);
-                DebugHelper.DrawWireSphere(ray.GetPoint(groundHitResult.distance), raycastRadius, Color.green, Time.fixedDeltaTime, false);
+                DebugHelper.DrawWireSphere(p2, raycastRadius, Color.red, Time.fixedDeltaTime, false);
+                DebugHelper.DrawWireSphere(p2 + Vector3.down * distance, raycastRadius, Color.red, Time.fixedDeltaTime, false);
+                DebugHelper.DrawWireSphere(p2 + Vector3.down * groundHitResult.distance, raycastRadius, Color.green, Time.fixedDeltaTime, false);
             }
             else if (Collider is SphereCollider)
             {
                 SphereCollider sphereCollider = (SphereCollider)Collider;
+                Ray ray = new Ray();
                 ray.origin = transform.TransformPoint(sphereCollider.center);
                 ray.direction = Vector3.down;
                 float scaledRadius = sphereCollider.radius * MMath.Max(transform.localScale);
@@ -209,6 +212,8 @@ namespace Manatea.AdventureRoots
                 DebugHelper.DrawWireSphere(ray.GetPoint(distance), radius, Color.red, Time.fixedDeltaTime, false);
                 DebugHelper.DrawWireSphere(ray.GetPoint(groundHitResult.distance), radius, Color.green, Time.fixedDeltaTime, false);
             }
+            else
+                Debug.Assert(false, "Collider type is not supported!", gameObject);
 
             if (hits == 0)
                 return false;
