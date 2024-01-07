@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -7,35 +8,46 @@ public class PlayerController : CharacterController
 {
     public float DashForce;
 
+    private Keyboard keeb;
+    private Mouse mickey;
+
+    private void OnEnable()
+    {
+        keeb = InputSystem.GetDevice<Keyboard>();
+        mickey = InputSystem.GetDevice<Mouse>();
+    }
+
     private void Update()
     {
+
         Vector3 inputVector = Vector3.zero;
-        if (InputSystem.GetDevice<Keyboard>().dKey.isPressed)
+
+        if (keeb.dKey.isPressed)
             inputVector += Vector3.right;
-        if (InputSystem.GetDevice<Keyboard>().aKey.isPressed)
+        if (keeb.aKey.isPressed)
             inputVector += Vector3.left;
-        if (InputSystem.GetDevice<Keyboard>().wKey.isPressed)
+        if (keeb.wKey.isPressed)
             inputVector += Vector3.forward;
-        if (InputSystem.GetDevice<Keyboard>().sKey.isPressed)
+        if (keeb.sKey.isPressed)
             inputVector += Vector3.back;
         if (inputVector != Vector3.zero)
             inputVector.Normalize();
 
         CharacterMovement.Move(inputVector);
 
-        if (InputSystem.GetDevice<Keyboard>().spaceKey.isPressed)
+        if (keeb.spaceKey.isPressed)
             CharacterMovement.Jump();
         else
             CharacterMovement.ReleaseJump();
 
-        if (InputSystem.GetDevice<Keyboard>().eKey.wasPressedThisFrame)
+        if (keeb.eKey.wasPressedThisFrame)
             CharacterMovement.GetComponent<Rigidbody>().AddForce(inputVector * DashForce, ForceMode.Impulse);
 
 
 #if DEBUG
-        if (InputSystem.GetDevice<Keyboard>().ctrlKey.isPressed && InputSystem.GetDevice<Mouse>().rightButton.wasPressedThisFrame)
+        if (keeb.ctrlKey.isPressed && mickey.rightButton.wasPressedThisFrame)
         {
-            Ray ray = Camera.main.ScreenPointToRay(InputSystem.GetDevice<Mouse>().position.value);
+            Ray ray = Camera.main.ScreenPointToRay(mickey.position.value);
             if (Physics.Raycast(ray, out RaycastHit hit))
             {
                 transform.GetComponent<Rigidbody>().position = hit.point + hit.normal;
