@@ -21,8 +21,11 @@ namespace Manatea.AdventureRoots
         public float MovementFriction = 0.1f;
         public float StepHeight = 0.4f;
         public float DashForce = 10;
+        public float RotationRate = 10;
 
         public float SkinThickness = 0.05f;
+
+        public bool DebugCharacter = false;
 
 
         private Rigidbody m_RigidBody;
@@ -38,13 +41,18 @@ namespace Manatea.AdventureRoots
         private PhysicMaterial m_PhysicsMaterial;
 
 
-        private void Start()
+        private void Awake()
         {
             m_RigidBody = GetComponent<Rigidbody>();
 
             m_PhysicsMaterial = new PhysicMaterial();
             m_PhysicsMaterial.frictionCombine = PhysicMaterialCombine.Minimum;
             Collider.material = m_PhysicsMaterial;
+        }
+
+        private void OnEnable()
+        {
+            m_RigidBody.freezeRotation = true;
         }
 
         public void Move(Vector3 moveVector)
@@ -91,18 +99,18 @@ namespace Manatea.AdventureRoots
 
 
             // The direction we want to move in
-            Debug.DrawLine(transform.position, transform.position + m_ScheduledMove, Color.blue, dt, false);
-            if (groundDetected)
-                Debug.DrawLine(preciseGroundHitResult.point, preciseGroundHitResult.point + preciseGroundHitResult.normal, Color.black, dt, false);
+            if (DebugCharacter)
+            {
+                Debug.DrawLine(transform.position, transform.position + m_ScheduledMove, Color.blue, dt, false);
+                if (groundDetected)
+                    Debug.DrawLine(preciseGroundHitResult.point, preciseGroundHitResult.point + preciseGroundHitResult.normal, Color.black, dt, false);
+            }
 
             // Feet drag
             if (m_IsGrounded && !m_IsSliding)
             {
                 m_RigidBody.velocity = m_RigidBody.velocity * Mathf.Clamp01(1 - FeetDrag * dt);
             }
-
-            if (preciseGroundHitResult.point.y > 0.001f)
-                Debug.DebugBreak();
 
             // Contact Movement
             // movement that results from ground or surface contact
@@ -116,7 +124,8 @@ namespace Manatea.AdventureRoots
                     {
                         // TODO only do this if we are moving TOWARDS the wall, not if we are moving away from it
                         Vector3 wallNormal = Vector3.ProjectOnPlane(preciseGroundHitResult.normal, Physics.gravity.normalized).normalized;
-                        Debug.DrawLine(preciseGroundHitResult.point + Vector3.one, preciseGroundHitResult.point + Vector3.one + wallNormal, Color.blue, dt, false);
+                        if (DebugCharacter)
+                            Debug.DrawLine(preciseGroundHitResult.point + Vector3.one, preciseGroundHitResult.point + Vector3.one + wallNormal, Color.blue, dt, false);
                         if (Vector3.Dot(wallNormal, contactMove) < 0)
                         {
                             contactMove = Vector3.ProjectOnPlane(contactMove, wallNormal).normalized * contactMove.magnitude;
@@ -124,10 +133,10 @@ namespace Manatea.AdventureRoots
                     }
                     else
                     {
-                        if (Vector3.Dot(contactMove, groundHitResult.normal) > 0)
-                            contactMove = Vector3.ProjectOnPlane(contactMove, groundHitResult.normal);
-                        else
-                            contactMove = Vector3.ProjectOnPlane(contactMove - Physics.gravity * dt, groundHitResult.normal);
+                        // When we walk perpendicular to a slope we do not expect to move down, we expect the height not to change
+                        // So here we cancel out the gravity factor to reduce this effect
+                        contactMove += -Physics.gravity * dt * (1 + Vector3.Dot(contactMove, -preciseGroundHitResult.normal)) * 0.5f;
+                        contactMove = Vector3.ProjectOnPlane(contactMove, preciseGroundHitResult.normal);
                     }
 
                     m_RigidBody.AddForce(contactMove * Speed, ForceMode.Acceleration);
@@ -138,6 +147,9 @@ namespace Manatea.AdventureRoots
                     float airSpeedMult = MMath.InverseLerpClamped(0.707f, 0f, Vector3.Dot(m_RigidBody.velocity.normalized, contactMove.normalized));
                     m_RigidBody.AddForce(contactMove * AirSpeed * airSpeedMult, ForceMode.Acceleration);
                 }
+
+                // TODO proper physical rotation
+                m_RigidBody.rotation = Quaternion.RotateTowards(m_RigidBody.rotation, Quaternion.LookRotation(Vector3.ProjectOnPlane(contactMove, Vector3.up), Vector3.up), RotationRate * dt);
             }
 
 
@@ -166,7 +178,8 @@ namespace Manatea.AdventureRoots
             m_PhysicsMaterial.staticFriction = frictionTarget;
             m_PhysicsMaterial.dynamicFriction = frictionTarget;
 
-            Debug.DrawLine(transform.position, transform.position + contactMove, Color.green, dt, false);
+            if (DebugCharacter)
+                Debug.DrawLine(transform.position, transform.position + contactMove, Color.green, dt, false);
         }
 
         private int m_GroundColliderCount = 0;
@@ -194,9 +207,11 @@ namespace Manatea.AdventureRoots
                 float raycastRadius = scaledRadius - SkinThickness;
                 hits = Physics.CapsuleCastNonAlloc(p1, p2, raycastRadius, Vector3.down, m_GroundHits, distance, layerMask);
 
-                DebugHelper.DrawWireSphere(p2, raycastRadius, Color.red, Time.fixedDeltaTime, false);
-                DebugHelper.DrawWireSphere(p2 + Vector3.down * distance, raycastRadius, Color.red, Time.fixedDeltaTime, false);
-                DebugHelper.DrawWireSphere(p2 + Vector3.down * groundHitResult.distance, raycastRadius, Color.green, Time.fixedDeltaTime, false);
+                if (DebugCharacter)
+                {
+                    DebugHelper.DrawWireSphere(p2, raycastRadius, Color.red, Time.fixedDeltaTime, false);
+                    DebugHelper.DrawWireSphere(p2 + Vector3.down * distance, raycastRadius, Color.red, Time.fixedDeltaTime, false);
+                }
             }
             else if (Collider is SphereCollider)
             {
@@ -208,9 +223,11 @@ namespace Manatea.AdventureRoots
                 float radius = scaledRadius - SkinThickness;
                 hits = Physics.SphereCastNonAlloc(ray, radius, m_GroundHits, distance, layerMask);
 
-                DebugHelper.DrawWireSphere(ray.origin, radius, Color.red, Time.fixedDeltaTime, false);
-                DebugHelper.DrawWireSphere(ray.GetPoint(distance), radius, Color.red, Time.fixedDeltaTime, false);
-                DebugHelper.DrawWireSphere(ray.GetPoint(groundHitResult.distance), radius, Color.green, Time.fixedDeltaTime, false);
+                if (DebugCharacter)
+                {
+                    DebugHelper.DrawWireSphere(ray.origin, radius, Color.red, Time.fixedDeltaTime, false);
+                    DebugHelper.DrawWireSphere(ray.GetPoint(distance), radius, Color.red, Time.fixedDeltaTime, false);
+                }
             }
             else
                 Debug.Assert(false, "Collider type is not supported!", gameObject);
@@ -248,7 +265,7 @@ namespace Manatea.AdventureRoots
             GUILayout.Label("Is Grounded:" + m_IsGrounded);
             GUILayout.Label("Is Sliding:" + m_IsSliding);
             GUILayout.EndVertical();
-
+        
         }
     }
 }

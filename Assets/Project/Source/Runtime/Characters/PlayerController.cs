@@ -5,6 +5,8 @@ using UnityEngine.InputSystem;
 
 public class PlayerController : CharacterController
 {
+    public float DashForce;
+
     private void Update()
     {
         Vector3 inputVector = Vector3.zero;
@@ -25,5 +27,20 @@ public class PlayerController : CharacterController
             CharacterMovement.Jump();
         else
             CharacterMovement.ReleaseJump();
+
+        if (InputSystem.GetDevice<Keyboard>().eKey.wasPressedThisFrame)
+            CharacterMovement.GetComponent<Rigidbody>().AddForce(inputVector * DashForce, ForceMode.Impulse);
+
+
+#if DEBUG
+        if (InputSystem.GetDevice<Keyboard>().ctrlKey.isPressed && InputSystem.GetDevice<Mouse>().rightButton.wasPressedThisFrame)
+        {
+            Ray ray = Camera.main.ScreenPointToRay(InputSystem.GetDevice<Mouse>().position.value);
+            if (Physics.Raycast(ray, out RaycastHit hit))
+            {
+                transform.GetComponent<Rigidbody>().position = hit.point + hit.normal;
+            }
+        }
+#endif
     }
 }
