@@ -1,36 +1,36 @@
-using System.Collections;
-using System.Collections.Generic;
-using System.Text.RegularExpressions;
-using Unity.Burst.CompilerServices;
 using UnityEngine;
-using UnityEngine.InputSystem;
+using UnityEngine.Serialization;
 
 namespace Manatea.AdventureRoots
 {
     [RequireComponent(typeof(Rigidbody))]
     public class CharacterMovement : MonoBehaviour
     {
-        public Collider Collider;
-        public float Speed = 1;
-        public float AirSpeed = 1;
-        public float GroundDetectionDistance = 0.01f;
+        public float GroundMoveForce = 1;
+        public float AirMoveForce = 1;
         public float JumpForce = 5;
-        public float FeetDrag = 2;
-        public float MaxSlopeAngle = 46;
+        public float StepHeight = 0.4f;
+        public float FeetLinearResistance = 2;
+        public float FeetAngularResistance = 2;
         public float StationaryFriction = 1;
         public float MovementFriction = 0.1f;
-        public float StepHeight = 0.4f;
-        public float DashForce = 10;
-        public float RotationRate = 10;
+        public float GroundRotationRate = 10;
+        public float AirRotationRate = .05f;
 
+        [Header("Collision Detection")]
+        public Collider Collider;
         public float SkinThickness = 0.05f;
+        public float GroundDetectionDistance = 0.01f;
+        public float MaxSlopeAngle = 46;
 
+        [Header("Debug")]
         public bool DebugCharacter = false;
 
 
         private Rigidbody m_RigidBody;
 
         private Vector3 m_ScheduledMove;
+        private Vector3 m_TargetRotation;
         private bool m_ScheduledJump;
         
 
@@ -52,12 +52,14 @@ namespace Manatea.AdventureRoots
 
         private void OnEnable()
         {
-            m_RigidBody.freezeRotation = true;
+            m_TargetRotation = transform.forward;
         }
 
-        public void Move(Vector3 moveVector)
+        public void Move(Vector3 moveVector, bool rotateTowardsMove = true)
         {
             m_ScheduledMove = moveVector;
+            if (rotateTowardsMove && m_ScheduledMove != Vector3.zero)
+                m_TargetRotation = m_ScheduledMove.normalized;
         }
         public void Jump()
         {
@@ -106,11 +108,6 @@ namespace Manatea.AdventureRoots
                     Debug.DrawLine(preciseGroundHitResult.point, preciseGroundHitResult.point + preciseGroundHitResult.normal, Color.black, dt, false);
             }
 
-            // Feet drag
-            if (m_IsGrounded && !m_IsSliding)
-            {
-                m_RigidBody.velocity = m_RigidBody.velocity * Mathf.Clamp01(1 - FeetDrag * dt);
-            }
 
             // Contact Movement
             // movement that results from ground or surface contact
@@ -139,17 +136,28 @@ namespace Manatea.AdventureRoots
                         contactMove = Vector3.ProjectOnPlane(contactMove, preciseGroundHitResult.normal);
                     }
 
-                    m_RigidBody.AddForce(contactMove * Speed, ForceMode.Acceleration);
+                    m_RigidBody.AddForce(contactMove * GroundMoveForce, ForceMode.Acceleration);
                 }
                 // Air movement
                 else
                 {
                     float airSpeedMult = MMath.InverseLerpClamped(0.707f, 0f, Vector3.Dot(m_RigidBody.velocity.normalized, contactMove.normalized));
-                    m_RigidBody.AddForce(contactMove * AirSpeed * airSpeedMult, ForceMode.Acceleration);
+                    m_RigidBody.AddForce(contactMove * AirMoveForce * airSpeedMult, ForceMode.Acceleration);
                 }
 
-                // TODO proper physical rotation
-                m_RigidBody.rotation = Quaternion.RotateTowards(m_RigidBody.rotation, Quaternion.LookRotation(Vector3.ProjectOnPlane(contactMove, Vector3.up), Vector3.up), RotationRate * dt);
+
+                // Add rotation torque
+                // TODO adding 90 deg to the character rotation works out, it might be a hack tho and is not tested in every scenario, could break 
+                float targetRotationTorque = MMath.DeltaAngle((m_RigidBody.rotation.eulerAngles.y + 90) * MMath.Deg2Rad, MMath.Atan2(m_TargetRotation.z, -m_TargetRotation.x)) * MMath.Rad2Deg;
+                if (m_IsGrounded && !m_IsSliding)
+                {
+                    targetRotationTorque *= GroundRotationRate;
+                }
+                else
+                {
+                    targetRotationTorque *= AirRotationRate;
+                }
+                m_RigidBody.AddTorque(0, targetRotationTorque, 0, ForceMode.Force);
             }
 
 
@@ -158,7 +166,7 @@ namespace Manatea.AdventureRoots
             {
                 m_RigidBody.velocity = Vector3.ProjectOnPlane(m_RigidBody.velocity, Physics.gravity.normalized);
                 Vector3 jumpForce = -Physics.gravity.normalized * JumpForce;
-                m_RigidBody.AddForce(jumpForce, ForceMode.VelocityChange);
+                m_RigidBody.AddForce(jumpForce, ForceMode.Impulse);
                 m_ScheduledJump = false;
                 m_ForceAirborneTimer = 0.05f;
 
@@ -172,11 +180,24 @@ namespace Manatea.AdventureRoots
                 }
             }
 
+            // Feet drag
+            if (m_IsGrounded && !m_IsSliding)
+            {
+                m_RigidBody.velocity *= Mathf.Clamp01(1 - FeetLinearResistance * dt);
+                m_RigidBody.angularVelocity *= Mathf.Clamp01(1 - FeetAngularResistance * dt);
+
+                Vector3 accVel = (m_RigidBody.GetAccumulatedForce() * Mathf.Clamp01(1 - FeetLinearResistance * dt)) - m_RigidBody.GetAccumulatedForce();
+                m_RigidBody.AddForce(accVel, ForceMode.Force);
+                Vector3 accTorque = m_RigidBody.GetAccumulatedTorque() - (m_RigidBody.GetAccumulatedTorque() * Mathf.Clamp01(1 - FeetAngularResistance * dt));
+                m_RigidBody.AddTorque(accTorque, ForceMode.Force);
+            }
+
             float frictionTarget = MMath.LerpClamped(StationaryFriction, MovementFriction, contactMove.magnitude); ;
             if (!m_IsGrounded || m_IsSliding)
                 frictionTarget = 0;
             m_PhysicsMaterial.staticFriction = frictionTarget;
             m_PhysicsMaterial.dynamicFriction = frictionTarget;
+
 
             if (DebugCharacter)
                 Debug.DrawLine(transform.position, transform.position + contactMove, Color.green, dt, false);
