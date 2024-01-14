@@ -36,6 +36,7 @@ namespace Manatea.AdventureRoots
 
         // Simulation
         private bool m_IsGrounded;
+        private bool m_IsStableGrounded;
         private bool m_IsSliding;
         private float m_ForceAirborneTimer;
         private PhysicMaterial m_PhysicsMaterial;
@@ -88,14 +89,14 @@ namespace Manatea.AdventureRoots
             Vector3 feetPos = Collider.ClosestPoint(transform.position + Physics.gravity * 10000);
 
 
-            m_IsGrounded = groundDetected;
-            m_IsGrounded &= m_ForceAirborneTimer <= 0;
-            m_IsSliding = m_IsGrounded && MMath.Acos(Vector3.Dot(preciseGroundHitResult.normal, -Physics.gravity.normalized)) * MMath.Rad2Deg > MaxSlopeAngle;
-            m_IsGrounded &= !m_IsSliding;
+            m_IsStableGrounded = groundDetected;
+            m_IsStableGrounded &= m_ForceAirborneTimer <= 0;
+            m_IsSliding = m_IsStableGrounded && MMath.Acos(Vector3.Dot(preciseGroundHitResult.normal, -Physics.gravity.normalized)) * MMath.Rad2Deg > MaxSlopeAngle;
+            m_IsStableGrounded &= !m_IsSliding;
             // Step height
             if (m_IsSliding && Vector3.Dot(preciseGroundHitResult.normal, groundHitResult.normal) < 0.9f && Vector3.Project(preciseGroundHitResult.point - feetPos, transform.up).magnitude < StepHeight)
             {
-                m_IsGrounded = true;
+                m_IsStableGrounded = true;
                 m_IsSliding = false;
             }
 
@@ -114,7 +115,7 @@ namespace Manatea.AdventureRoots
             Vector3 contactMove = m_ScheduledMove;
             if (contactMove != Vector3.zero)
             {
-                if (m_IsGrounded)
+                if (m_IsStableGrounded)
                 {
                     // Wall movement
                     if (m_IsSliding)
@@ -149,7 +150,7 @@ namespace Manatea.AdventureRoots
                 // Add rotation torque
                 // TODO adding 90 deg to the character rotation works out, it might be a hack tho and is not tested in every scenario, could break 
                 float targetRotationTorque = MMath.DeltaAngle((m_RigidBody.rotation.eulerAngles.y + 90) * MMath.Deg2Rad, MMath.Atan2(m_TargetRotation.z, -m_TargetRotation.x)) * MMath.Rad2Deg;
-                if (m_IsGrounded && !m_IsSliding)
+                if (m_IsStableGrounded && !m_IsSliding)
                 {
                     targetRotationTorque *= GroundRotationRate;
                 }
@@ -162,10 +163,12 @@ namespace Manatea.AdventureRoots
 
 
             // Jump
-            if (m_ScheduledJump && m_IsGrounded)
+            if (m_ScheduledJump && m_IsStableGrounded)
             {
-                m_RigidBody.velocity = Vector3.ProjectOnPlane(m_RigidBody.velocity, Physics.gravity.normalized);
-                Vector3 jumpForce = -Physics.gravity.normalized * JumpForce;
+                Vector3 jumpDir = -Physics.gravity.normalized;
+                // TODO add a sliding jump here that is perpendicular to the slide normal
+                m_RigidBody.velocity = Vector3.ProjectOnPlane(m_RigidBody.velocity, jumpDir);
+                Vector3 jumpForce = jumpDir * JumpForce;
                 m_RigidBody.AddForce(jumpForce, ForceMode.Impulse);
                 m_ScheduledJump = false;
                 m_ForceAirborneTimer = 0.05f;
@@ -181,7 +184,7 @@ namespace Manatea.AdventureRoots
             }
 
             // Feet drag
-            if (m_IsGrounded && !m_IsSliding)
+            if (m_IsStableGrounded && !m_IsSliding)
             {
                 m_RigidBody.velocity *= Mathf.Clamp01(1 - FeetLinearResistance * dt);
                 m_RigidBody.angularVelocity *= Mathf.Clamp01(1 - FeetAngularResistance * dt);
@@ -193,7 +196,7 @@ namespace Manatea.AdventureRoots
             }
 
             float frictionTarget = MMath.LerpClamped(StationaryFriction, MovementFriction, contactMove.magnitude); ;
-            if (!m_IsGrounded || m_IsSliding)
+            if (!m_IsStableGrounded || m_IsSliding)
                 frictionTarget = 0;
             m_PhysicsMaterial.staticFriction = frictionTarget;
             m_PhysicsMaterial.dynamicFriction = frictionTarget;
@@ -283,7 +286,7 @@ namespace Manatea.AdventureRoots
         {
             GUILayout.BeginVertical();
             GUI.color = Color.red;
-            GUILayout.Label("Is Grounded:" + m_IsGrounded);
+            GUILayout.Label("Is Grounded:" + m_IsStableGrounded);
             GUILayout.Label("Is Sliding:" + m_IsSliding);
             GUILayout.EndVertical();
         

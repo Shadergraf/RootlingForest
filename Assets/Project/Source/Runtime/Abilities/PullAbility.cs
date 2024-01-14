@@ -16,6 +16,7 @@ public class PullAbility : MonoBehaviour
         m_Joint = gameObject.AddComponent<ConfigurableJoint>();
         m_Joint.connectedBody = Target;
         m_Joint.autoConfigureConnectedAnchor = false;
+        m_Joint.enableCollision = true;
 
         // Find closest point
         var colliders = Target.GetComponents<Collider>();
@@ -29,6 +30,8 @@ public class PullAbility : MonoBehaviour
         closestPoint = Target.transform.InverseTransformPoint(closestPoint);
 
         m_Joint.connectedAnchor = Target.transform.InverseTransformPoint(Target.ClosestPointOnBounds(transform.position));
+        m_Joint.anchor = transform.InverseTransformPoint(Target.transform.TransformPoint(m_Joint.connectedAnchor));
+
         if (m_Joint is SpringJoint)
         {
             (m_Joint as SpringJoint).spring = JointForce;
