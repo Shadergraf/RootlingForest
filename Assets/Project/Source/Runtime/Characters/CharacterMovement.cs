@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -30,9 +31,11 @@ namespace Manatea.AdventureRoots
         private Rigidbody m_RigidBody;
 
         private Vector3 m_ScheduledMove;
-        private Vector3 m_TargetRotation;
+        private Vector3 m_TargetMoveRotation;
         private bool m_ScheduledJump;
-        
+
+        private float m_RotationMult = 1;
+
 
         // Simulation
         private bool m_IsGrounded;
@@ -40,6 +43,7 @@ namespace Manatea.AdventureRoots
         private bool m_IsSliding;
         private float m_ForceAirborneTimer;
         private PhysicMaterial m_PhysicsMaterial;
+        private float m_RotationRelaxation;
 
 
         private void Awake()
@@ -53,14 +57,14 @@ namespace Manatea.AdventureRoots
 
         private void OnEnable()
         {
-            m_TargetRotation = transform.forward;
+            m_TargetMoveRotation = transform.forward;
         }
 
         public void Move(Vector3 moveVector, bool rotateTowardsMove = true)
         {
             m_ScheduledMove = moveVector;
             if (rotateTowardsMove && m_ScheduledMove != Vector3.zero)
-                m_TargetRotation = m_ScheduledMove.normalized;
+                m_TargetMoveRotation = m_ScheduledMove.normalized;
         }
         public void Jump()
         {
@@ -137,19 +141,19 @@ namespace Manatea.AdventureRoots
                         contactMove = Vector3.ProjectOnPlane(contactMove, preciseGroundHitResult.normal);
                     }
 
-                    m_RigidBody.AddForce(contactMove * GroundMoveForce, ForceMode.Acceleration);
+                    m_RigidBody.AddForceAtPosition(contactMove * GroundMoveForce, feetPos, ForceMode.Acceleration);
                 }
                 // Air movement
                 else
                 {
                     float airSpeedMult = MMath.InverseLerpClamped(0.707f, 0f, Vector3.Dot(m_RigidBody.velocity.normalized, contactMove.normalized));
-                    m_RigidBody.AddForce(contactMove * AirMoveForce * airSpeedMult, ForceMode.Acceleration);
+                    m_RigidBody.AddForceAtPosition(contactMove * AirMoveForce * airSpeedMult, feetPos, ForceMode.Acceleration);
                 }
 
 
                 // Add rotation torque
                 // TODO adding 90 deg to the character rotation works out, it might be a hack tho and is not tested in every scenario, could break 
-                float targetRotationTorque = MMath.DeltaAngle((m_RigidBody.rotation.eulerAngles.y + 90) * MMath.Deg2Rad, MMath.Atan2(m_TargetRotation.z, -m_TargetRotation.x)) * MMath.Rad2Deg;
+                float targetRotationTorque = MMath.DeltaAngle((m_RigidBody.rotation.eulerAngles.y + 90) * MMath.Deg2Rad, MMath.Atan2(m_TargetMoveRotation.z, -m_TargetMoveRotation.x)) * MMath.Rad2Deg;
                 if (m_IsStableGrounded && !m_IsSliding)
                 {
                     targetRotationTorque *= GroundRotationRate;
@@ -158,8 +162,26 @@ namespace Manatea.AdventureRoots
                 {
                     targetRotationTorque *= AirRotationRate;
                 }
-                m_RigidBody.AddTorque(0, targetRotationTorque, 0, ForceMode.Force);
+                float rotMult = m_RotationMult;
+                //rotMult = MMath.RemapClamped(0.5f, 1, 1, 0, m_RotationRelaxation);
+                //rotMult *= MMath.RemapClamped(180, 90, 0.1f, 1f, MMath.Abs(targetRotationTorque));
+                //rotMult *= MMath.RemapClamped(1, 3, 0.01f, 1f, MMath.Abs(m_RigidBody.angularVelocity.y));
+                //rotMult *= MMath.RemapClamped(2, 4, 0.05f, 1f, m_RigidBody.velocity.magnitude);
+                //Debug.Log(rotMult);
+                m_RigidBody.AddTorque(0, targetRotationTorque * rotMult, 0, ForceMode.Force);
             }
+
+
+            // TODO maybe try rotating by applying a torque impulse instead of a force
+            // when target rotation and *last* target rotation differ, a force is applied
+            // that could help with the rotation relaxment problem
+            // maybe even lerp the last target roation with the current one and apply force based on the diff
+            // so if you want to go in the new direction for longer, the vectors have lerpt on top of each other
+            // and you should either have rotated to target rot or you are stuck and get rotated less.
+
+            // TODO relax the rotation amount if we realize that we can not rotate under the current load we have
+            //m_RotationRelaxation -= Vector3.Dot(m_TargetRotation, transform.forward) * dt;
+            //m_RotationRelaxation = MMath.Clamp(m_RotationRelaxation, 0, 1);
 
 
             // Jump
@@ -177,8 +199,9 @@ namespace Manatea.AdventureRoots
                 {
                     if (m_GroundColliders[i] && m_GroundColliders[i].attachedRigidbody)
                     {
-                        m_GroundColliders[i].attachedRigidbody.AddForceAtPosition(-m_RigidBody.velocity, feetPos, ForceMode.Impulse);
-                        m_GroundColliders[i].attachedRigidbody.AddForceAtPosition(-m_RigidBody.GetAccumulatedForce(), feetPos, ForceMode.Force);
+                        // TODO very extreme jumping push to objects. Can be tested by jumping off certain items
+                        m_GroundColliders[i].attachedRigidbody.AddForceAtPosition(-m_RigidBody.velocity, feetPos, ForceMode.VelocityChange);
+                        //m_GroundColliders[i].attachedRigidbody.AddForceAtPosition(-m_RigidBody.GetAccumulatedForce(), feetPos, ForceMode.Force);
                     }
                 }
             }
@@ -190,7 +213,7 @@ namespace Manatea.AdventureRoots
                 m_RigidBody.angularVelocity *= Mathf.Clamp01(1 - FeetAngularResistance * dt);
 
                 Vector3 accVel = (m_RigidBody.GetAccumulatedForce() * Mathf.Clamp01(1 - FeetLinearResistance * dt)) - m_RigidBody.GetAccumulatedForce();
-                m_RigidBody.AddForce(accVel, ForceMode.Force);
+                m_RigidBody.AddForceAtPosition(accVel, feetPos, ForceMode.Force);
                 Vector3 accTorque = m_RigidBody.GetAccumulatedTorque() - (m_RigidBody.GetAccumulatedTorque() * Mathf.Clamp01(1 - FeetAngularResistance * dt));
                 m_RigidBody.AddTorque(accTorque, ForceMode.Force);
             }
@@ -200,7 +223,6 @@ namespace Manatea.AdventureRoots
                 frictionTarget = 0;
             m_PhysicsMaterial.staticFriction = frictionTarget;
             m_PhysicsMaterial.dynamicFriction = frictionTarget;
-
 
             if (DebugCharacter)
                 Debug.DrawLine(transform.position, transform.position + contactMove, Color.green, dt, false);
@@ -215,7 +237,8 @@ namespace Manatea.AdventureRoots
             groundHitResult = new RaycastHit();
             preciseGroundHitResult = new RaycastHit();
 
-            int layerMask = LayerMask.GetMask(LayerMask.LayerToName(gameObject.layer));
+            
+            int layerMask = LayerMaskExtensions.CalculatePhysicsLayerMask(gameObject.layer);
             float distance = GroundDetectionDistance + SkinThickness;
 
             int hits = 0;
@@ -288,8 +311,18 @@ namespace Manatea.AdventureRoots
             GUI.color = Color.red;
             GUILayout.Label("Is Grounded:" + m_IsStableGrounded);
             GUILayout.Label("Is Sliding:" + m_IsSliding);
+            if (TryGetComponent(out Joint joint))
+            {
+                GUILayout.Label("Pulling:" + joint.connectedBody.name);
+                GUILayout.Label("Joint Force:" + joint.currentForce.magnitude);
+            }
             GUILayout.EndVertical();
         
+        }
+
+        public void SetRotationMult(float rotationMult)
+        {
+            m_RotationMult = rotationMult;
         }
     }
 }

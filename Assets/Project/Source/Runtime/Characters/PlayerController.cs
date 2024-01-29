@@ -3,90 +3,132 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-public class PlayerController : CharacterController
+namespace Manatea
 {
-    public float DashForce;
-    public PullAbility PullAbility;
-    public CapsuleCollider TriggerCollider;
-
-    private Collider[] Colliders;
-    private int OverlapCount;
-
-    private Keyboard keeb;
-    private Mouse mickey;
-
-
-    private void Awake()
+    public class PlayerController : CharacterController
     {
-        Colliders = new Collider[8];
-    }
+        public float DashForce;
+        public PullAbility PullAbility;
+        public CapsuleCollider TriggerCollider;
 
-    private void OnEnable()
-    {
-        keeb = InputSystem.GetDevice<Keyboard>();
-        mickey = InputSystem.GetDevice<Mouse>();
-    }
+        private Collider[] Colliders;
+        private int OverlapCount;
 
+        private Keyboard m_Keyboard;
+        private Mouse m_Mouse;
+        private Gamepad m_Gamepad;
 
-    private void Update()
-    {
-
-        Vector3 inputVector = Vector3.zero;
-
-        if (keeb.dKey.isPressed)
-            inputVector += Vector3.right;
-        if (keeb.aKey.isPressed)
-            inputVector += Vector3.left;
-        if (keeb.wKey.isPressed)
-            inputVector += Vector3.forward;
-        if (keeb.sKey.isPressed)
-            inputVector += Vector3.back;
-        if (inputVector != Vector3.zero)
-            inputVector.Normalize();
-
-        CharacterMovement.Move(inputVector);
-
-        if (keeb.spaceKey.isPressed)
-            CharacterMovement.Jump();
-        else
-            CharacterMovement.ReleaseJump();
-
-        if (keeb.eKey.wasPressedThisFrame)
-            CharacterMovement.GetComponent<Rigidbody>().AddForce(inputVector * DashForce, ForceMode.Impulse);
+        public float InputSmoothing = 2;
 
 
-        TriggerCollider.GetGlobalParams(out Vector3 p1, out Vector3 p2, out float radius);
-        OverlapCount = Physics.OverlapCapsuleNonAlloc(p1, p2, radius, Colliders);
-        if (mickey.leftButton.wasPressedThisFrame)
+        private void Awake()
         {
-            if (!PullAbility.enabled)
+            Colliders = new Collider[8];
+        }
+
+        private void OnEnable()
+        {
+            m_Keyboard = InputSystem.GetDevice<Keyboard>();
+            m_Mouse = InputSystem.GetDevice<Mouse>();
+            m_Gamepad = InputSystem.GetDevice<Gamepad>();
+        }
+
+
+        private void Update()
+        {
+
+            Vector3 inputVector = Vector3.zero;
+
+            // Keyboard
+            if (m_Keyboard.dKey.isPressed)
+                inputVector += Vector3.right;
+            if (m_Keyboard.aKey.isPressed)
+                inputVector += Vector3.left;
+            if (m_Keyboard.wKey.isPressed)
+                inputVector += Vector3.forward;
+            if (m_Keyboard.sKey.isPressed)
+                inputVector += Vector3.back;
+
+            // Gamepad
+            if (m_Gamepad.leftStick.value != Vector2.zero)
             {
-                for (int i = 0; i < OverlapCount; i++)
+                Vector2 stickInput          = m_Gamepad.leftStick.value;
+                Vector2 stickDir            = stickInput.normalized;
+                float   stickDirAngle       = MMath.DirToAng(stickDir) * MMath.Rad2Deg / 45;
+                float   stickDirAngleFrac   = MMath.Frac(stickDirAngle);
+                int     stickDirAngleFloor  = MMath.FloorToInt(stickDirAngle);
+                stickDirAngleFrac = Smoothing01(stickDirAngleFrac, InputSmoothing);
+                stickDirAngle = (stickDirAngleFloor + stickDirAngleFrac) * 45 * MMath.Deg2Rad;
+                stickDir = MMath.AngToDir(stickDirAngle);
+                stickInput = stickDir * stickInput.magnitude;
+
+                inputVector += Vector3.right * stickInput.x;
+                inputVector += Vector3.forward * stickInput.y;
+            }
+
+            if (inputVector != Vector3.zero)
+                inputVector.Normalize();
+
+            CharacterMovement.Move(inputVector);
+
+
+            if (m_Keyboard.spaceKey.isPressed || m_Gamepad.buttonSouth.isPressed)
+                CharacterMovement.Jump();
+            else
+                CharacterMovement.ReleaseJump();
+
+
+            if (m_Keyboard.eKey.wasPressedThisFrame || m_Gamepad.buttonNorth.wasPressedThisFrame)
+                CharacterMovement.GetComponent<Rigidbody>().AddForce(inputVector * DashForce, ForceMode.Impulse);
+
+
+            TriggerCollider.GetGlobalParams(out Vector3 p1, out Vector3 p2, out float radius);
+            OverlapCount = Physics.OverlapCapsuleNonAlloc(p1, p2, radius, Colliders);
+            if (m_Mouse.leftButton.wasPressedThisFrame || m_Gamepad.buttonWest.wasPressedThisFrame)
+            {
+                if (!PullAbility.enabled)
                 {
-                    if (Colliders[i].gameObject == CharacterMovement.gameObject)
-                        continue;
-                    Rigidbody rigid = Colliders[i].attachedRigidbody;
-                    if (rigid == null)
-                        continue;
-                    PullAbility.Target = rigid;
-                    PullAbility.enabled = true;
+                    for (int i = 0; i < OverlapCount; i++)
+                    {
+                        if (Colliders[i].gameObject == CharacterMovement.gameObject)
+                            continue;
+                        Rigidbody rigid = Colliders[i].attachedRigidbody;
+                        if (rigid == null)
+                            continue;
+                        PullAbility.Target = rigid;
+                        PullAbility.enabled = true;
+                    }
+                }
+                else
+                {
+                    PullAbility.enabled = false;
                 }
             }
-            else
+
+            if (m_Mouse.rightButton.wasPressedThisFrame || m_Gamepad.buttonEast.wasPressedThisFrame)
             {
-                PullAbility.enabled = false;
+                if (PullAbility.enabled)
+                {
+                    PullAbility.Throw();
+                }
             }
+
+    #if DEBUG
+            if (m_Keyboard.ctrlKey.isPressed && m_Mouse.rightButton.wasPressedThisFrame)
+            {
+                Ray ray = Camera.main.ScreenPointToRay(m_Mouse.position.value);
+                if (Physics.Raycast(ray, out RaycastHit hit))
+                {
+                    transform.GetComponent<Rigidbody>().position = hit.point + hit.normal;
+                }
+            }
+    #endif
         }
 
-#if DEBUG
-        if (keeb.ctrlKey.isPressed && mickey.rightButton.wasPressedThisFrame)
+
+        private float Smoothing01(float x, float n)
         {
-            Ray ray = Camera.main.ScreenPointToRay(mickey.position.value);
-            if (Physics.Raycast(ray, out RaycastHit hit))
-            {
-                transform.GetComponent<Rigidbody>().position = hit.point + hit.normal;
-            }
+            return MMath.Pow(x, n) / (MMath.Pow(x, n) + MMath.Pow(1.0f - x, n));
         }
-#endif
     }
 }

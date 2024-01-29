@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 2459274439249617929}
   - component: {fileID: 4146674922894845674}
   - component: {fileID: 5137507898606658623}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: BaseCharacter
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -44,7 +44,7 @@ Rigidbody:
   serializedVersion: 4
   m_Mass: 1
   m_Drag: 0.5
-  m_AngularDrag: 1
+  m_AngularDrag: 0.2
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
   m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
@@ -75,13 +75,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   GroundMoveForce: 200
   AirMoveForce: 20
-  JumpForce: 15
+  JumpForce: 12
   StepHeight: 0
   FeetLinearResistance: 20
-  FeetAngularResistance: 20
+  FeetAngularResistance: 15
   StationaryFriction: 1
   MovementFriction: 0.1
-  GroundRotationRate: 0.1
+  GroundRotationRate: 0.08
   AirRotationRate: 0.005
   Collider: {fileID: 0}
   SkinThickness: 0.05
