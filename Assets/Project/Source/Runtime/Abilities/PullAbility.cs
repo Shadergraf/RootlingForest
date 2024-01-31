@@ -86,13 +86,20 @@ public class PullAbility : MonoBehaviour
 
             configurableJoint.linearLimit = new SoftJointLimit() { limit = LinearLimit, contactDistance = 0.1f };
             configurableJoint.linearLimitSpring = new SoftJointLimitSpring() { spring = SpringForce, damper = MaxDamper };
-
         }
 
-        //Debug.Break();
+        // TODO try ignoring all collision stuff
+        Physics.IgnoreCollision(GetComponent<Collider>(), Target.GetComponentInChildren<Collider>(), true);
     }
     private void OnDisable()
     {
+        if (Target != null)
+        {
+            Physics.IgnoreCollision(GetComponent<Collider>(), Target.GetComponentInChildren<Collider>(), false);
+        }
+
+        Target = null;
+
         if (m_Joint != null)
         {
             Destroy(m_Joint);
@@ -107,7 +114,8 @@ public class PullAbility : MonoBehaviour
 
     private void Update()
     {
-        if (m_Joint == null)
+        if (m_Joint == null ||
+            m_Joint.connectedBody == null)
         {
             enabled = false;
             return;
