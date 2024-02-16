@@ -30,20 +30,26 @@ namespace Manatea.AdventureRoots
 
         private Rigidbody m_RigidBody;
 
+        // Input
         private Vector3 m_ScheduledMove;
         private Vector3 m_TargetMoveRotation;
+        private bool m_IsRotating;
         private bool m_ScheduledJump;
 
         private float m_RotationMult = 1;
 
+        // Constants
+        private const float MIN_JUMP_TIME = 0.2f;       // The minimum time after a jump we are guaranteed to be airborne
 
         // Simulation
-        private bool m_IsGrounded;
         private bool m_IsStableGrounded;
         private bool m_IsSliding;
         private float m_ForceAirborneTimer;
+        private float m_AirborneTimer;
+        private float m_JumpTimer;
+        private bool m_HasJumped;
         private PhysicMaterial m_PhysicsMaterial;
-        private float m_RotationRelaxation;
+        private Vector3 m_CurrentRotation;
 
 
         private void Awake()
@@ -64,7 +70,10 @@ namespace Manatea.AdventureRoots
         {
             m_ScheduledMove = moveVector;
             if (rotateTowardsMove && m_ScheduledMove != Vector3.zero)
+            {
                 m_TargetMoveRotation = m_ScheduledMove.normalized;
+                m_IsRotating = true;
+            }
         }
         public void Jump()
         {
@@ -85,14 +94,26 @@ namespace Manatea.AdventureRoots
 
         protected void UpdatePhysics(float dt)
         {
-            // Decrement timers
+            // Update timers
             m_ForceAirborneTimer = MMath.Max(m_ForceAirborneTimer - dt, 0);
+
+            if (!m_IsStableGrounded)
+            {
+                m_AirborneTimer += dt;
+            }
+            else
+            {
+                m_AirborneTimer = 0;
+            }
+            if (m_HasJumped)
+            {
+                m_JumpTimer += dt;
+            }
 
             // Ground detection
             bool groundDetected = DetectGround(out RaycastHit groundHitResult, out RaycastHit preciseGroundHitResult);
             Vector3 feetPos = Collider.ClosestPoint(transform.position + Physics.gravity * 10000);
-
-
+            // TODO where is m_IsGrounded set??????
             m_IsStableGrounded = groundDetected;
             m_IsStableGrounded &= m_ForceAirborneTimer <= 0;
             m_IsSliding = m_IsStableGrounded && MMath.Acos(Vector3.Dot(preciseGroundHitResult.normal, -Physics.gravity.normalized)) * MMath.Rad2Deg > MaxSlopeAngle;
@@ -102,6 +123,17 @@ namespace Manatea.AdventureRoots
             {
                 m_IsStableGrounded = true;
                 m_IsSliding = false;
+            }
+            // Guarantee airborne when jumping just occured
+            if (m_HasJumped && m_JumpTimer <= MIN_JUMP_TIME)
+            {
+                m_IsStableGrounded = false;
+                m_IsSliding = false;
+            }
+            if (m_IsStableGrounded)
+            {
+                m_HasJumped = false;
+                m_JumpTimer = 0;
             }
 
 
@@ -152,7 +184,12 @@ namespace Manatea.AdventureRoots
 
 
                 // Add rotation torque
-                // TODO adding 90 deg to the character rotation works out, it might be a hack tho and is not tested in every scenario, could break 
+                if (m_IsRotating)
+                {
+                    m_CurrentRotation = Vector3.Slerp(transform.forward, m_TargetMoveRotation, MMath.Damp(0, 1, 100, dt));
+                    m_IsRotating = false;
+                }
+                // TODO adding 90 deg to the character rotation works out, it might be a hack tho and is not tested in every scenario, could break
                 float targetRotationTorque = MMath.DeltaAngle((m_RigidBody.rotation.eulerAngles.y + 90) * MMath.Deg2Rad, MMath.Atan2(m_TargetMoveRotation.z, -m_TargetMoveRotation.x)) * MMath.Rad2Deg;
                 if (m_IsStableGrounded && !m_IsSliding)
                 {
@@ -185,7 +222,7 @@ namespace Manatea.AdventureRoots
 
 
             // Jump
-            if (m_ScheduledJump && m_IsStableGrounded)
+            if (m_ScheduledJump && !m_HasJumped && m_AirborneTimer < 0.1f)
             {
                 Vector3 jumpDir = -Physics.gravity.normalized;
                 // TODO add a sliding jump here that is perpendicular to the slide normal
@@ -204,6 +241,8 @@ namespace Manatea.AdventureRoots
                         //m_GroundColliders[i].attachedRigidbody.AddForceAtPosition(-m_RigidBody.GetAccumulatedForce(), feetPos, ForceMode.Force);
                     }
                 }
+
+                m_HasJumped = true;
             }
 
             // Feet drag
@@ -212,10 +251,10 @@ namespace Manatea.AdventureRoots
                 m_RigidBody.velocity *= Mathf.Clamp01(1 - FeetLinearResistance * dt);
                 m_RigidBody.angularVelocity *= Mathf.Clamp01(1 - FeetAngularResistance * dt);
 
-                Vector3 accVel = (m_RigidBody.GetAccumulatedForce() * Mathf.Clamp01(1 - FeetLinearResistance * dt)) - m_RigidBody.GetAccumulatedForce();
-                m_RigidBody.AddForceAtPosition(accVel, feetPos, ForceMode.Force);
-                Vector3 accTorque = m_RigidBody.GetAccumulatedTorque() - (m_RigidBody.GetAccumulatedTorque() * Mathf.Clamp01(1 - FeetAngularResistance * dt));
-                m_RigidBody.AddTorque(accTorque, ForceMode.Force);
+                //Vector3 accVel = (m_RigidBody.GetAccumulatedForce() * Mathf.Clamp01(1 - FeetLinearResistance * dt)) - m_RigidBody.GetAccumulatedForce();
+                //m_RigidBody.AddForceAtPosition(accVel, feetPos, ForceMode.Force);
+                //Vector3 accTorque = m_RigidBody.GetAccumulatedTorque() - (m_RigidBody.GetAccumulatedTorque() * Mathf.Clamp01(1 - FeetAngularResistance * dt));
+                //m_RigidBody.AddTorque(accTorque, ForceMode.Force);
             }
 
             float frictionTarget = MMath.LerpClamped(StationaryFriction, MovementFriction, contactMove.magnitude); ;
@@ -286,8 +325,13 @@ namespace Manatea.AdventureRoots
             m_GroundColliderCount = 0;
             for (int i = 0; i < hits; i++)
             {
+                // Discard overlaps
+                if (m_GroundHits[i].distance == 0)
+                    continue;
+                // Discard collisions that are further away
                 if (m_GroundHits[i].distance > groundHitResult.distance)
                     continue;
+                // Discard self collisions
                 if (m_GroundHits[i].collider.gameObject == gameObject)
                     continue;
 
@@ -298,6 +342,7 @@ namespace Manatea.AdventureRoots
             if (groundHitResult.distance == float.PositiveInfinity)
                 return false;
 
+            // Raycast for precise ground collision
             bool preciseHit = Physics.Raycast(groundHitResult.point + Vector3.up * 0.0001f + groundHitResult.normal * 0.001f, -groundHitResult.normal, out preciseGroundHitResult, 0.1f, layerMask);
             if (!preciseHit)
                 preciseHit = Physics.Raycast(groundHitResult.point - Vector3.up * 0.0001f + groundHitResult.normal * 0.001f, -groundHitResult.normal, out preciseGroundHitResult, 0.1f, layerMask);
@@ -311,7 +356,7 @@ namespace Manatea.AdventureRoots
             GUI.color = Color.red;
             GUILayout.Label("Is Grounded:" + m_IsStableGrounded);
             GUILayout.Label("Is Sliding:" + m_IsSliding);
-            if (TryGetComponent(out Joint joint))
+            if (TryGetComponent(out Joint joint) && joint.connectedBody)
             {
                 GUILayout.Label("Pulling:" + joint.connectedBody.name);
                 GUILayout.Label("Joint Force:" + joint.currentForce.magnitude);

@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Manatea;
+using UnityEngine.Events;
 
 public class ForceDetector : MonoBehaviour
 {
@@ -18,10 +19,18 @@ public class ForceDetector : MonoBehaviour
     [SerializeField]
     private bool m_UseMass;
 
+    [SerializeField]
+    private UnityEvent m_ForceDetected;
+
     private void OnCollisionEnter(Collision collision)
     {
-        Debug.Log(collision.impulse.magnitude);
-
+        if (collision.impulse.magnitude > m_ImpulseMagnitude)
+        {
+            ForceDetected();
+        }
+    }
+    private void OnCollisionStay(Collision collision)
+    {
         if (collision.impulse.magnitude > m_ImpulseMagnitude)
         {
             ForceDetected();
@@ -30,6 +39,8 @@ public class ForceDetector : MonoBehaviour
 
     public void ForceDetected()
     {
+        m_ForceDetected.Invoke();
+
         Rigidbody sourceRigid = GetComponent<Rigidbody>();
         for (int i = 0; i < m_SpawnObjects.Length; ++i)
         {

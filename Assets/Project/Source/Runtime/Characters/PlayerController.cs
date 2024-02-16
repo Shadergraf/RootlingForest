@@ -11,6 +11,8 @@ namespace Manatea
         public PullAbility PullAbility;
         public CapsuleCollider TriggerCollider;
 
+        public InputActionReference m_MovementAction;
+
         private Collider[] Colliders;
         private int OverlapCount;
 
@@ -26,11 +28,20 @@ namespace Manatea
             Colliders = new Collider[8];
         }
 
+        private void Start()
+        {
+            m_MovementAction.action.Enable();
+        }
         private void OnEnable()
         {
             m_Keyboard = InputSystem.GetDevice<Keyboard>();
             m_Mouse = InputSystem.GetDevice<Mouse>();
             m_Gamepad = InputSystem.GetDevice<Gamepad>();
+
+        }
+        private void OnDisable()
+        {
+            m_MovementAction.action.Disable();
         }
 
 
@@ -69,13 +80,19 @@ namespace Manatea
             if (inputVector != Vector3.zero)
                 inputVector.Normalize();
 
+            inputVector = m_MovementAction.action.ReadValue<Vector2>().XZtoXYZ();
+
             CharacterMovement.Move(inputVector);
 
 
             if (m_Keyboard.spaceKey.isPressed || m_Gamepad.buttonSouth.isPressed)
+            {
                 CharacterMovement.Jump();
+            }
             else
+            {
                 CharacterMovement.ReleaseJump();
+            }
 
 
             if (m_Keyboard.eKey.wasPressedThisFrame || m_Gamepad.buttonNorth.wasPressedThisFrame)

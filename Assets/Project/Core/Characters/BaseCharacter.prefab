@@ -73,15 +73,15 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5266fe543a7f7d64388b4cde3b2c86bf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GroundMoveForce: 200
+  GroundMoveForce: 100
   AirMoveForce: 20
-  JumpForce: 12
+  JumpForce: 8.5
   StepHeight: 0
   FeetLinearResistance: 20
-  FeetAngularResistance: 15
+  FeetAngularResistance: 25
   StationaryFriction: 1
   MovementFriction: 0.1
-  GroundRotationRate: 0.08
+  GroundRotationRate: 0.25
   AirRotationRate: 0.005
   Collider: {fileID: 0}
   SkinThickness: 0.05

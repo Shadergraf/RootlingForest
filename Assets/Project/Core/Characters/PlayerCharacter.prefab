@@ -160,18 +160,8 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8597781962724660110, guid: 10e5fa5dfab45f14ab93f58ee4b2416d,
         type: 3}
-      propertyPath: GroundMoveForce
-      value: 160
-      objectReference: {fileID: 0}
-    - target: {fileID: 8597781962724660110, guid: 10e5fa5dfab45f14ab93f58ee4b2416d,
-        type: 3}
       propertyPath: FeetAngularTraction
       value: 25.96
-      objectReference: {fileID: 0}
-    - target: {fileID: 8597781962724660110, guid: 10e5fa5dfab45f14ab93f58ee4b2416d,
-        type: 3}
-      propertyPath: FeetAngularResistance
-      value: 20
       objectReference: {fileID: 0}
     - target: {fileID: 9090137850083684283, guid: 10e5fa5dfab45f14ab93f58ee4b2416d,
         type: 3}
@@ -230,21 +220,31 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Target: {fileID: 0}
-  SpringForce: 1000
-  MaxDamper: 50
-  MinDamper: 2
+  StartSpring: 0
+  EndSpring: 500
+  StartDamper: 0
+  EndDamper: 50
+  StartDriveSpring: 0
+  EndDriveSpring: 2000
+  StartDriveDamper: 0
+  EndDriveDamper: 200
   DamperSpeed: 30
   HandPosition: {x: 0, y: 0, z: 0.6}
   TargetPosition: {x: 0, y: 1, z: 0}
   AutoTargetPosition: 1
-  ThrowForce: 7
+  ThrowForce: 6
+  ThrowRotation: 4
   ThrowDir: {x: 0, y: 1, z: 1}
-  BreakForce: 1500
-  BreakTorque: 1500
+  BreakForce: 500
+  BreakTorque: 500
   LinearLimit: 0.01
   EnableCollision: 1
+  rotationAngle: {x: 0, y: 0, z: 0}
+  DriverSpring: 50
+  DriverDamper: 5
   MinRotationForce: 80
   MaxRotationForce: 100
+  GrabTime: 0.2
 --- !u!136 &2362455876002437693
 CapsuleCollider:
   m_ObjectHideFlags: 0

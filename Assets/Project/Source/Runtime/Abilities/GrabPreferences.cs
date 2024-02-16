@@ -1,5 +1,8 @@
+using Manatea;
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Serialization;
 using static UnityEngine.GraphicsBuffer;
@@ -27,8 +30,59 @@ public class GrabPreferences : MonoBehaviour
     private RotationRule m_RotationRule;
     [SerializeField]
     private float m_RotationLimit = 0;
+    [SerializeField]
+    private bool m_UseOrientations;
+    [SerializeField]
+    private GrabOrientation[] m_Orientations;
+
+    private ConfigurableJoint m_GrabJoint;
+    private Quaternion startRotation;
+
+    private Quaternion cachedRotation;
+    private Quaternion targetRotation;
+    private Quaternion targetRotDelta;
+
+    public bool CollisionEnabled => m_CollisionEnabled;
 
 
+    public void PreEstablishGrab(Rigidbody Instigator)
+    {
+        if (m_Orientations.Length == 0)
+        {
+            return;
+        }
+
+        Vector3 forwardDir = (transform.position - Instigator.transform.position).normalized;
+        Vector3 upDir = Instigator.transform.up;
+        Vector3 rightDir = Instigator.transform.right;
+
+        float bestMatch = float.NegativeInfinity;
+        GrabOrientation bestOrientationMatch = null;
+        for (int i = 0; i < m_Orientations.Length; i++)
+        {
+            float match = -Quaternion.Angle(Instigator.transform.rotation, m_Orientations[i].transform.rotation) / MMath.Max(MMath.Epsilon, m_Orientations[i].Weight);
+            if (match < bestMatch)
+            {
+                continue;
+            }
+            bestMatch = match;
+            bestOrientationMatch = m_Orientations[i];
+        }
+
+        if (bestOrientationMatch != null)
+        {
+            var m = bestOrientationMatch.transform.localToWorldMatrix * transform.worldToLocalMatrix;
+            Quaternion deltaQuat = Instigator.transform.rotation * Quaternion.Inverse(bestOrientationMatch.transform.rotation);
+            Rigidbody rb = GetComponent<Rigidbody>();
+            targetRotation = deltaQuat * rb.rotation;
+            //rb.rotation = deltaQuat * rb.rotation;
+            //rb.PublishTransform();
+
+            //targetRotation = Instigator.rotation;
+        }
+
+        cachedRotation = transform.rotation;
+    }
     public void EstablishGrab(ConfigurableJoint grabJoint)
     {
         grabJoint.enableCollision = m_CollisionEnabled;
@@ -51,7 +105,6 @@ public class GrabPreferences : MonoBehaviour
         grabJoint.angularXMotion = angularMotion;
         grabJoint.angularYMotion = angularMotion;
         grabJoint.angularZMotion = angularMotion;
-
 
         switch (m_LocationRule)
         {
@@ -84,6 +137,21 @@ public class GrabPreferences : MonoBehaviour
             limit.limit = m_RotationLimit;
             grabJoint.angularZLimit = limit;
         }
+
+
+        grabJoint.angularXDrive = new JointDrive() { useAcceleration = true, positionSpring = 5000, positionDamper = 500, maximumForce = 10000 };
+        grabJoint.angularYZDrive = new JointDrive() { useAcceleration = true, positionSpring = 5000, positionDamper = 500, maximumForce = 10000 };
+        grabJoint.rotationDriveMode = RotationDriveMode.XYAndZ;
+
+        startRotation = transform.rotation;
+        grabJoint.configuredInWorldSpace = true;
+        grabJoint.targetRotation = targetRotation * Quaternion.Inverse(transform.rotation);
+
+        m_GrabJoint = grabJoint;
+    }
+
+    public void UpdateGrab()
+    {
     }
 
     public void DisbandGrab(ConfigurableJoint grabJoint)
