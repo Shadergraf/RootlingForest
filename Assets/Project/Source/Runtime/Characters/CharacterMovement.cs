@@ -1,3 +1,4 @@
+using Manatea.GameplaySystem;
 using System;
 using UnityEngine;
 using UnityEngine.Serialization;
@@ -24,9 +25,14 @@ namespace Manatea.AdventureRoots
         public float GroundDetectionDistance = 0.01f;
         public float MaxSlopeAngle = 46;
 
+        [Header("Attributes & Tags")]
+        public GameplayAttribute m_MoveSpeedAttribute;
+        public GameplayAttribute m_RotationRateAttribute;
+
         [Header("Debug")]
         public bool DebugCharacter = false;
 
+        public Rigidbody Rigidbody => m_RigidBody;
 
         private Rigidbody m_RigidBody;
 
@@ -94,6 +100,21 @@ namespace Manatea.AdventureRoots
 
         protected void UpdatePhysics(float dt)
         {
+            // Get Attributes
+            float moveSpeedMult = 1;
+            float rotRateMult = 1;
+            if (TryGetComponent(out GameplayAttributeOwner attributes))
+            {
+                if (attributes.TryGetAttributeEvaluatedValue(m_MoveSpeedAttribute, out float speed))
+                {
+                    moveSpeedMult = speed;
+                }
+                if (attributes.TryGetAttributeEvaluatedValue(m_RotationRateAttribute, out float rot))
+                {
+                    rotRateMult = rot;
+                }
+            }
+
             // Update timers
             m_ForceAirborneTimer = MMath.Max(m_ForceAirborneTimer - dt, 0);
 
@@ -149,6 +170,7 @@ namespace Manatea.AdventureRoots
             // Contact Movement
             // movement that results from ground or surface contact
             Vector3 contactMove = m_ScheduledMove;
+            contactMove *= moveSpeedMult;
             if (contactMove != Vector3.zero)
             {
                 if (m_IsStableGrounded)
@@ -199,13 +221,13 @@ namespace Manatea.AdventureRoots
                 {
                     targetRotationTorque *= AirRotationRate;
                 }
-                float rotMult = m_RotationMult;
+                targetRotationTorque *= rotRateMult;
                 //rotMult = MMath.RemapClamped(0.5f, 1, 1, 0, m_RotationRelaxation);
                 //rotMult *= MMath.RemapClamped(180, 90, 0.1f, 1f, MMath.Abs(targetRotationTorque));
                 //rotMult *= MMath.RemapClamped(1, 3, 0.01f, 1f, MMath.Abs(m_RigidBody.angularVelocity.y));
                 //rotMult *= MMath.RemapClamped(2, 4, 0.05f, 1f, m_RigidBody.velocity.magnitude);
                 //Debug.Log(rotMult);
-                m_RigidBody.AddTorque(0, targetRotationTorque * rotMult, 0, ForceMode.Force);
+                m_RigidBody.AddTorque(0, targetRotationTorque, 0, ForceMode.Force);
             }
 
 
@@ -362,12 +384,6 @@ namespace Manatea.AdventureRoots
                 GUILayout.Label("Joint Force:" + joint.currentForce.magnitude);
             }
             GUILayout.EndVertical();
-        
-        }
-
-        public void SetRotationMult(float rotationMult)
-        {
-            m_RotationMult = rotationMult;
         }
     }
 }

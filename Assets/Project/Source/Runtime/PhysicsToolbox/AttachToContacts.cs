@@ -1,4 +1,5 @@
 using Manatea;
+using Manatea.GameplaySystem;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -6,7 +7,11 @@ using UnityEngine.UIElements;
 
 public class AttachToContacts : MonoBehaviour
 {
+    [SerializeField]
+    private GameplayAttribute m_StickyAttribute;
+
     private List<Joint> m_ConnectedJoints = new List<Joint>();
+    private Dictionary<Joint, float> m_ConnectedJointMultiplier = new Dictionary<Joint, float>();
 
     private const float maxBreakForce = 150;
     private const float targetForce = 60;
@@ -31,7 +36,7 @@ public class AttachToContacts : MonoBehaviour
             }
             else
             {
-                joint.breakForce = MMath.Damp(joint.breakForce, targetForce, 0.5f, Time.fixedDeltaTime);
+                joint.breakForce = MMath.Damp(joint.breakForce, targetForce * m_ConnectedJointMultiplier[joint], 0.5f, Time.fixedDeltaTime);
             }
             
             joint.breakTorque = joint.breakForce;
@@ -42,6 +47,16 @@ public class AttachToContacts : MonoBehaviour
     {
         Rigidbody otherRb = collision.collider.attachedRigidbody;
         if (!otherRb)
+        {
+            return;
+        }
+
+        float stickiness = 1;
+        if (m_StickyAttribute && otherRb.TryGetComponent(out GameplayAttributeOwner attributes) && attributes.TryGetAttributeEvaluatedValue(m_StickyAttribute, out float stickinessAttr))
+        {
+            stickiness = stickinessAttr;
+        }
+        if (stickiness <= 0)
         {
             return;
         }
@@ -100,38 +115,24 @@ public class AttachToContacts : MonoBehaviour
 
         m_ConnectedJoints.Add(joint);
 
-        // TODO limit the amount of joints that can be spawned here
 
         // TODO limit the distance an object can have to the connected body
         // You can test this on the bounce pad
+
+        m_ConnectedJointMultiplier.Add(joint, stickiness);
     }
 
-    static Texture2D texture;
     private void OnGUI()
     {
         if (m_ConnectedJoints.Count == 0 || m_ConnectedJoints[0] == null)
             return;
-        if (texture == null)
+
+        for (int i = 0; i < m_ConnectedJoints.Count; i++)
         {
-            texture = new Texture2D(1, 1);
-            texture.SetPixel(0, 0, Color.white);
-            texture.Apply();
+            if (m_ConnectedJoints[i])
+            {
+                MGUI.DrawWorldProgressBar(transform.position + Vector3.up * 0.2f, new Rect(0, i * 5, 20 * m_ConnectedJointMultiplier[m_ConnectedJoints[i]], 4), MMath.InverseLerp(0, maxBreakForce, m_ConnectedJoints[i].breakForce));
+            }
         }
-
-        Rect window = new Rect(50, 50, 300, 30);
-        GUI.BeginGroup(window);
-
-        GUI.skin.box.normal.background = texture;
-
-        GUI.backgroundColor = new Color(64, 0, 0);
-        GUI.Box(new Rect(0, 0, 300, 50), GUIContent.none);
-
-        GUI.backgroundColor = new Color(0, 128, 0);
-        GUI.Box(new Rect(0, 0, MMath.RemapClamped(0, maxBreakForce, 0, 300, m_ConnectedJoints[0].breakForce), 50), GUIContent.none);
-
-        GUI.backgroundColor = new Color(0, 0, 0);
-        GUI.Box(new Rect(MMath.RemapClamped(0, maxBreakForce, 0, 300, targetForce) - 1, 0, 20, 50), GUIContent.none);
-
-        GUI.EndGroup();
     }
 }

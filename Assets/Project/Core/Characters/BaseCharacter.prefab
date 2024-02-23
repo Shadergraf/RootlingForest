@@ -11,6 +11,8 @@ GameObject:
   - component: {fileID: 2459274439249617929}
   - component: {fileID: 4146674922894845674}
   - component: {fileID: 5137507898606658623}
+  - component: {fileID: 5171198309114388193}
+  - component: {fileID: 30843199278676019}
   m_Layer: 6
   m_Name: BaseCharacter
   m_TagString: Untagged
@@ -87,7 +89,58 @@ MonoBehaviour:
   SkinThickness: 0.05
   GroundDetectionDistance: 0.15
   MaxSlopeAngle: 46
+  m_MoveSpeedAttribute: {fileID: 11400000, guid: b08ce0e4b3536694bbf575ddf6619fa5,
+    type: 2}
+  m_RotationRateAttribute: {fileID: 11400000, guid: 13efa8a8c038c3a47ae5293010294aa4,
+    type: 2}
   DebugCharacter: 0
+--- !u!114 &5171198309114388193
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4226559076182182294}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e2ee4c4e098bbcd459201c714bd9c614, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Attributes:
+  - m_Attribute: {fileID: 11400000, guid: 544fa5972763a11478e613bc7b419079, type: 2}
+    m_BaseValue: 3
+    m_Modifiers: []
+  - m_Attribute: {fileID: 11400000, guid: 3290dc8df33c44c42831de70df3717fb, type: 2}
+    m_BaseValue: 3
+    m_Modifiers: []
+  - m_Attribute: {fileID: 11400000, guid: d62daeae609380a4e93f192aae3830a9, type: 2}
+    m_BaseValue: 0.9
+    m_Modifiers: []
+  - m_Attribute: {fileID: 11400000, guid: b08ce0e4b3536694bbf575ddf6619fa5, type: 2}
+    m_BaseValue: 1
+    m_Modifiers: []
+  - m_Attribute: {fileID: 11400000, guid: 13efa8a8c038c3a47ae5293010294aa4, type: 2}
+    m_BaseValue: 1
+    m_Modifiers: []
+--- !u!114 &30843199278676019
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4226559076182182294}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fcc896d7e52cbaa4b8cdad7eab44f57c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_CollisionEnabled: 0
+  m_LocationRule: 1
+  m_RotationRule: 0
+  m_RotationLimit: 0
+  m_UseOrientations: 0
+  m_Orientations: []
+  m_UpdateGrabLocation: 0
 --- !u!1 &4824895105632388978
 GameObject:
   m_ObjectHideFlags: 0

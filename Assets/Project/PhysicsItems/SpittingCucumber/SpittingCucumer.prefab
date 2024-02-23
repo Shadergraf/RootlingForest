@@ -114,9 +114,10 @@ MonoBehaviour:
   m_LocationRule: 0
   m_RotationRule: 2
   m_RotationLimit: 0
-  m_UseOrientations: 0
+  m_UseOrientations: 1
   m_Orientations:
   - {fileID: 7897559462832435134}
+  m_UpdateGrabLocation: 0
 --- !u!114 &2319755380855508169
 MonoBehaviour:
   m_ObjectHideFlags: 0

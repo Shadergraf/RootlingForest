@@ -46,37 +46,37 @@ PrefabInstance:
     - target: {fileID: 1314052735505241016, guid: 10e5fa5dfab45f14ab93f58ee4b2416d,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: -11.26
+      value: -11.09
       objectReference: {fileID: 0}
     - target: {fileID: 1314052735505241016, guid: 10e5fa5dfab45f14ab93f58ee4b2416d,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 5
+      value: 7.44
       objectReference: {fileID: 0}
     - target: {fileID: 1314052735505241016, guid: 10e5fa5dfab45f14ab93f58ee4b2416d,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 10.38
+      value: 16.44
       objectReference: {fileID: 0}
     - target: {fileID: 1314052735505241016, guid: 10e5fa5dfab45f14ab93f58ee4b2416d,
         type: 3}
       propertyPath: m_LocalRotation.w
-      value: 1
+      value: 0.76373285
       objectReference: {fileID: 0}
     - target: {fileID: 1314052735505241016, guid: 10e5fa5dfab45f14ab93f58ee4b2416d,
         type: 3}
       propertyPath: m_LocalRotation.x
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 1314052735505241016, guid: 10e5fa5dfab45f14ab93f58ee4b2416d,
         type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0
+      value: -0.6455325
       objectReference: {fileID: 0}
     - target: {fileID: 1314052735505241016, guid: 10e5fa5dfab45f14ab93f58ee4b2416d,
         type: 3}
       propertyPath: m_LocalRotation.z
-      value: 0
+      value: -0
       objectReference: {fileID: 0}
     - target: {fileID: 1314052735505241016, guid: 10e5fa5dfab45f14ab93f58ee4b2416d,
         type: 3}
@@ -86,7 +86,7 @@ PrefabInstance:
     - target: {fileID: 1314052735505241016, guid: 10e5fa5dfab45f14ab93f58ee4b2416d,
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.y
-      value: 0
+      value: -80.411
       objectReference: {fileID: 0}
     - target: {fileID: 1314052735505241016, guid: 10e5fa5dfab45f14ab93f58ee4b2416d,
         type: 3}
@@ -229,7 +229,7 @@ MonoBehaviour:
   StartDriveDamper: 0
   EndDriveDamper: 200
   DamperSpeed: 30
-  HandPosition: {x: 0, y: 0, z: 0.6}
+  HandPosition: {x: 0, y: -0.1, z: 0.7}
   TargetPosition: {x: 0, y: 1, z: 0}
   AutoTargetPosition: 1
   ThrowForce: 6
@@ -242,9 +242,17 @@ MonoBehaviour:
   rotationAngle: {x: 0, y: 0, z: 0}
   DriverSpring: 50
   DriverDamper: 5
+  MinMovementForce: 25
+  MaxMovementForce: 35
+  OverburdenedMovementMult: 0.8
+  OverburdenedRotationMult: 0.5
   MinRotationForce: 80
   MaxRotationForce: 100
   GrabTime: 0.2
+  m_WalkSpeedAttribute: {fileID: 11400000, guid: b08ce0e4b3536694bbf575ddf6619fa5,
+    type: 2}
+  m_RotationRateAttribute: {fileID: 11400000, guid: 13efa8a8c038c3a47ae5293010294aa4,
+    type: 2}
 --- !u!136 &2362455876002437693
 CapsuleCollider:
   m_ObjectHideFlags: 0

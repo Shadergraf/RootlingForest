@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 4272621952491087106}
   - component: {fileID: 4245538616831221962}
   - component: {fileID: 244979003951576699}
+  - component: {fileID: 4913222347596102311}
   m_Layer: 0
   m_Name: RopeElementTest
   m_TagString: Untagged
@@ -104,6 +105,7 @@ MonoBehaviour:
   m_RotationLimit: 0
   m_UseOrientations: 0
   m_Orientations: []
+  m_UpdateGrabLocation: 0
 --- !u!153 &244979003951576699
 ConfigurableJoint:
   m_ObjectHideFlags: 0
@@ -206,6 +208,22 @@ ConfigurableJoint:
   m_EnablePreprocessing: 0
   m_MassScale: 1
   m_ConnectedMassScale: 1
+--- !u!114 &4913222347596102311
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4135512306975400294}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e2ee4c4e098bbcd459201c714bd9c614, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Attributes:
+  - m_Attribute: {fileID: 11400000, guid: d62daeae609380a4e93f192aae3830a9, type: 2}
+    m_BaseValue: 3
+    m_Modifiers: []
 --- !u!1 &6245647005231283941
 GameObject:
   m_ObjectHideFlags: 0

@@ -4,6 +4,9 @@ using UnityEngine;
 using Manatea;
 using Manatea.AdventureRoots;
 using static UnityEngine.GraphicsBuffer;
+using Manatea.GameplaySystem;
+using System.Runtime.CompilerServices;
+using static UnityEngine.UI.Image;
 
 public class PullAbility : MonoBehaviour
 {
@@ -31,14 +34,29 @@ public class PullAbility : MonoBehaviour
     public float DriverSpring = 1000;
     public float DriverDamper = 10;
 
+    public float MinMovementForce = 10;
+    public float MaxMovementForce = 20;
+    public float OverburdenedMovementMult = 0.5f;
+    public float OverburdenedRotationMult = 0.5f;
     public float MinRotationForce = 10;
-    public float MaxRotationForce = 10;
+    public float MaxRotationForce = 20;
 
     public float GrabTime = 0.25f;
+
+    public GameplayAttribute m_WalkSpeedAttribute;
+    public GameplayAttribute m_RotationRateAttribute;
 
     private Joint m_Joint;
     private Quaternion startRotation;
     private float m_GrabTimer;
+
+    private GameplayAttributeModifier m_WalkSpeedModifier;
+    private GameplayAttributeModifier m_RotationRateModifier;
+
+    private Vector3 m_SmoothPullingForce;
+
+    private float m_HeavyLoad;
+    private float m_PullingLoad;
 
 
     private void OnEnable()
@@ -132,23 +150,40 @@ public class PullAbility : MonoBehaviour
         Target.detectCollisions = true;
 
         m_GrabTimer = 0;
+
+        if (TryGetComponent(out GameplayAttributeOwner attributes))
+        {
+            m_WalkSpeedModifier = new GameplayAttributeModifier() { Type = GameplayAttributeModifierType.Multiplicative, Value = 1 };
+            attributes.AddAttributeModifier(m_WalkSpeedAttribute, m_WalkSpeedModifier);
+
+            m_RotationRateModifier = new GameplayAttributeModifier() { Type = GameplayAttributeModifierType.Multiplicative, Value = 1 };
+            attributes.AddAttributeModifier(m_RotationRateAttribute, m_RotationRateModifier);
+        }
     }
 
     private Quaternion targetRotation => Quaternion.Euler(rotationAngle);
 
     private void OnDisable()
     {
-        Target = null;
-
         if (m_Joint != null)
         {
             Destroy(m_Joint);
         }
         m_Joint = null;
 
-        if (TryGetComponent(out CharacterMovement movement))
+        if (Target.TryGetComponent(out GrabPreferences grabPrefs) && !grabPrefs.AllowOverlapAfterDrop)
         {
-            movement.SetRotationMult(1);
+            bool cached_detectCollisions = Target.detectCollisions;
+            Target.detectCollisions = false;
+            Target.detectCollisions = cached_detectCollisions;
+        }
+
+        Target = null;
+
+        if (TryGetComponent(out GameplayAttributeOwner attributes))
+        {
+            attributes.RemoveAttributeModifier(m_WalkSpeedAttribute, m_WalkSpeedModifier);
+            attributes.RemoveAttributeModifier(m_RotationRateAttribute, m_RotationRateModifier);
         }
     }
 
@@ -176,9 +211,27 @@ public class PullAbility : MonoBehaviour
 
         if (TryGetComponent(out CharacterMovement movement))
         {
-            movement.SetRotationMult(MMath.RemapClamped(MinRotationForce, MaxRotationForce, 1, 0, m_Joint.currentForce.magnitude));
-        }
+            m_SmoothPullingForce = Vector3.Lerp(m_SmoothPullingForce, m_Joint.currentForce, Time.fixedDeltaTime * 20);
 
+            Debug.DrawLine(m_Joint.transform.TransformPoint(m_Joint.anchor), m_Joint.transform.TransformPoint(m_Joint.anchor) + m_SmoothPullingForce * 0.2f, Color.red, Time.fixedDeltaTime);
+            Vector3 forwardDir = transform.forward;
+
+            float moveMult = 1;
+            float rotMult = 1;
+
+            // Heavy load
+            m_HeavyLoad = MMath.InverseLerpClamped(MinMovementForce, MaxMovementForce, m_SmoothPullingForce.magnitude);
+            moveMult = MMath.Lerp(moveMult, OverburdenedMovementMult, m_HeavyLoad);
+            rotMult = MMath.Lerp(rotMult, OverburdenedRotationMult, m_HeavyLoad);
+
+            // Pulling load
+            m_PullingLoad = MMath.InverseLerpClamped(30, 70, m_SmoothPullingForce.magnitude) * MMath.Pow(MMath.InverseLerpClamped(0.9f, 1, Vector3.Dot(forwardDir, m_SmoothPullingForce)), 2);
+            moveMult = MMath.Lerp(moveMult, MMath.RemapClamped(0.5f, 0, 1, 1.5f, movement.Rigidbody.velocity.magnitude), m_PullingLoad);
+            rotMult = MMath.Lerp(rotMult, 0, m_PullingLoad);
+
+            m_WalkSpeedModifier.Value = moveMult;
+            m_RotationRateModifier.Value = rotMult;
+        }
 
         if (m_Joint is ConfigurableJoint)
         {
@@ -190,28 +243,54 @@ public class PullAbility : MonoBehaviour
             configurableJoint.linearLimitSpring = linearLimitSpring;
             if (m_GrabTimer > GrabTime)
             {
-                configurableJoint.linearLimit = new SoftJointLimit() { limit = 0, contactDistance = 0.1f };
+                configurableJoint.linearLimit = new SoftJointLimit() { limit = 0.0f, contactDistance = 0.1f };
+
+                if (!copiedJoint && Target.TryGetComponent(out GrabPreferences grabPrefs) && grabPrefs.UseOrientations)
+                {
+                    // TODO only weld bodies this way if the target rotation has been reached!
+                    // TODO suuuper hacky but allows us to lock the rotation and have the current orientation persist
+                    // We want to fuse the hands and the object as much as possible to have them simulated more robustly
+                    copiedJoint = CopyComponent(m_Joint, gameObject);
+                    (copiedJoint as ConfigurableJoint).angularXMotion = ConfigurableJointMotion.Locked;
+                    (copiedJoint as ConfigurableJoint).angularYMotion = ConfigurableJointMotion.Locked;
+                    (copiedJoint as ConfigurableJoint).angularZMotion = ConfigurableJointMotion.Locked;
+                    Destroy(m_Joint);
+                    m_Joint = copiedJoint as ConfigurableJoint;
+                }
             }
-
-
-            var drive = configurableJoint.slerpDrive;
-            drive.positionSpring = MMath.RemapClamped(0, GrabTime, StartDriveSpring, EndDriveSpring, m_GrabTimer);
-            drive.positionDamper = MMath.RemapClamped(0, GrabTime, StartDriveDamper, EndDriveDamper, m_GrabTimer);
-            configurableJoint.slerpDrive = drive;
-            if (m_GrabTimer > GrabTime)
-            {
-                drive = configurableJoint.slerpDrive;
-                drive.positionSpring = 100000000;
-                drive.positionDamper = 1000;
-                configurableJoint.slerpDrive = drive;
-
-                //configurableJoint.angularXMotion = ConfigurableJointMotion.Locked;
-                //configurableJoint.angularYMotion = ConfigurableJointMotion.Locked;
-                //configurableJoint.angularZMotion = ConfigurableJointMotion.Locked;
-            }
-
-            //configurableJoint.SetTargetRotationLocal(targetRotation, startRotation);
         }
+
+        if (Target.TryGetComponent(out GrabPreferences prefs))
+        {
+            prefs.UpdateGrab((ConfigurableJoint)m_Joint);
+        }
+    }
+    Component copiedJoint;
+    T CopyComponent<T>(T original, GameObject destination) where T : Component
+    {
+        System.Type type = original.GetType();
+        var dst = destination.AddComponent(type) as T;
+        var fields = type.GetFields();
+        foreach (var field in fields)
+        {
+            if (field.IsStatic) continue;
+            field.SetValue(dst, field.GetValue(original));
+        }
+        var props = type.GetProperties();
+        foreach (var prop in props)
+        {
+            if (!prop.CanWrite || !prop.CanWrite || prop.Name == "name") continue;
+            prop.SetValue(dst, prop.GetValue(original, null), null);
+        }
+        return dst as T;
+    }
+
+
+
+    private void OnGUI()
+    {
+        MGUI.DrawWorldProgressBar(transform.position, new Rect(10, 10, 50, 9), m_HeavyLoad);
+        MGUI.DrawWorldProgressBar(transform.position, new Rect(10, 20, 50, 9), m_PullingLoad);
     }
 
     public void Throw()

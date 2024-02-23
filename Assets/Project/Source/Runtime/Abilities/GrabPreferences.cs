@@ -11,7 +11,9 @@ public enum LocationRule
 {
     Center = 0,
     Bounds = 1,
-    UpdatedBounds = 2,
+    XAxis = 2,
+    YAxis = 3,
+    ZAxis = 4,
 }
 public enum RotationRule
 {
@@ -34,54 +36,51 @@ public class GrabPreferences : MonoBehaviour
     private bool m_UseOrientations;
     [SerializeField]
     private GrabOrientation[] m_Orientations;
-
-    private ConfigurableJoint m_GrabJoint;
-    private Quaternion startRotation;
-
-    private Quaternion cachedRotation;
-    private Quaternion targetRotation;
-    private Quaternion targetRotDelta;
+    [SerializeField]
+    private bool m_UpdateGrabLocation;
+    [SerializeField]
+    private bool m_AllowOverlapAfterDrop = true;
 
     public bool CollisionEnabled => m_CollisionEnabled;
+    public LocationRule LocationRule => m_LocationRule;
+    public RotationRule RotationRule => m_RotationRule;
+    public float RotationLimit => m_RotationLimit;
+    public bool UseOrientations => m_UseOrientations;
+    public GrabOrientation[] Orientations => m_Orientations;
+    public bool UpdateGrabLocation => m_UpdateGrabLocation;
+    public bool AllowOverlapAfterDrop => m_AllowOverlapAfterDrop;
+
+
+    private Quaternion targetRotation;
+
+
 
 
     public void PreEstablishGrab(Rigidbody Instigator)
     {
-        if (m_Orientations.Length == 0)
+        if (m_UseOrientations)
         {
-            return;
-        }
-
-        Vector3 forwardDir = (transform.position - Instigator.transform.position).normalized;
-        Vector3 upDir = Instigator.transform.up;
-        Vector3 rightDir = Instigator.transform.right;
-
-        float bestMatch = float.NegativeInfinity;
-        GrabOrientation bestOrientationMatch = null;
-        for (int i = 0; i < m_Orientations.Length; i++)
-        {
-            float match = -Quaternion.Angle(Instigator.transform.rotation, m_Orientations[i].transform.rotation) / MMath.Max(MMath.Epsilon, m_Orientations[i].Weight);
-            if (match < bestMatch)
+            float bestMatch = float.NegativeInfinity;
+            GrabOrientation bestOrientationMatch = null;
+            for (int i = 0; i < m_Orientations.Length; i++)
             {
-                continue;
+                float match = -Quaternion.Angle(Instigator.transform.rotation, m_Orientations[i].transform.rotation) / MMath.Max(MMath.Epsilon, m_Orientations[i].Weight);
+                if (match < bestMatch)
+                {
+                    continue;
+                }
+                bestMatch = match;
+                bestOrientationMatch = m_Orientations[i];
             }
-            bestMatch = match;
-            bestOrientationMatch = m_Orientations[i];
+
+            if (bestOrientationMatch != null)
+            {
+                var m = bestOrientationMatch.transform.localToWorldMatrix * transform.worldToLocalMatrix;
+                Quaternion deltaQuat = Instigator.transform.rotation * Quaternion.Inverse(bestOrientationMatch.transform.rotation);
+                Rigidbody rb = GetComponent<Rigidbody>();
+                targetRotation = deltaQuat * rb.rotation;
+            }
         }
-
-        if (bestOrientationMatch != null)
-        {
-            var m = bestOrientationMatch.transform.localToWorldMatrix * transform.worldToLocalMatrix;
-            Quaternion deltaQuat = Instigator.transform.rotation * Quaternion.Inverse(bestOrientationMatch.transform.rotation);
-            Rigidbody rb = GetComponent<Rigidbody>();
-            targetRotation = deltaQuat * rb.rotation;
-            //rb.rotation = deltaQuat * rb.rotation;
-            //rb.PublishTransform();
-
-            //targetRotation = Instigator.rotation;
-        }
-
-        cachedRotation = transform.rotation;
     }
     public void EstablishGrab(ConfigurableJoint grabJoint)
     {
@@ -106,16 +105,7 @@ public class GrabPreferences : MonoBehaviour
         grabJoint.angularYMotion = angularMotion;
         grabJoint.angularZMotion = angularMotion;
 
-        switch (m_LocationRule)
-        {
-            case LocationRule.Center:
-                grabJoint.connectedAnchor = Vector3.zero;
-                break;
-            case LocationRule.Bounds:
-                Vector3 handPosWorld = grabJoint.transform.TransformPoint(grabJoint.anchor);
-                grabJoint.connectedAnchor = transform.InverseTransformPoint(GetComponent<Rigidbody>().ClosestPointOnBounds(handPosWorld));
-                break;
-        }
+        AttachToLocation(grabJoint);
 
         if (m_RotationRule == RotationRule.Limited)
         {
@@ -138,20 +128,49 @@ public class GrabPreferences : MonoBehaviour
             grabJoint.angularZLimit = limit;
         }
 
+        if (m_UseOrientations)
+        {
+            grabJoint.angularXDrive = new JointDrive() { useAcceleration = true, positionSpring = 1000000, positionDamper = 50000, maximumForce = 1000000 };
+            grabJoint.angularYZDrive = new JointDrive() { useAcceleration = true, positionSpring = 1000000, positionDamper = 50000, maximumForce = 1000000 };
+            grabJoint.rotationDriveMode = RotationDriveMode.XYAndZ;
 
-        grabJoint.angularXDrive = new JointDrive() { useAcceleration = true, positionSpring = 5000, positionDamper = 500, maximumForce = 10000 };
-        grabJoint.angularYZDrive = new JointDrive() { useAcceleration = true, positionSpring = 5000, positionDamper = 500, maximumForce = 10000 };
-        grabJoint.rotationDriveMode = RotationDriveMode.XYAndZ;
-
-        startRotation = transform.rotation;
-        grabJoint.configuredInWorldSpace = true;
-        grabJoint.targetRotation = targetRotation * Quaternion.Inverse(transform.rotation);
-
-        m_GrabJoint = grabJoint;
+            grabJoint.configuredInWorldSpace = true;
+            grabJoint.targetRotation = targetRotation * Quaternion.Inverse(transform.rotation);
+        }
     }
 
-    public void UpdateGrab()
+    public void UpdateGrab(ConfigurableJoint grabJoint)
     {
+        AttachToLocation(grabJoint);
+
+
+        if (m_UseOrientations)
+        {
+            Debug.Log(Quaternion.Angle(targetRotation, grabJoint.connectedBody.transform.rotation));
+        }
+    }
+
+    private void AttachToLocation(ConfigurableJoint grabJoint)
+    {
+        Vector3 handPosWorld = grabJoint.transform.TransformPoint(grabJoint.anchor);
+        switch (m_LocationRule)
+        {
+            case LocationRule.Center:
+                grabJoint.connectedAnchor = Vector3.zero;
+                break;
+            case LocationRule.Bounds:
+                grabJoint.connectedAnchor = transform.InverseTransformPoint(GetComponent<Rigidbody>().ClosestPointOnBounds(handPosWorld));
+                break;
+            case LocationRule.XAxis:
+                grabJoint.connectedAnchor = Vector3.Project(transform.InverseTransformPoint(GetComponent<Rigidbody>().ClosestPointOnBounds(handPosWorld)), Vector3.right);
+                break;
+            case LocationRule.YAxis:
+                grabJoint.connectedAnchor = Vector3.Project(transform.InverseTransformPoint(GetComponent<Rigidbody>().ClosestPointOnBounds(handPosWorld)), Vector3.up);
+                break;
+            case LocationRule.ZAxis:
+                grabJoint.connectedAnchor = Vector3.Project(transform.InverseTransformPoint(GetComponent<Rigidbody>().ClosestPointOnBounds(handPosWorld)), Vector3.forward);
+                break;
+        }
     }
 
     public void DisbandGrab(ConfigurableJoint grabJoint)

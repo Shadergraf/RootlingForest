@@ -11,7 +11,8 @@ namespace Manatea
         public PullAbility PullAbility;
         public CapsuleCollider TriggerCollider;
 
-        public InputActionReference m_MovementAction;
+        public InputActionAsset m_InputAsset;
+        public int m_Player = -1;
 
         private Collider[] Colliders;
         private int OverlapCount;
@@ -22,15 +23,39 @@ namespace Manatea
 
         public float InputSmoothing = 2;
 
+        private InputActionAsset m_InputActions;
+        private InputAction m_MovementAction;
+        private InputAction m_JumpAction;
+        private InputAction m_GrabAction;
+        private InputAction m_ThrowAction;
 
         private void Awake()
         {
             Colliders = new Collider[8];
+
+            m_InputActions = Instantiate(m_InputAsset);
+            switch (m_Player)
+            {
+                case 0:
+                    m_InputActions.devices = new InputDevice[] { Keyboard.current, Mouse.current };
+                    break;
+                case 1:
+                    m_InputActions.devices = new InputDevice[] { Gamepad.current };
+                    break;
+            }
+
+            m_MovementAction    = m_InputActions.actionMaps[0].actions[0];
+            m_JumpAction        = m_InputActions.actionMaps[0].actions[1];
+            m_GrabAction        = m_InputActions.actionMaps[0].actions[2];
+            m_ThrowAction       = m_InputActions.actionMaps[0].actions[3];
         }
 
         private void Start()
         {
-            m_MovementAction.action.Enable();
+            m_MovementAction.Enable();
+            m_JumpAction.Enable();
+            m_GrabAction.Enable();
+            m_ThrowAction.Enable();
         }
         private void OnEnable()
         {
@@ -41,7 +66,10 @@ namespace Manatea
         }
         private void OnDisable()
         {
-            m_MovementAction.action.Disable();
+            m_MovementAction.Disable();
+            m_JumpAction.Disable();
+            m_GrabAction.Disable();
+            m_ThrowAction.Disable();
         }
 
 
@@ -50,42 +78,12 @@ namespace Manatea
 
             Vector3 inputVector = Vector3.zero;
 
-            // Keyboard
-            if (m_Keyboard.dKey.isPressed)
-                inputVector += Vector3.right;
-            if (m_Keyboard.aKey.isPressed)
-                inputVector += Vector3.left;
-            if (m_Keyboard.wKey.isPressed)
-                inputVector += Vector3.forward;
-            if (m_Keyboard.sKey.isPressed)
-                inputVector += Vector3.back;
-
-            // Gamepad
-            if (m_Gamepad.leftStick.value != Vector2.zero)
-            {
-                Vector2 stickInput          = m_Gamepad.leftStick.value;
-                Vector2 stickDir            = stickInput.normalized;
-                float   stickDirAngle       = MMath.DirToAng(stickDir) * MMath.Rad2Deg / 45;
-                float   stickDirAngleFrac   = MMath.Frac(stickDirAngle);
-                int     stickDirAngleFloor  = MMath.FloorToInt(stickDirAngle);
-                stickDirAngleFrac = Smoothing01(stickDirAngleFrac, InputSmoothing);
-                stickDirAngle = (stickDirAngleFloor + stickDirAngleFrac) * 45 * MMath.Deg2Rad;
-                stickDir = MMath.AngToDir(stickDirAngle);
-                stickInput = stickDir * stickInput.magnitude;
-
-                inputVector += Vector3.right * stickInput.x;
-                inputVector += Vector3.forward * stickInput.y;
-            }
-
-            if (inputVector != Vector3.zero)
-                inputVector.Normalize();
-
-            inputVector = m_MovementAction.action.ReadValue<Vector2>().XZtoXYZ();
+            inputVector = m_MovementAction.ReadValue<Vector2>().XZtoXYZ();
 
             CharacterMovement.Move(inputVector);
 
 
-            if (m_Keyboard.spaceKey.isPressed || m_Gamepad.buttonSouth.isPressed)
+            if (m_JumpAction.IsPressed())
             {
                 CharacterMovement.Jump();
             }
@@ -95,13 +93,10 @@ namespace Manatea
             }
 
 
-            if (m_Keyboard.eKey.wasPressedThisFrame || m_Gamepad.buttonNorth.wasPressedThisFrame)
-                CharacterMovement.GetComponent<Rigidbody>().AddForce(inputVector * DashForce, ForceMode.Impulse);
-
-
             TriggerCollider.GetGlobalParams(out Vector3 p1, out Vector3 p2, out float radius);
             OverlapCount = Physics.OverlapCapsuleNonAlloc(p1, p2, radius, Colliders);
-            if (m_Mouse.leftButton.wasPressedThisFrame || m_Gamepad.buttonWest.wasPressedThisFrame)
+            // TODO capsule cast to find nearest collider
+            if (m_GrabAction.WasPressedThisFrame())
             {
                 if (!PullAbility.enabled)
                 {
@@ -122,7 +117,7 @@ namespace Manatea
                 }
             }
 
-            if (m_Mouse.rightButton.wasPressedThisFrame || m_Gamepad.buttonEast.wasPressedThisFrame)
+            if (m_ThrowAction.WasPressedThisFrame())
             {
                 if (PullAbility.enabled)
                 {
