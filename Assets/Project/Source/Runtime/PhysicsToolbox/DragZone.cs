@@ -11,9 +11,6 @@ public class DragZone : MonoBehaviour
     [SerializeField]
     private float m_AngularDrag = 0.5f;
 
-    [SerializeField]
-    private bool m_IgnoreSelf = true;
-
     private Rigidbody m_SelfRigidbody;
 
     private void Start()

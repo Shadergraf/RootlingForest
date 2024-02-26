@@ -31,11 +31,4 @@ public class ObjectSpawner : MonoBehaviour
         spawnedRigid.velocity += Vector3.ProjectOnPlane(selfRigid.velocity, Vector3.up);
         selfRigid.AddForce(spawnedRigid.transform.forward * -1 * 200, ForceMode.Force);
     }
-    private void Update()
-    {
-        if (Input.GetMouseButtonDown(2))
-        {
-            SpawnSilent();
-        }
-    }
 }

@@ -17,21 +17,23 @@ namespace Manatea
         }
 
         public static void DrawScreenProgressBar(Rect screenRect, float progress)
+            => DrawScreenProgressBar(screenRect, progress, new Color(0, 128, 0), new Color(64, 0, 0));
+        public static void DrawScreenProgressBar(Rect screenRect, float progress, Color FG, Color BG)
         {
             Validate();
 
-            GUI.DrawTexture(screenRect, s_Pixel, ScaleMode.StretchToFill, true, 0, new Color(64, 0, 0), 0, 0);
+            GUI.DrawTexture(screenRect, s_Pixel, ScaleMode.StretchToFill, true, 0, BG, 0, 0);
             screenRect.width *= MMath.Clamp01(progress);
-            GUI.DrawTexture(screenRect, s_Pixel, ScaleMode.StretchToFill, true, 0, new Color(0, 128, 0), 0, 0);
+            GUI.DrawTexture(screenRect, s_Pixel, ScaleMode.StretchToFill, true, 0, FG, 0, 0);
         }
         public static void DrawWorldProgressBar(Vector3 worldPos, Rect screenRect, float progress)
+            => DrawWorldProgressBar(worldPos, screenRect, progress, new Color(0, 128, 0), new Color(64, 0, 0));
+        public static void DrawWorldProgressBar(Vector3 worldPos, Rect screenRect, float progress, Color FG, Color BG)
         {
-            Validate();
-
             Vector3 screenPoint = Camera.main.WorldToScreenPoint(worldPos);
             screenRect.x = screenPoint.x - screenRect.x;
             screenRect.y = Screen.height - screenPoint.y - screenRect.y;
-            DrawScreenProgressBar(screenRect, progress);
+            DrawScreenProgressBar(screenRect, progress, FG, BG);
         }
     }
 }

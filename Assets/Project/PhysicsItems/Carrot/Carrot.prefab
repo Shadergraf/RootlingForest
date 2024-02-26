@@ -107,10 +107,6 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: -6022363768642451203, guid: 07eef7875006a53488053b4dd57b6360,
         type: 3}
       insertIndex: -1
-      addedObject: {fileID: 7962624285136075361}
-    - targetCorrespondingSourceObject: {fileID: -6022363768642451203, guid: 07eef7875006a53488053b4dd57b6360,
-        type: 3}
-      insertIndex: -1
       addedObject: {fileID: 3544983708598889725}
     - targetCorrespondingSourceObject: {fileID: -6022363768642451203, guid: 07eef7875006a53488053b4dd57b6360,
         type: 3}
@@ -173,19 +169,6 @@ Rigidbody:
   m_Interpolate: 1
   m_Constraints: 0
   m_CollisionDetection: 3
---- !u!114 &7962624285136075361
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 552648220919168534}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d3cd86f7f49cceb469293242ed20a7b3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  PullLocation: 1
 --- !u!114 &3544983708598889725
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -205,6 +188,7 @@ MonoBehaviour:
   m_UseOrientations: 0
   m_Orientations: []
   m_UpdateGrabLocation: 1
+  m_AllowOverlapAfterDrop: 1
 --- !u!114 &2797358665718637356
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -410,6 +394,7 @@ MonoBehaviour:
   m_UseOrientations: 0
   m_Orientations: []
   m_UpdateGrabLocation: 1
+  m_AllowOverlapAfterDrop: 1
 --- !u!114 &215818604791492574
 MonoBehaviour:
   m_ObjectHideFlags: 0

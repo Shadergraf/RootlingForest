@@ -42,8 +42,6 @@ namespace Manatea.AdventureRoots
         private bool m_IsRotating;
         private bool m_ScheduledJump;
 
-        private float m_RotationMult = 1;
-
         // Constants
         private const float MIN_JUMP_TIME = 0.2f;       // The minimum time after a jump we are guaranteed to be airborne
 
@@ -70,6 +68,9 @@ namespace Manatea.AdventureRoots
         private void OnEnable()
         {
             m_TargetMoveRotation = transform.forward;
+
+            Rigidbody.automaticInertiaTensor = false;
+            Rigidbody.inertiaTensorRotation = Quaternion.Euler(0, 360, 0);
         }
 
         public void Move(Vector3 moveVector, bool rotateTowardsMove = true)
@@ -354,7 +355,9 @@ namespace Manatea.AdventureRoots
                 if (m_GroundHits[i].distance > groundHitResult.distance)
                     continue;
                 // Discard self collisions
-                if (m_GroundHits[i].collider.gameObject == gameObject)
+                if (m_GroundHits[i].collider.transform == Rigidbody.transform)
+                    continue;
+                if (m_GroundHits[i].collider.transform.IsChildOf(Rigidbody.transform))
                     continue;
 
                 groundHitResult = m_GroundHits[i];

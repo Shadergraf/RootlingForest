@@ -1,16 +1,15 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using Manatea;
 using Manatea.AdventureRoots;
-using static UnityEngine.GraphicsBuffer;
 using Manatea.GameplaySystem;
-using System.Runtime.CompilerServices;
-using static UnityEngine.UI.Image;
+using UnityEngine.Events;
+
+// TODO cleanup this file
 
 public class PullAbility : MonoBehaviour
 {
     public Rigidbody Target;
+    public Rigidbody Self;
     public float StartSpring = 10;
     public float EndSpring = 500;
     public float StartDamper = 50;
@@ -46,8 +45,15 @@ public class PullAbility : MonoBehaviour
     public GameplayAttribute m_WalkSpeedAttribute;
     public GameplayAttribute m_RotationRateAttribute;
 
-    private Joint m_Joint;
+    public UnityEvent m_GrabStarted;
+    public UnityEvent m_GrabEnded;
+
+    private GameplayAttributeOwner m_Attributes;
+    private ConfigurableJoint m_Joint;
+    private GrabPreferences m_Target_GrabPrefs;
+
     private Quaternion startRotation;
+    private Quaternion targetRotation;
     private float m_GrabTimer;
 
     private GameplayAttributeModifier m_WalkSpeedModifier;
@@ -61,18 +67,24 @@ public class PullAbility : MonoBehaviour
 
     private void OnEnable()
     {
-        if (!Target.TryGetComponent(out GrabPreferences grabPrefs))
+        if (!Target.TryGetComponent(out m_Target_GrabPrefs))
+        {
+            enabled = false;
+            return;
+        }
+        if (Target == Self || Target.transform.IsChildOf(Self.transform))
         {
             enabled = false;
             return;
         }
 
-        Quaternion startRotation = Target.rotation;
+        TryGetComponent(out m_Attributes);
+
 
         // HACK solves an issue with "enableCollision" property of the joint
         Target.detectCollisions = false;
 
-        grabPrefs.PreEstablishGrab(GetComponent<Rigidbody>());
+        PreEstablishGrab();
 
         m_Joint = gameObject.AddComponent<ConfigurableJoint>();
         m_Joint.connectedBody = Target;
@@ -80,17 +92,6 @@ public class PullAbility : MonoBehaviour
         //m_Joint.enableCollision = EnableCollision;
         m_Joint.breakForce = BreakForce;
         m_Joint.breakTorque = BreakTorque;
-
-        // Find closest point
-        var colliders = Target.GetComponents<Collider>();
-        Vector3 closestPoint = Vector3.one * 10000;
-        for (int i  = 0; i < colliders.Length; i++)
-        {
-            Vector3 newPoint = colliders[i].ClosestPoint(transform.position);
-            if (Vector3.Distance(transform.position, newPoint) < Vector3.Distance(transform.position, closestPoint))
-                closestPoint = newPoint;
-        }
-        closestPoint = Target.transform.InverseTransformPoint(closestPoint);
 
         m_Joint.anchor = HandPosition;
         if (AutoTargetPosition)
@@ -115,75 +116,171 @@ public class PullAbility : MonoBehaviour
         }
         //m_Joint.anchor = transform.InverseTransformPoint(Target.transform.TransformPoint(m_Joint.connectedAnchor));
 
-        if (m_Joint is SpringJoint)
-        {
-            (m_Joint as SpringJoint).spring = StartSpring;
-            (m_Joint as SpringJoint).damper = StartDamper;
-        }
-        if (m_Joint is ConfigurableJoint)
-        {
-            ConfigurableJoint configurableJoint = (ConfigurableJoint)m_Joint;
-
-            if (Target.TryGetComponent(out GrabPreferences grabPrefss))
-            {
-                grabPrefss.EstablishGrab(configurableJoint);
-            }
-
-            configurableJoint.linearLimit = new SoftJointLimit() { limit = LinearLimit, contactDistance = 0.1f };
-            configurableJoint.linearLimitSpring = new SoftJointLimitSpring() { spring = StartSpring, damper = StartDamper };
-
-            var drive = configurableJoint.slerpDrive;
-            drive.positionSpring = DriverSpring;
-            drive.positionDamper = DriverDamper;
-            configurableJoint.slerpDrive = drive;
 
 
-            //configurableJoint.targetRotation = Quaternion.Inverse(startRotation);// Quaternion.Inverse(startRotation)
-            //startRotation = Target.transform.rotation;
+        EstablishGrab();
 
-            //configurableJoint.SetTargetRotationLocal(targetRotation, startRotation);
-            //configurableJoint.targetRotation = (startRotation);
-        }
+        m_Joint.linearLimit = new SoftJointLimit() { limit = LinearLimit, contactDistance = 0.1f };
+        m_Joint.linearLimitSpring = new SoftJointLimitSpring() { spring = StartSpring, damper = StartDamper };
 
-        //Target.rotation = startRotation;
-        //Target.PublishTransform();
+        var drive = m_Joint.slerpDrive;
+        drive.positionSpring = DriverSpring;
+        drive.positionDamper = DriverDamper;
+        m_Joint.slerpDrive = drive;
+
+
         Target.detectCollisions = true;
 
         m_GrabTimer = 0;
 
-        if (TryGetComponent(out GameplayAttributeOwner attributes))
+
+        if (m_Attributes)
         {
             m_WalkSpeedModifier = new GameplayAttributeModifier() { Type = GameplayAttributeModifierType.Multiplicative, Value = 1 };
-            attributes.AddAttributeModifier(m_WalkSpeedAttribute, m_WalkSpeedModifier);
+            m_Attributes.AddAttributeModifier(m_WalkSpeedAttribute, m_WalkSpeedModifier);
 
             m_RotationRateModifier = new GameplayAttributeModifier() { Type = GameplayAttributeModifierType.Multiplicative, Value = 1 };
-            attributes.AddAttributeModifier(m_RotationRateAttribute, m_RotationRateModifier);
+            m_Attributes.AddAttributeModifier(m_RotationRateAttribute, m_RotationRateModifier);
+        }
+
+        m_GrabStarted.Invoke();
+    }
+
+    public void EstablishGrab()
+    {
+        m_Joint.enableCollision = m_Target_GrabPrefs.CollisionEnabled;
+
+        m_Joint.xMotion = ConfigurableJointMotion.Limited;
+        m_Joint.yMotion = ConfigurableJointMotion.Limited;
+        m_Joint.zMotion = ConfigurableJointMotion.Limited;
+
+        // Rotation rule
+        ConfigurableJointMotion angularMotion = ConfigurableJointMotion.Free;
+        switch (m_Target_GrabPrefs.RotationRule)
+        {
+            case RotationRule.Locked:
+                angularMotion = ConfigurableJointMotion.Locked; break;
+            case RotationRule.Limited:
+                angularMotion = ConfigurableJointMotion.Limited; break;
+            case RotationRule.Free:
+                angularMotion = ConfigurableJointMotion.Free; break;
+        }
+        m_Joint.angularXMotion = angularMotion;
+        m_Joint.angularYMotion = angularMotion;
+        m_Joint.angularZMotion = angularMotion;
+
+        AttachToLocation();
+
+        if (m_Target_GrabPrefs.RotationRule == RotationRule.Limited)
+        {
+            SoftJointLimit limit;
+
+            limit = m_Joint.highAngularXLimit;
+            limit.limit = m_Target_GrabPrefs.RotationLimit;
+            m_Joint.highAngularXLimit = limit;
+
+            limit = m_Joint.lowAngularXLimit;
+            limit.limit = -m_Target_GrabPrefs.RotationLimit;
+            m_Joint.lowAngularXLimit = limit;
+
+            limit = m_Joint.angularYLimit;
+            limit.limit = m_Target_GrabPrefs.RotationLimit;
+            m_Joint.angularYLimit = limit;
+
+            limit = m_Joint.angularZLimit;
+            limit.limit = m_Target_GrabPrefs.RotationLimit;
+            m_Joint.angularZLimit = limit;
+        }
+
+        if (m_Target_GrabPrefs.UseOrientations)
+        {
+            m_Joint.angularXDrive = new JointDrive() { useAcceleration = true, positionSpring = 1000000, positionDamper = 50000, maximumForce = 1000000 };
+            m_Joint.angularYZDrive = new JointDrive() { useAcceleration = true, positionSpring = 1000000, positionDamper = 50000, maximumForce = 1000000 };
+            m_Joint.rotationDriveMode = RotationDriveMode.XYAndZ;
+
+            m_Joint.configuredInWorldSpace = true;
+            m_Joint.targetRotation = targetRotation * Quaternion.Inverse(Target.transform.rotation);
         }
     }
 
-    private Quaternion targetRotation => Quaternion.Euler(rotationAngle);
+    private void AttachToLocation()
+    {
+        Vector3 handPosWorld = m_Joint.transform.TransformPoint(m_Joint.anchor);
+        Vector3 targetHandPos = Target.transform.InverseTransformPoint(Target.ClosestPointOnBounds(handPosWorld));
+        switch (m_Target_GrabPrefs.LocationRule)
+        {
+            case LocationRule.Center:
+                m_Joint.connectedAnchor = Vector3.zero;
+                break;
+            case LocationRule.Bounds:
+                m_Joint.connectedAnchor = targetHandPos;
+                break;
+            case LocationRule.XAxis:
+                m_Joint.connectedAnchor = Vector3.Project(targetHandPos, Vector3.right);
+                break;
+            case LocationRule.YAxis:
+                m_Joint.connectedAnchor = Vector3.Project(targetHandPos, Vector3.up);
+                break;
+            case LocationRule.ZAxis:
+                m_Joint.connectedAnchor = Vector3.Project(targetHandPos, Vector3.forward);
+                break;
+        }
+    }
 
     private void OnDisable()
     {
-        if (m_Joint != null)
+        if (m_Joint)
         {
             Destroy(m_Joint);
         }
         m_Joint = null;
 
-        if (Target.TryGetComponent(out GrabPreferences grabPrefs) && !grabPrefs.AllowOverlapAfterDrop)
+        if (Target && m_Target_GrabPrefs)
         {
-            bool cached_detectCollisions = Target.detectCollisions;
-            Target.detectCollisions = false;
-            Target.detectCollisions = cached_detectCollisions;
+            if (!m_Target_GrabPrefs.AllowOverlapAfterDrop)
+            {
+                bool cached_detectCollisions = Target.detectCollisions;
+                Target.detectCollisions = false;
+                Target.detectCollisions = cached_detectCollisions;
+            }
         }
 
         Target = null;
+        m_Target_GrabPrefs = null;
 
-        if (TryGetComponent(out GameplayAttributeOwner attributes))
+
+        if (m_Attributes)
         {
-            attributes.RemoveAttributeModifier(m_WalkSpeedAttribute, m_WalkSpeedModifier);
-            attributes.RemoveAttributeModifier(m_RotationRateAttribute, m_RotationRateModifier);
+            m_Attributes.RemoveAttributeModifier(m_WalkSpeedAttribute, m_WalkSpeedModifier);
+            m_Attributes.RemoveAttributeModifier(m_RotationRateAttribute, m_RotationRateModifier);
+        }
+        m_Attributes = null;
+
+        m_GrabEnded.Invoke();
+    }
+
+    public void PreEstablishGrab()
+    {
+        if (m_Target_GrabPrefs.UseOrientations)
+        {
+            float bestMatch = float.NegativeInfinity;
+            GrabOrientation bestOrientationMatch = null;
+            for (int i = 0; i < m_Target_GrabPrefs.Orientations.Length; i++)
+            {
+                float match = -Quaternion.Angle(transform.rotation, m_Target_GrabPrefs.Orientations[i].transform.rotation) / MMath.Max(MMath.Epsilon, m_Target_GrabPrefs.Orientations[i].Weight);
+                if (match < bestMatch)
+                {
+                    continue;
+                }
+                bestMatch = match;
+                bestOrientationMatch = m_Target_GrabPrefs.Orientations[i];
+            }
+
+            if (bestOrientationMatch != null)
+            {
+                Quaternion deltaQuat = transform.rotation * Quaternion.Inverse(bestOrientationMatch.transform.rotation);
+                targetRotation = deltaQuat * Target.rotation;
+            }
         }
     }
 
@@ -201,7 +298,7 @@ public class PullAbility : MonoBehaviour
     }
     private void FixedUpdate()
     {
-        if (m_Joint == null)
+        if (m_Joint == null || !Target.gameObject.activeInHierarchy)
         {
             enabled = false;
             return;
@@ -209,62 +306,69 @@ public class PullAbility : MonoBehaviour
 
         m_GrabTimer += Time.fixedDeltaTime;
 
-        if (TryGetComponent(out CharacterMovement movement))
+
+
+        m_SmoothPullingForce = Vector3.Lerp(m_SmoothPullingForce, m_Joint.currentForce, Time.fixedDeltaTime * 20);
+
+        Debug.DrawLine(m_Joint.transform.TransformPoint(m_Joint.anchor), m_Joint.transform.TransformPoint(m_Joint.anchor) + m_SmoothPullingForce * 0.2f, Color.red, Time.fixedDeltaTime);
+        Vector3 forwardDir = transform.forward;
+
+        float moveMult = 1;
+        float rotMult = 1;
+
+        // Heavy load
+        m_HeavyLoad = MMath.InverseLerpClamped(MinMovementForce, MaxMovementForce, m_SmoothPullingForce.magnitude);
+        moveMult = MMath.Lerp(moveMult, OverburdenedMovementMult, m_HeavyLoad);
+        rotMult = MMath.Lerp(rotMult, OverburdenedRotationMult, m_HeavyLoad);
+
+        // Pulling load
+        m_PullingLoad = MMath.InverseLerpClamped(30, 70, m_SmoothPullingForce.magnitude) * MMath.Pow(MMath.InverseLerpClamped(0.9f, 1, Vector3.Dot(forwardDir, m_SmoothPullingForce)), 2);
+        moveMult = MMath.Lerp(moveMult, MMath.RemapClamped(0.5f, 0, 1, 1.5f, Self.velocity.magnitude), m_PullingLoad);
+        rotMult = MMath.Lerp(rotMult, 0, m_PullingLoad);
+
+        m_WalkSpeedModifier.Value = moveMult;
+        m_RotationRateModifier.Value = rotMult;
+
+
+
+        SoftJointLimitSpring linearLimitSpring = m_Joint.linearLimitSpring;
+        linearLimitSpring.spring = MMath.RemapClamped(0, GrabTime, StartSpring, EndSpring, m_GrabTimer);
+        linearLimitSpring.damper = MMath.RemapClamped(0, GrabTime, StartDamper, EndDamper, m_GrabTimer);
+        m_Joint.linearLimitSpring = linearLimitSpring;
+        if (m_GrabTimer > GrabTime)
         {
-            m_SmoothPullingForce = Vector3.Lerp(m_SmoothPullingForce, m_Joint.currentForce, Time.fixedDeltaTime * 20);
+            m_Joint.linearLimit = new SoftJointLimit() { limit = 0.0f, contactDistance = 0.1f };
 
-            Debug.DrawLine(m_Joint.transform.TransformPoint(m_Joint.anchor), m_Joint.transform.TransformPoint(m_Joint.anchor) + m_SmoothPullingForce * 0.2f, Color.red, Time.fixedDeltaTime);
-            Vector3 forwardDir = transform.forward;
-
-            float moveMult = 1;
-            float rotMult = 1;
-
-            // Heavy load
-            m_HeavyLoad = MMath.InverseLerpClamped(MinMovementForce, MaxMovementForce, m_SmoothPullingForce.magnitude);
-            moveMult = MMath.Lerp(moveMult, OverburdenedMovementMult, m_HeavyLoad);
-            rotMult = MMath.Lerp(rotMult, OverburdenedRotationMult, m_HeavyLoad);
-
-            // Pulling load
-            m_PullingLoad = MMath.InverseLerpClamped(30, 70, m_SmoothPullingForce.magnitude) * MMath.Pow(MMath.InverseLerpClamped(0.9f, 1, Vector3.Dot(forwardDir, m_SmoothPullingForce)), 2);
-            moveMult = MMath.Lerp(moveMult, MMath.RemapClamped(0.5f, 0, 1, 1.5f, movement.Rigidbody.velocity.magnitude), m_PullingLoad);
-            rotMult = MMath.Lerp(rotMult, 0, m_PullingLoad);
-
-            m_WalkSpeedModifier.Value = moveMult;
-            m_RotationRateModifier.Value = rotMult;
-        }
-
-        if (m_Joint is ConfigurableJoint)
-        {
-            ConfigurableJoint configurableJoint = (ConfigurableJoint)m_Joint;
-
-            SoftJointLimitSpring linearLimitSpring = configurableJoint.linearLimitSpring;
-            linearLimitSpring.spring = MMath.RemapClamped(0, GrabTime, StartSpring, EndSpring, m_GrabTimer);
-            linearLimitSpring.damper = MMath.RemapClamped(0, GrabTime, StartDamper, EndDamper, m_GrabTimer);
-            configurableJoint.linearLimitSpring = linearLimitSpring;
-            if (m_GrabTimer > GrabTime)
+            if (!copiedJoint && Target.TryGetComponent(out GrabPreferences grabPrefs) && grabPrefs.UseOrientations)
             {
-                configurableJoint.linearLimit = new SoftJointLimit() { limit = 0.0f, contactDistance = 0.1f };
-
-                if (!copiedJoint && Target.TryGetComponent(out GrabPreferences grabPrefs) && grabPrefs.UseOrientations)
-                {
-                    // TODO only weld bodies this way if the target rotation has been reached!
-                    // TODO suuuper hacky but allows us to lock the rotation and have the current orientation persist
-                    // We want to fuse the hands and the object as much as possible to have them simulated more robustly
-                    copiedJoint = CopyComponent(m_Joint, gameObject);
-                    (copiedJoint as ConfigurableJoint).angularXMotion = ConfigurableJointMotion.Locked;
-                    (copiedJoint as ConfigurableJoint).angularYMotion = ConfigurableJointMotion.Locked;
-                    (copiedJoint as ConfigurableJoint).angularZMotion = ConfigurableJointMotion.Locked;
-                    Destroy(m_Joint);
-                    m_Joint = copiedJoint as ConfigurableJoint;
-                }
+                // TODO only weld bodies this way if the target rotation has been reached!
+                // TODO suuuper hacky but allows us to lock the rotation and have the current orientation persist
+                // We want to fuse the hands and the object as much as possible to have them simulated more robustly
+                copiedJoint = CopyComponent(m_Joint, gameObject);
+                (copiedJoint as ConfigurableJoint).angularXMotion = ConfigurableJointMotion.Locked;
+                (copiedJoint as ConfigurableJoint).angularYMotion = ConfigurableJointMotion.Locked;
+                (copiedJoint as ConfigurableJoint).angularZMotion = ConfigurableJointMotion.Locked;
+                Destroy(m_Joint);
+                m_Joint = copiedJoint as ConfigurableJoint;
             }
         }
 
         if (Target.TryGetComponent(out GrabPreferences prefs))
         {
-            prefs.UpdateGrab((ConfigurableJoint)m_Joint);
+            UpdateGrab();
         }
     }
+
+    public void UpdateGrab()
+    {
+        AttachToLocation();
+
+        if (m_Target_GrabPrefs.UseOrientations)
+        {
+            Debug.Log(Quaternion.Angle(targetRotation * Quaternion.Inverse(Target.transform.rotation), m_Joint.connectedBody.transform.rotation));
+        }
+    }
+
     Component copiedJoint;
     T CopyComponent<T>(T original, GameObject destination) where T : Component
     {
@@ -282,7 +386,7 @@ public class PullAbility : MonoBehaviour
             if (!prop.CanWrite || !prop.CanWrite || prop.Name == "name") continue;
             prop.SetValue(dst, prop.GetValue(original, null), null);
         }
-        return dst as T;
+        return dst;
     }
 
 
@@ -306,63 +410,5 @@ public class PullAbility : MonoBehaviour
         Target.AddForceAtPosition(Vector3.down * ThrowRotation * massMult, Target.worldCenterOfMass + transform.forward, ForceMode.VelocityChange);
 
         enabled = false;
-    }
-}
-
-public static class ConfigurableJointExtensions
-{
-    /// <summary>
-    /// Sets a joint's targetRotation to match a given local rotation.
-    /// The joint transform's local rotation must be cached on Start and passed into this method.
-    /// </summary>
-    public static void SetTargetRotationLocal(this ConfigurableJoint joint, Quaternion targetLocalRotation, Quaternion startLocalRotation)
-    {
-        if (joint.configuredInWorldSpace)
-        {
-            Debug.LogError("SetTargetRotationLocal should not be used with joints that are configured in world space. For world space joints, use SetTargetRotation.", joint);
-        }
-        SetTargetRotationInternal(joint, targetLocalRotation, startLocalRotation, Space.Self);
-    }
-
-    /// <summary>
-    /// Sets a joint's targetRotation to match a given world rotation.
-    /// The joint transform's world rotation must be cached on Start and passed into this method.
-    /// </summary>
-    public static void SetTargetRotation(this ConfigurableJoint joint, Quaternion targetWorldRotation, Quaternion startWorldRotation)
-    {
-        if (!joint.configuredInWorldSpace)
-        {
-            Debug.LogError("SetTargetRotation must be used with joints that are configured in world space. For local space joints, use SetTargetRotationLocal.", joint);
-        }
-        SetTargetRotationInternal(joint, targetWorldRotation, startWorldRotation, Space.World);
-    }
-
-    static void SetTargetRotationInternal(this ConfigurableJoint joint, Quaternion targetRotation, Quaternion startRotation, Space space)
-    {
-        // Calculate the rotation expressed by the joint's axis and secondary axis
-        var right = joint.axis;
-        var forward = Vector3.Cross(joint.axis, joint.secondaryAxis).normalized;
-        var up = Vector3.Cross(forward, right).normalized;
-        Quaternion worldToJointSpace = Quaternion.LookRotation(forward, up);
-
-        // Transform into world space
-        Quaternion resultRotation = Quaternion.Inverse(worldToJointSpace);
-
-        // Counter-rotate and apply the new local rotation.
-        // Joint space is the inverse of world space, so we need to invert our value
-        if (space == Space.World)
-        {
-            resultRotation *= startRotation * Quaternion.Inverse(targetRotation);
-        }
-        else
-        {
-            resultRotation *= Quaternion.Inverse(targetRotation) * startRotation;
-        }
-
-        // Transform back into joint space
-        resultRotation *= worldToJointSpace;
-
-        // Set target rotation to our newly calculated rotation
-        joint.targetRotation = resultRotation;
     }
 }

@@ -7,8 +7,6 @@ using UnityEngine.Splines;
 public class RopeGenerator : MonoBehaviour
 {
     [SerializeField]
-    private int m_Elements = 5;
-    [SerializeField]
     private float m_Spacing = 0.1f;
     [SerializeField]
     private GameObject m_Prefab;

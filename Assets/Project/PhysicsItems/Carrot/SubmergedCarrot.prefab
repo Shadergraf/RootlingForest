@@ -95,8 +95,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_PullRigid: {fileID: 4556308410430504159}
-  m_Lever: {fileID: 8305354717111763998}
-  m_PullOutDistance: 1
+  m_Levers:
+  - {fileID: 8305354717111763998}
   m_PullSpeed: 1.6
   m_PullOutForce: 13
   m_PullAxis: {x: 0, y: 1, z: 0}

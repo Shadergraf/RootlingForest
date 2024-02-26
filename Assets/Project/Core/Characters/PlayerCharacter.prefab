@@ -201,6 +201,12 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 2362455876002437693}
   m_SourcePrefab: {fileID: 100100000, guid: 10e5fa5dfab45f14ab93f58ee4b2416d, type: 3}
+--- !u!54 &4970427809924738771 stripped
+Rigidbody:
+  m_CorrespondingSourceObject: {fileID: 690915299916681563, guid: 10e5fa5dfab45f14ab93f58ee4b2416d,
+    type: 3}
+  m_PrefabInstance: {fileID: 5578867091486015368}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &5176520583305314735 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 773119421530684967, guid: 10e5fa5dfab45f14ab93f58ee4b2416d,
@@ -220,6 +226,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Target: {fileID: 0}
+  Self: {fileID: 4970427809924738771}
   StartSpring: 0
   EndSpring: 500
   StartDamper: 0

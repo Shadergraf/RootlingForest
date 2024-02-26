@@ -56,7 +56,7 @@ Rigidbody:
   m_ExcludeLayers:
     serializedVersion: 2
     m_Bits: 0
-  m_ImplicitCom: 1
+  m_ImplicitCom: 0
   m_ImplicitTensor: 1
   m_UseGravity: 1
   m_IsKinematic: 0
@@ -141,6 +141,7 @@ MonoBehaviour:
   m_UseOrientations: 0
   m_Orientations: []
   m_UpdateGrabLocation: 0
+  m_AllowOverlapAfterDrop: 1
 --- !u!1 &4824895105632388978
 GameObject:
   m_ObjectHideFlags: 0

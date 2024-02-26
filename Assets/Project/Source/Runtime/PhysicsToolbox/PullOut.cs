@@ -10,9 +10,7 @@ public class PullOut : MonoBehaviour
     [SerializeField]
     private Rigidbody m_PullRigid;
     [SerializeField]
-    private ConfigurableJoint m_Lever;
-    [SerializeField]
-    private float m_PullOutDistance = 1;
+    private ConfigurableJoint[] m_Levers;
     [SerializeField]
     private float m_PullSpeed = 0.4f;
     [SerializeField]
@@ -33,35 +31,53 @@ public class PullOut : MonoBehaviour
 
     private void FixedUpdate()
     {
-        float pulloutDist = Vector3.Distance(m_Lever.transform.TransformPoint(m_Lever.anchor), m_Lever.connectedBody.transform.TransformPoint(m_Lever.connectedAnchor));
-        float force = m_Lever.currentForce.magnitude;
-        Debug.DrawLine(transform.position, transform.position + m_Lever.currentForce / 50f, Color.red, Time.fixedDeltaTime, false);
-
-        Vector3 pullDir = m_Lever.connectedBody.transform.TransformDirection(m_PullAxis);
-        Debug.DrawLine(m_Lever.connectedBody.transform.position, m_Lever.connectedBody.transform.position + pullDir * 2f, Color.green, Time.fixedDeltaTime, false);
-
-        if (force > 75 && Vector3.Dot(pullDir.normalized, m_Lever.currentForce.normalized) > 0.3f)
+        bool pullIsHappening = false;
+        for (int i = 0; i < m_Levers.Length; i++)
         {
-            m_Progress -= Time.fixedDeltaTime * m_PullSpeed;
+            var lever = m_Levers[i];
+
+            float force = lever.currentForce.magnitude;
+            Debug.DrawLine(transform.position, transform.position + lever.currentForce / 50f, Color.red, Time.fixedDeltaTime, false);
+
+            Vector3 pullDir = lever.connectedBody.transform.TransformDirection(m_PullAxis);
+            Debug.DrawLine(lever.connectedBody.transform.position, lever.connectedBody.transform.position + pullDir * 2f, Color.green, Time.fixedDeltaTime, false);
+
+            if (force > 75 && Vector3.Dot(pullDir.normalized, lever.currentForce.normalized) > 0.3f)
+            {
+                m_Progress -= Time.fixedDeltaTime * m_PullSpeed;
+                pullIsHappening = true;
+            }
+            m_Progress = MMath.Clamp01(m_Progress);
         }
-        else
+
+        if (!pullIsHappening)
         {
             m_Progress += Time.fixedDeltaTime * m_PullSpeed * 0.25f;
         }
-        m_Progress = MMath.Clamp01(m_Progress);
 
         if (m_Progress <= 0)
         {
-            m_PullRigid.isKinematic = false;
-            m_PullRigid.detectCollisions = false;
-
-            m_PullRigid.AddForceAtPosition(Vector3.up * m_PullOutForce, transform.position, ForceMode.VelocityChange);
-            m_Lever.connectedBody.AddForceAtPosition(Vector3.up * m_PullOutForce, transform.position, ForceMode.VelocityChange);
-            enabled = false;
-
-            m_PulledOut.Invoke();
-            StartCoroutine(DelayedDestroy(0.3f));
+            TriggerPullOut();
         }
+    }
+
+    private void TriggerPullOut()
+    {
+        m_PullRigid.isKinematic = false;
+        m_PullRigid.detectCollisions = false;
+
+        Vector3 leverForce = Vector3.zero;
+        for (int i = 0; i < m_Levers.Length; i++)
+        {
+            leverForce += m_Levers[i].currentForce;
+        }
+        leverForce.Normalize();
+
+        m_PullRigid.AddForceAtPosition(Vector3.up * m_PullOutForce, transform.position - leverForce, ForceMode.VelocityChange);
+        enabled = false;
+
+        m_PulledOut.Invoke();
+        StartCoroutine(DelayedDestroy(0.3f));
     }
 
     private IEnumerator DelayedDestroy(float delay)

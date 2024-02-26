@@ -57,7 +57,7 @@ CapsuleCollider:
   m_Enabled: 1
   serializedVersion: 2
   m_Radius: 0.1
-  m_Height: 0.7
+  m_Height: 0.6
   m_Direction: 2
   m_Center: {x: 0, y: 0, z: 0}
 --- !u!54 &4272621952491087106
@@ -106,6 +106,7 @@ MonoBehaviour:
   m_UseOrientations: 0
   m_Orientations: []
   m_UpdateGrabLocation: 0
+  m_AllowOverlapAfterDrop: 1
 --- !u!153 &244979003951576699
 ConfigurableJoint:
   m_ObjectHideFlags: 0
