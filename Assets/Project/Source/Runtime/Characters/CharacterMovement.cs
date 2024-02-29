@@ -38,7 +38,7 @@ namespace Manatea.AdventureRoots
 
         // Input
         private Vector3 m_ScheduledMove;
-        private Vector3 m_TargetMoveRotation;
+        private Vector3 m_TargetLookDir;
         private bool m_IsRotating;
         private bool m_ScheduledJump;
 
@@ -67,7 +67,7 @@ namespace Manatea.AdventureRoots
 
         private void OnEnable()
         {
-            m_TargetMoveRotation = transform.forward;
+            m_TargetLookDir = transform.forward;
 
             Rigidbody.automaticInertiaTensor = false;
             Rigidbody.inertiaTensorRotation = Quaternion.Euler(0, 360, 0);
@@ -78,8 +78,15 @@ namespace Manatea.AdventureRoots
             m_ScheduledMove = moveVector;
             if (rotateTowardsMove && m_ScheduledMove != Vector3.zero)
             {
-                m_TargetMoveRotation = m_ScheduledMove.normalized;
+                m_TargetLookDir = m_ScheduledMove.normalized;
                 m_IsRotating = true;
+            }
+        }
+        public void SetTargetRotation(Vector3 targetRotation)
+        {
+            if (targetRotation != Vector3.zero)
+            {
+                m_TargetLookDir = targetRotation.FlattenY().normalized;
             }
         }
         public void Jump()
@@ -209,11 +216,11 @@ namespace Manatea.AdventureRoots
                 // Add rotation torque
                 if (m_IsRotating)
                 {
-                    m_CurrentRotation = Vector3.Slerp(transform.forward, m_TargetMoveRotation, MMath.Damp(0, 1, 100, dt));
+                    m_CurrentRotation = Vector3.Slerp(transform.forward, m_TargetLookDir, MMath.Damp(0, 1, 100, dt));
                     m_IsRotating = false;
                 }
                 // TODO adding 90 deg to the character rotation works out, it might be a hack tho and is not tested in every scenario, could break
-                float targetRotationTorque = MMath.DeltaAngle((m_RigidBody.rotation.eulerAngles.y + 90) * MMath.Deg2Rad, MMath.Atan2(m_TargetMoveRotation.z, -m_TargetMoveRotation.x)) * MMath.Rad2Deg;
+                float targetRotationTorque = MMath.DeltaAngle((m_RigidBody.rotation.eulerAngles.y + 90) * MMath.Deg2Rad, MMath.Atan2(m_TargetLookDir.z, -m_TargetLookDir.x)) * MMath.Rad2Deg;
                 if (m_IsStableGrounded && !m_IsSliding)
                 {
                     targetRotationTorque *= GroundRotationRate;
@@ -375,18 +382,18 @@ namespace Manatea.AdventureRoots
             return preciseHit;
         }
 
-        private void OnGUI()
-        {
-            GUILayout.BeginVertical();
-            GUI.color = Color.red;
-            GUILayout.Label("Is Grounded:" + m_IsStableGrounded);
-            GUILayout.Label("Is Sliding:" + m_IsSliding);
-            if (TryGetComponent(out Joint joint) && joint.connectedBody)
-            {
-                GUILayout.Label("Pulling:" + joint.connectedBody.name);
-                GUILayout.Label("Joint Force:" + joint.currentForce.magnitude);
-            }
-            GUILayout.EndVertical();
-        }
+        //private void OnGUI()
+        //{
+        //    GUILayout.BeginVertical();
+        //    GUI.color = Color.red;
+        //    GUILayout.Label("Is Grounded:" + m_IsStableGrounded);
+        //    GUILayout.Label("Is Sliding:" + m_IsSliding);
+        //    if (TryGetComponent(out Joint joint) && joint.connectedBody)
+        //    {
+        //        GUILayout.Label("Pulling:" + joint.connectedBody.name);
+        //        GUILayout.Label("Joint Force:" + joint.currentForce.magnitude);
+        //    }
+        //    GUILayout.EndVertical();
+        //}
     }
 }

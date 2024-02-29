@@ -63,10 +63,20 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 37.969
       objectReference: {fileID: 0}
+    - target: {fileID: -6022363768642451203, guid: 07eef7875006a53488053b4dd57b6360,
+        type: 3}
+      propertyPath: m_Layer
+      value: 3
+      objectReference: {fileID: 0}
     - target: {fileID: 919132149155446097, guid: 07eef7875006a53488053b4dd57b6360,
         type: 3}
       propertyPath: m_Name
       value: Carrot
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 07eef7875006a53488053b4dd57b6360,
+        type: 3}
+      propertyPath: m_Layer
+      value: 3
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -182,7 +192,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_CollisionEnabled: 0
-  m_LocationRule: 3
+  m_LocationRule: 0
   m_RotationRule: 2
   m_RotationLimit: 0
   m_UseOrientations: 0
@@ -388,7 +398,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_CollisionEnabled: 1
-  m_LocationRule: 1
+  m_LocationRule: 0
   m_RotationRule: 2
   m_RotationLimit: 0
   m_UseOrientations: 0

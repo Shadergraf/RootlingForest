@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 4245538616831221962}
   - component: {fileID: 244979003951576699}
   - component: {fileID: 4913222347596102311}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: RopeElementTest
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -236,7 +236,7 @@ GameObject:
   - component: {fileID: 5203027519405569642}
   - component: {fileID: 8875323765404340134}
   - component: {fileID: 87719921522287079}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: RopeElement
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -319,7 +319,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 864971109619364894}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Visuals
   m_TagString: Untagged
   m_Icon: {fileID: 0}

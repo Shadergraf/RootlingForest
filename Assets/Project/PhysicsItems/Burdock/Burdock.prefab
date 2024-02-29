@@ -126,7 +126,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5135583354816041980}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Colliders
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -162,7 +162,7 @@ GameObject:
   - component: {fileID: 1912897405256420168}
   - component: {fileID: -6263978307282472212}
   - component: {fileID: 4666493984155210928}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Burdock
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -272,7 +272,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1393480141861807275}
   - component: {fileID: 4745125776400940943}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: UCX_Murdock
   m_TagString: Untagged
   m_Icon: {fileID: 0}

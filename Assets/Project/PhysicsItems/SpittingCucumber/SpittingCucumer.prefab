@@ -45,7 +45,7 @@ GameObject:
   - component: {fileID: 4818369785316035154}
   - component: {fileID: 2319755380855508169}
   - component: {fileID: 6618392527476168520}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SpittingCucumer
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -118,6 +118,7 @@ MonoBehaviour:
   m_Orientations:
   - {fileID: 7897559462832435134}
   m_UpdateGrabLocation: 0
+  m_AllowOverlapAfterDrop: 1
 --- !u!114 &2319755380855508169
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -368,7 +369,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7477600560589917824}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Colliders
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -401,7 +402,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5103663074197815698}
   - component: {fileID: 8006139303015065590}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: SpittingCucumberCollider
   m_TagString: Untagged
   m_Icon: {fileID: 0}

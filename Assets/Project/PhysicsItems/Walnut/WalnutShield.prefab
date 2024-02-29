@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4103699958663023398}
   - component: {fileID: 545369309902910416}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: WalnutShieldCollider.004
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -66,7 +66,7 @@ GameObject:
   - component: {fileID: 4059429443240054381}
   - component: {fileID: 5161068872235294011}
   - component: {fileID: 5039551733653399992}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: WalnutShield
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -141,6 +141,7 @@ MonoBehaviour:
   - {fileID: 3185309384376228711}
   - {fileID: 7545253929670488415}
   m_UpdateGrabLocation: 0
+  m_AllowOverlapAfterDrop: 1
 --- !u!114 &5039551733653399992
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -167,7 +168,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4460227720977446022}
   - component: {fileID: 2993054973140812807}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: WalnutShieldCollider.008
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -221,7 +222,7 @@ GameObject:
   m_Component:
   - component: {fileID: 4622799779905455176}
   - component: {fileID: 8407567647979787664}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: WalnutShieldCollider
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -275,7 +276,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6521850642305311121}
   - component: {fileID: 5493807457697756768}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: WalnutShieldCollider.002
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -539,7 +540,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6693600711879941096}
   - component: {fileID: 7340679650954130365}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: WalnutShieldCollider.003
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -592,7 +593,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6294774613206663501}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Colliders
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -635,7 +636,7 @@ GameObject:
   - component: {fileID: 2153295406412414224}
   - component: {fileID: 3705400007702076268}
   - component: {fileID: 8750333148580549622}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: DragZone
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -671,7 +672,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Drag: 2
   m_AngularDrag: 2
-  m_IgnoreSelf: 1
 --- !u!65 &8750333148580549622
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -703,7 +703,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5310856853003794942}
   - component: {fileID: 3504514533914546719}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: WalnutShieldCollider.005
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -879,7 +879,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8330846742818524495}
   - component: {fileID: 1616570451453538355}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: WalnutShieldCollider.001
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -933,7 +933,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6639397968457556477}
   - component: {fileID: 650728089143126440}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: WalnutShieldCollider.007
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -987,7 +987,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5281315366869190660}
   - component: {fileID: 4190658727660497007}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: WalnutShieldCollider.006
   m_TagString: Untagged
   m_Icon: {fileID: 0}

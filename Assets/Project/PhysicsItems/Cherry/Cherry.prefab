@@ -15,7 +15,7 @@ GameObject:
   - component: {fileID: 6936763382819897549}
   - component: {fileID: 4002256813249257879}
   - component: {fileID: 2824065528534943777}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Cherry
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -267,7 +267,7 @@ GameObject:
   - component: {fileID: 1300496382873942420}
   - component: {fileID: 3077929755067247999}
   - component: {fileID: 1066201789450149300}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: CherryStem
   m_TagString: Untagged
   m_Icon: {fileID: 0}

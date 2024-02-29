@@ -229,7 +229,7 @@ GameObject:
   m_Component:
   - component: {fileID: 96107508245816439}
   - component: {fileID: 5000921502398335414}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: WalnutCollider
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -327,7 +327,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7842402246003738101}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Colliders
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -570,7 +570,7 @@ GameObject:
   - component: {fileID: 7990871353178818655}
   - component: {fileID: 8626774236786544462}
   - component: {fileID: 1222348005642737074}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Walnut
   m_TagString: Untagged
   m_Icon: {fileID: 0}

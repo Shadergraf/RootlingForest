@@ -126,7 +126,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7518074088282362772}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Colliders
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -160,7 +160,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1501681147111245105}
   - component: {fileID: 2387281455540725280}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: GlowshroomCollider
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -214,7 +214,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6989472137390665570}
   - component: {fileID: 4943582765687280326}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Orientation
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -259,7 +259,7 @@ GameObject:
   m_Component:
   - component: {fileID: 455210343592085788}
   - component: {fileID: 2334067057490558763}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Orientation_2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -304,7 +304,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5818404036025557877}
   - component: {fileID: 7200203125981015718}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: GlowshroomCollider.001
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -475,7 +475,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1069528770333312894}
   - component: {fileID: 8394842516445654318}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Orientation_1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -520,7 +520,7 @@ GameObject:
   m_Component:
   - component: {fileID: 800393340067050735}
   - component: {fileID: 2892726041537301051}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Orientation_3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -567,7 +567,7 @@ GameObject:
   - component: {fileID: 6707401605536890640}
   - component: {fileID: 3545395578675869099}
   - component: {fileID: 2177451633682432440}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Glowshroom
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -756,7 +756,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5905176054222198419}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Orientations
   m_TagString: Untagged
   m_Icon: {fileID: 0}

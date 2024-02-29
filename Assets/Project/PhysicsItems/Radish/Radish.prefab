@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 580193797168425813}
   - component: {fileID: 874028418416818850}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Collider
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -409,7 +409,7 @@ GameObject:
   - component: {fileID: 8662332011830870132}
   - component: {fileID: 1782069479178151686}
   - component: {fileID: 1245953078291209924}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Radish
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -904,7 +904,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8318467627775904952}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Colliders
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1107,7 +1107,7 @@ GameObject:
   m_Component:
   - component: {fileID: 1157844044873248048}
   - component: {fileID: 8337573969269823587}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Collider
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -1327,7 +1327,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4717306493558329953}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Colliders
   m_TagString: Untagged
   m_Icon: {fileID: 0}

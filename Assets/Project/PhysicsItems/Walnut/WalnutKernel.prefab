@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 8968385386192783537}
   - component: {fileID: 4165502909753827904}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: WalnutKernelCollider
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -95,7 +95,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8929219463471938773}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Colliders
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -215,7 +215,7 @@ GameObject:
   - component: {fileID: 5933205000868771512}
   - component: {fileID: 571263561696252465}
   - component: {fileID: 3968587593059047297}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: WalnutKernel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -285,6 +285,7 @@ MonoBehaviour:
   m_UseOrientations: 0
   m_Orientations: []
   m_UpdateGrabLocation: 0
+  m_AllowOverlapAfterDrop: 1
 --- !u!114 &3968587593059047297
 MonoBehaviour:
   m_ObjectHideFlags: 0
