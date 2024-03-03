@@ -1265,8 +1265,8 @@ namespace Manatea
 			return 0.5f * (Vector2.Max(smolVec, p + q).Sqrt() - Vector2.Max(smolVec, p - q).Sqrt());
 		}
 
-		#endregion
+        #endregion
 
-	}
+    }
 
 }

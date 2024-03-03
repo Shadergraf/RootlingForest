@@ -1,8 +1,13 @@
 using Manatea;
+using Manatea.GameplaySystem;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
+using Unity.Loading;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.XR;
+using static UnityEngine.GraphicsBuffer;
 
 public class AiController : CharacterController
 {
@@ -10,8 +15,28 @@ public class AiController : CharacterController
 
     public float m_Radius = 0.5f;
     public float m_TickRate = 0.1f;
+    public Transform[] m_AfraidOf;
+    public GameplayAttribute m_MoveSpeedAttribute;
+    public GameplayAttribute m_RotationSpeedAttribute;
 
     private NavMeshPath m_CurrentPath;
+    private Vector3[] m_Path;
+
+    private GameplayAttributeOwner m_AttributeOwner;
+
+    private GameplayAttributeModifier m_MoveSpeedMod;
+    private GameplayAttributeModifier m_RotationSpeedMod;
+
+    public State CurrentState = State.Idle;
+
+    public enum State
+    {
+        Idle,       // Normal behavior
+        Sleeping,   // Sleepy boy
+        Afraid,     // Rund away from something
+        Panic,      // Random movement, while in panic
+        Hungry,     // Run to food and eat
+    }
 
 
     private void Awake()
@@ -21,7 +46,26 @@ public class AiController : CharacterController
 
     private void OnEnable()
     {
-        StartCoroutine(UpdateTickV2());
+        StartCoroutine(UpdateTick());
+
+        m_AttributeOwner = GetComponent<GameplayAttributeOwner>();
+
+        m_MoveSpeedMod = new GameplayAttributeModifier()
+        {
+            Type = GameplayAttributeModifierType.Multiplicative,
+            Value = 1,
+        };
+        m_AttributeOwner.AddAttributeModifier(m_MoveSpeedAttribute, m_MoveSpeedMod);
+
+        m_RotationSpeedMod = new GameplayAttributeModifier()
+        {
+            Type = GameplayAttributeModifierType.Multiplicative,
+            Value = 1,
+        };
+        m_AttributeOwner.AddAttributeModifier(m_RotationSpeedAttribute, m_RotationSpeedMod);
+    }
+    private void OnDisable()
+    {
     }
 
 
@@ -32,81 +76,131 @@ public class AiController : CharacterController
 
     private IEnumerator UpdateTick()
     {
-        yield return new WaitForSeconds(Random.value);
+        yield return new WaitForSeconds(Random.value * m_TickRate);
 
         while (true)
         {
-            m_MoveDir = transform.forward;
+            m_MoveSpeedMod.Value = 1;
+            m_MoveDir = Vector3.zero;
 
-            Vector3 newTarget = transform.forward * m_Radius * 0.95f;
-            newTarget += transform.right * MMath.Pow(Random.value, 4) * MMath.Sign(Random.value - 0.5f) * 0.6f;
-            const float c_SearchRadius = 0.5f;
-            if (NavMesh.SamplePosition(transform.position + newTarget, out NavMeshHit hit, c_SearchRadius, -1))
+            switch (CurrentState)
             {
-                DebugHelper.DrawWireSphere(transform.position + newTarget, c_SearchRadius, Color.blue, m_TickRate);
-                DebugHelper.DrawWireSphere(hit.position, 0.1f, Color.green, m_TickRate);
-                Vector3 move = (hit.position - transform.position).FlattenY() * 2;
-                m_MoveDir = move.ClampMagnitude(0, 1);
-
-                if (m_MoveDir.magnitude <= 0.1f)
-                {
-                    m_MoveDir = -transform.forward;
-                    Debug.Log("Turn back!");
-                }
+                case State.Idle:
+                    yield return TickIdle();
+                    break;
+                case State.Afraid:
+                    yield return TickAfraid();
+                    break;
+                case State.Panic:
+                    yield return TickPanic();
+                    break;
             }
-            else
-            {
-                m_MoveDir = -transform.forward;
-                Debug.Log("Turn back!");
-            }
-
-            yield return new WaitForSeconds(m_TickRate);
+            
+            yield return new WaitForEndOfFrame();
         }
     }
 
-    private IEnumerator UpdateTickV2()
+    private IEnumerator TickIdle()
     {
-        yield return new WaitForSeconds(Random.value);
+        Vector3 newTargetDir = transform.forward * m_Radius * 1.5f;
+        newTargetDir += transform.right * MMath.Pow(Random.value, 4) * MMath.Sign(Random.value - 0.5f) * 2.0f;
 
-        while (true)
+        Vector3 targetPos = GetSensibleNextMove(transform.position, transform.position + newTargetDir);
+        m_MoveDir = (targetPos - transform.position).FlattenY().ClampMagnitude(0, 1);
+
+        // Random turn
+        if (MPropabilities.TimedProbability(0.15f, m_TickRate, Random.value))
         {
-            m_MoveDir = transform.forward;
+            m_MoveDir = Random.insideUnitCircle.XZtoXYZ();
+        }
 
-            Vector3 newTarget = transform.forward * m_Radius * 2.0f;
-            newTarget += transform.right * MMath.Pow(Random.value, 4) * MMath.Sign(Random.value - 0.5f) * 1.0f;
-            const float c_SearchRadius = 0.5f;
+        // Turn around when can't going forward
+        if (m_MoveDir.magnitude < 0.5f)
+        {
+            m_MoveDir *= -1f;
+        }
 
-            bool moveWorked = true;
-            for (int i = 0; i <= 3; i++)
+        yield return new WaitForSeconds(m_TickRate);
+    }
+    private IEnumerator TickAfraid()
+    {
+        m_MoveSpeedMod.Value = 4;
+
+        Vector3 newTargetDir = transform.forward * m_Radius * 1.5f;
+        newTargetDir += transform.right * 2.5f;
+        if (m_AfraidOf.Length > 0)
+        {
+            newTargetDir = (transform.position - m_AfraidOf[0].position).FlattenY().normalized;
+
+            if (Vector3.Distance(m_AfraidOf[0].position, transform.position) > 6)
             {
-                if (i == 3)
-                {
-                    moveWorked = false;
-                    break;
-                }
-                if (NavMesh.CalculatePath(transform.position, transform.position + newTarget * (3 - i) / 3f, -1, m_CurrentPath))
-                {
-                    Vector3 endPos = m_CurrentPath.corners[m_CurrentPath.corners.Length - 1];
-                    DebugHelper.DrawWireSphere(transform.position + newTarget, c_SearchRadius, Color.blue, m_TickRate);
-                    DebugHelper.DrawWireSphere(endPos, 0.1f, Color.green, m_TickRate);
-                    Vector3 move = (endPos - transform.position).FlattenY() * 2;
-                    m_MoveDir = move.ClampMagnitude(0, 1);
-
-                    if (m_MoveDir.magnitude < 0.1f)
-                    {
-                        moveWorked = false;
-                    }
-                    break;
-                }
+                CurrentState = State.Idle;
             }
+        }
 
-            if (!moveWorked)
+        Vector3 targetPos = GetSensibleNextMove(transform.position, transform.position + newTargetDir);
+        m_MoveDir = (targetPos - transform.position).FlattenY().normalized;
+        m_MoveDir = Vector3.Lerp(m_MoveDir, newTargetDir, 0.75f);
+        m_MoveDir = (m_MoveDir + Random.insideUnitCircle.XZtoXYZ() * 0.25f).normalized;
+
+        yield return new WaitForSeconds(0.1f);
+    }
+    private IEnumerator TickPanic()
+    {
+        m_MoveSpeedMod.Value = 3.5f;
+        m_RotationSpeedMod.Value = 2.5f;
+
+        m_MoveDir = (m_MoveDir * 0.25f + Random.insideUnitCircle.XZtoXYZ()).normalized;
+
+        yield return new WaitForSeconds(0.15f);
+    }
+
+    private Vector3 GetSensibleNextMove(Vector3 currentPosition,  Vector3 targetPosition)
+    {
+        // Create sample points on NavMesh
+        Vector3[] testPositions = new Vector3[4];
+        for (int i = 0; i <= 3; i++)
+        {
+            Vector3 target = Vector3.Lerp(currentPosition, targetPosition, i / 3f);
+            if (NavMesh.SamplePosition(target, out NavMeshHit hit, 2, -1))
             {
-                m_MoveDir = -transform.forward;
-                Debug.Log("Turn back!");
+                DebugHelper.DrawWireSphere(target, 0.05f, Color.green, m_TickRate, false);
+                DebugHelper.DrawWireSphere(hit.position, 0.05f, Color.blue, m_TickRate, false);
+                testPositions[i] = hit.position;
             }
+            else
+            {
+                DebugHelper.DrawWireSphere(target, 0.05f, Color.red, m_TickRate, false);
+            }
+        }
 
-            yield return new WaitForSeconds(m_TickRate);
+        // Evaluate Sample points
+        float expectedDistance = Vector3.Distance(currentPosition, targetPosition) / 3;
+        Vector3 bestTarget = testPositions[0];
+        for (int i = 0; i < 3; i++)
+        {
+            float nextDistance = Vector3.Distance(testPositions[i], testPositions[i + 1]);
+            if (nextDistance > expectedDistance * 1.3f)
+            {
+                break;
+            }
+            bestTarget = testPositions[i + 1];
+        }
+
+        DebugHelper.DrawWireSphere(bestTarget, 0.1f, Color.yellow, m_TickRate, false);
+        return bestTarget;
+    }
+
+    public void OnCollisionEnter(Collision collision)
+    {
+        if (collision.rigidbody != null && collision.rigidbody.gameObject != gameObject)
+        {
+            CurrentState = State.Afraid;
+            if (m_AfraidOf.Length == 0)
+            {
+                m_AfraidOf = new Transform[1];
+            }
+            m_AfraidOf[0] = collision.rigidbody.transform;
         }
     }
 }

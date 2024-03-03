@@ -231,13 +231,18 @@ PrefabInstance:
     - target: {fileID: 4226559076182182294, guid: bf0177a3809de3d49ac5dcdb1afa9084,
         type: 3}
       propertyPath: m_Name
-      value: BaseSphereCharacter1
+      value: BaseSphereCharacter
       objectReference: {fileID: 0}
     - target: {fileID: 5137507898606658623, guid: bf0177a3809de3d49ac5dcdb1afa9084,
         type: 3}
       propertyPath: Collider
       value: 
       objectReference: {fileID: 2171703461037526104}
+    - target: {fileID: 5171198309114388193, guid: bf0177a3809de3d49ac5dcdb1afa9084,
+        type: 3}
+      propertyPath: m_Attributes.Array.data[3].m_BaseValue
+      value: 30
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:

@@ -75,8 +75,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5266fe543a7f7d64388b4cde3b2c86bf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GroundMoveForce: 100
-  AirMoveForce: 20
+  GroundMoveForce: 1
+  AirMoveForce: 0.2
   JumpForce: 8.5
   StepHeight: 0
   FeetLinearResistance: 20
@@ -117,7 +117,7 @@ MonoBehaviour:
     m_BaseValue: 0.9
     m_Modifiers: []
   - m_Attribute: {fileID: 11400000, guid: b08ce0e4b3536694bbf575ddf6619fa5, type: 2}
-    m_BaseValue: 1
+    m_BaseValue: 100
     m_Modifiers: []
   - m_Attribute: {fileID: 11400000, guid: 13efa8a8c038c3a47ae5293010294aa4, type: 2}
     m_BaseValue: 1

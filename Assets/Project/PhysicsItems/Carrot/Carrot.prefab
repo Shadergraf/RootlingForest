@@ -192,7 +192,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_CollisionEnabled: 0
-  m_LocationRule: 0
+  m_LocationRule: 3
   m_RotationRule: 2
   m_RotationLimit: 0
   m_UseOrientations: 0
@@ -398,7 +398,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_CollisionEnabled: 1
-  m_LocationRule: 0
+  m_LocationRule: 1
   m_RotationRule: 2
   m_RotationLimit: 0
   m_UseOrientations: 0
