@@ -30,7 +30,10 @@ public class DragZone : MonoBehaviour
         }
 
         // TODO handle multiple colliders with the same rigidbody in one frame
-        other.attachedRigidbody.velocity = other.attachedRigidbody.velocity * (1 - Time.fixedDeltaTime * m_Drag);
-        other.attachedRigidbody.angularVelocity = other.attachedRigidbody.angularVelocity * (1 - Time.fixedDeltaTime * m_AngularDrag);
+        if (!other.attachedRigidbody.isKinematic)
+        {
+            other.attachedRigidbody.velocity = other.attachedRigidbody.velocity * (1 - Time.fixedDeltaTime * m_Drag);
+            other.attachedRigidbody.angularVelocity = other.attachedRigidbody.angularVelocity * (1 - Time.fixedDeltaTime * m_AngularDrag);
+        }
     }
 }
