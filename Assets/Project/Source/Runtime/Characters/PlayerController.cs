@@ -34,13 +34,36 @@ namespace Manatea
             Colliders = new Collider[8];
 
             m_InputActions = Instantiate(m_InputAsset);
+            List<InputDevice> devices = new List<InputDevice>();
             switch (m_Player)
             {
                 case 0:
-                    m_InputActions.devices = new InputDevice[] { Keyboard.current, Mouse.current };
+                    if (Keyboard.current != null)
+                        devices.Add(Keyboard.current);
+                    if (Mouse.current != null)
+                        devices.Add(Mouse.current);
+                    if (devices.Count > 0)
+                    {
+                        m_InputActions.devices = devices.ToArray();
+                    }
+                    else
+                    {
+                        enabled = false;
+                        return;
+                    }
                     break;
                 case 1:
-                    m_InputActions.devices = new InputDevice[] { Gamepad.current };
+                    if (Gamepad.current != null)
+                        devices.Add(Gamepad.current);
+                    if (devices.Count > 0)
+                    {
+                        m_InputActions.devices = devices.ToArray();
+                    }
+                    else
+                    {
+                        enabled = false;
+                        return;
+                    }
                     break;
             }
 
@@ -52,6 +75,11 @@ namespace Manatea
 
         private void Start()
         {
+            if (m_MovementAction == null)
+            {
+                return;
+            }
+
             m_MovementAction.Enable();
             m_JumpAction.Enable();
             m_GrabAction.Enable();
@@ -66,6 +94,11 @@ namespace Manatea
         }
         private void OnDisable()
         {
+            if (m_MovementAction == null)
+            {
+                return;
+            }
+
             m_MovementAction.Disable();
             m_JumpAction.Disable();
             m_GrabAction.Disable();
