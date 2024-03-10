@@ -1809,6 +1809,7 @@ GameObject:
   m_Component:
   - component: {fileID: 272049074}
   - component: {fileID: 272049073}
+  - component: {fileID: 272049075}
   m_Layer: 0
   m_Name: PlayerController
   m_TagString: Untagged
@@ -1851,6 +1852,18 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &272049075
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 272049072}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 011a77ee83b21ad45adc9105cbec089d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &285598103
 GameObject:
   m_ObjectHideFlags: 0
@@ -12843,6 +12856,7 @@ MonoBehaviour:
   m_PullRigid: {fileID: 2131780667}
   m_Levers:
   - {fileID: 2131780660}
+  m_NeededForce: 75
   m_PullSpeed: 1
   m_PullOutForce: 30
   m_PullAxis: {x: 0, y: 1, z: 0}

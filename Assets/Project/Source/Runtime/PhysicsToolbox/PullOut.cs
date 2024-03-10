@@ -12,6 +12,8 @@ public class PullOut : MonoBehaviour
     [SerializeField]
     private ConfigurableJoint[] m_Levers;
     [SerializeField]
+    private float m_NeededForce = 75;
+    [SerializeField]
     private float m_PullSpeed = 0.4f;
     [SerializeField]
     private float m_PullOutForce = 5;
@@ -42,7 +44,7 @@ public class PullOut : MonoBehaviour
             Vector3 pullDir = lever.connectedBody.transform.TransformDirection(m_PullAxis);
             Debug.DrawLine(lever.connectedBody.transform.position, lever.connectedBody.transform.position + pullDir * 2f, Color.green, Time.fixedDeltaTime, false);
 
-            if (force > 75 && Vector3.Dot(pullDir.normalized, lever.currentForce.normalized) > 0.3f)
+            if (force > m_NeededForce && Vector3.Dot(pullDir.normalized, lever.currentForce.normalized) > 0.3f)
             {
                 m_Progress -= Time.fixedDeltaTime * m_PullSpeed;
                 pullIsHappening = true;

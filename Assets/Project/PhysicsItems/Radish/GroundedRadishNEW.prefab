@@ -115,6 +115,7 @@ MonoBehaviour:
   m_PullRigid: {fileID: 427220604560815219}
   m_Levers:
   - {fileID: 367233598438489564}
+  m_NeededForce: 125
   m_PullSpeed: 1.6
   m_PullOutForce: 13
   m_PullAxis: {x: 0, y: 1, z: 0}

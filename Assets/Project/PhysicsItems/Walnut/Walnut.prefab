@@ -560,7 +560,7 @@ PrefabInstance:
     - target: {fileID: 2820277903825203249, guid: 8262b2170c2f0da4387d50da78b2fc03,
         type: 3}
       propertyPath: m_Name
-      value: WalnutNEW
+      value: Walnut
       objectReference: {fileID: 0}
     - target: {fileID: 4741099696618946961, guid: 8262b2170c2f0da4387d50da78b2fc03,
         type: 3}
@@ -776,11 +776,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 2491583799406048030}
     m_Modifications:
-    - target: {fileID: 2900316880346129731, guid: a14f34512d1243e4bb9cfde67b0f439a,
-        type: 3}
-      propertyPath: m_RotationRule
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 5444823454181325510, guid: a14f34512d1243e4bb9cfde67b0f439a,
         type: 3}
       propertyPath: m_Name
@@ -866,11 +861,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 2491583799406048030}
     m_Modifications:
-    - target: {fileID: 2900316880346129731, guid: a14f34512d1243e4bb9cfde67b0f439a,
-        type: 3}
-      propertyPath: m_RotationRule
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 5444823454181325510, guid: a14f34512d1243e4bb9cfde67b0f439a,
         type: 3}
       propertyPath: m_Name
@@ -1014,11 +1004,6 @@ PrefabInstance:
     - target: {fileID: 4553643509976108856, guid: bcf2aa0906b7dfd409c60644b2c78338,
         type: 3}
       propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6665840259077198013, guid: bcf2aa0906b7dfd409c60644b2c78338,
-        type: 3}
-      propertyPath: m_RotationRule
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []

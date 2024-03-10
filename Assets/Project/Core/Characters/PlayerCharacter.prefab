@@ -112,7 +112,7 @@ Transform:
   m_GameObject: {fileID: 7661988470776047675}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: -0.1, z: 0.5}
+  m_LocalPosition: {x: 0, y: 0, z: 0.6}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 1
   m_Children:
@@ -364,7 +364,7 @@ MonoBehaviour:
   StartDriveDamper: 0
   EndDriveDamper: 200
   DamperSpeed: 30
-  HandPosition: {x: 0, y: -0.1, z: 0.7}
+  HandTransform: {fileID: 4231361781513987864}
   TargetPosition: {x: 0, y: 1, z: 0}
   AutoTargetPosition: 1
   ThrowForce: 6
@@ -384,6 +384,7 @@ MonoBehaviour:
   MinRotationForce: 80
   MaxRotationForce: 100
   GrabTime: 0.2
+  m_HandBlocker: {fileID: 0}
   m_WalkSpeedAttribute: {fileID: 11400000, guid: b08ce0e4b3536694bbf575ddf6619fa5,
     type: 2}
   m_RotationRateAttribute: {fileID: 11400000, guid: 13efa8a8c038c3a47ae5293010294aa4,

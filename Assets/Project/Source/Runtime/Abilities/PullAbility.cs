@@ -19,7 +19,7 @@ public class PullAbility : MonoBehaviour
     public float StartDriveDamper = 50;
     public float EndDriveDamper = 2;
     public float DamperSpeed = 2;
-    public Vector3 HandPosition = new Vector3(0, .8f, .8f);
+    public Transform HandTransform;
     public Vector3 TargetPosition = new Vector3(0, 0, 0);
     public bool AutoTargetPosition;
     public float ThrowForce = 5;
@@ -41,6 +41,8 @@ public class PullAbility : MonoBehaviour
     public float MaxRotationForce = 20;
 
     public float GrabTime = 0.25f;
+
+    public Collider m_HandBlocker;
 
     public GameplayAttribute m_WalkSpeedAttribute;
     public GameplayAttribute m_RotationRateAttribute;
@@ -93,7 +95,7 @@ public class PullAbility : MonoBehaviour
         m_Joint.breakForce = BreakForce;
         m_Joint.breakTorque = BreakTorque;
 
-        m_Joint.anchor = HandPosition;
+        m_Joint.anchor = transform.InverseTransformPoint(HandTransform.position);
         if (AutoTargetPosition)
         {
             // TODO ClosestPointOnBounds uses the bounding box instead of the actual collider. This is imprecise
@@ -105,7 +107,7 @@ public class PullAbility : MonoBehaviour
                         m_Joint.connectedAnchor = Vector3.zero;
                         break;
                     case PullLocation.Bounds:
-                        m_Joint.connectedAnchor = Target.transform.InverseTransformPoint(Target.ClosestPointOnBounds(transform.TransformPoint(HandPosition)));
+                        m_Joint.connectedAnchor = Target.transform.InverseTransformPoint(Target.ClosestPointOnBounds(HandTransform.position));
                         break;
                 }
             }
@@ -133,6 +135,10 @@ public class PullAbility : MonoBehaviour
 
         m_GrabTimer = 0;
 
+
+        // TODO ignore hand blocker and hold item
+        //m_HandBlocker.attachedRigidbody.
+        //Physics.IgnoreCollision()
 
         if (m_Attributes)
         {
@@ -330,14 +336,20 @@ public class PullAbility : MonoBehaviour
         m_RotationRateModifier.Value = rotMult;
 
 
-
-        SoftJointLimitSpring linearLimitSpring = m_Joint.linearLimitSpring;
-        linearLimitSpring.spring = MMath.RemapClamped(0, GrabTime, StartSpring, EndSpring, m_GrabTimer);
-        linearLimitSpring.damper = MMath.RemapClamped(0, GrabTime, StartDamper, EndDamper, m_GrabTimer);
-        m_Joint.linearLimitSpring = linearLimitSpring;
         if (m_GrabTimer > GrabTime)
         {
-            m_Joint.linearLimit = new SoftJointLimit() { limit = 0.0f, contactDistance = 0.1f };
+            SoftJointLimitSpring linearLimitSpring = m_Joint.linearLimitSpring;
+            linearLimitSpring.spring = MMath.RemapClamped(0, GrabTime, StartSpring * 0, EndSpring * 0 + 75, m_GrabTimer);
+            linearLimitSpring.damper = MMath.RemapClamped(0, GrabTime, StartDamper * 0, EndDamper * 0 + 10, m_GrabTimer);
+            m_Joint.linearLimitSpring = linearLimitSpring;
+
+            m_Joint.linearLimit = new SoftJointLimit() { limit = 0.002f, contactDistance = 0.01f };
+        }
+        if (m_GrabTimer > GrabTime)
+        {
+            m_Joint.xMotion = ConfigurableJointMotion.Locked;
+            m_Joint.yMotion = ConfigurableJointMotion.Limited;
+            m_Joint.zMotion = ConfigurableJointMotion.Locked;
 
             if (!copiedJoint && Target.TryGetComponent(out GrabPreferences grabPrefs) && grabPrefs.UseOrientations)
             {

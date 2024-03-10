@@ -157,17 +157,6 @@ namespace Manatea
                     PullAbility.Throw();
                 }
             }
-
-    #if DEBUG
-            if (m_Keyboard.ctrlKey.isPressed && m_Mouse.rightButton.wasPressedThisFrame)
-            {
-                Ray ray = Camera.main.ScreenPointToRay(m_Mouse.position.value);
-                if (Physics.Raycast(ray, out RaycastHit hit))
-                {
-                    transform.GetComponent<Rigidbody>().position = hit.point + hit.normal;
-                }
-            }
-    #endif
         }
 
 
