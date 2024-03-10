@@ -1,0 +1,17 @@
+{
+    "name": "Manatea.GameplaySystem",
+    "rootNamespace": "Manatea.GameplaySystem",
+    "references": [
+        "GUID:ed7042dec4e340c47b5006bffc1935ec",
+        "GUID:d7fdb6ea84720db45a661c3eeef05357"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
