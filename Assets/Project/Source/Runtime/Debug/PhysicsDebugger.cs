@@ -26,6 +26,8 @@ public class PhysicsDebugger : MonoBehaviour
             if (Physics.Raycast(ray, out RaycastHit hit))
             {
                 m_GrabObject = hit.collider.GetComponentInParent<Rigidbody>();
+
+
                 if (m_GrabObject != null)
                 {
                     m_GrabPosLocal = m_GrabObject.transform.InverseTransformPoint(hit.point);
@@ -33,6 +35,8 @@ public class PhysicsDebugger : MonoBehaviour
                     m_CurrentGrabPosGlobal = m_InitialGrabPosGlobal;
 
                     GameObject springGO = new GameObject("DebugPhysicsSpring");
+                    springGO.hideFlags = HideFlags.HideAndDontSave;
+
                     springGO.transform.position = hit.point;
                     m_Spring = springGO.AddComponent<SpringJoint>();
                     m_Spring.connectedBody = m_GrabObject;
