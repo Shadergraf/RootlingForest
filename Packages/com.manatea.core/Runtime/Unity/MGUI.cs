@@ -29,11 +29,15 @@ namespace Manatea
         public static void DrawWorldProgressBar(Vector3 worldPos, Rect screenRect, float progress)
             => DrawWorldProgressBar(worldPos, screenRect, progress, new Color(0, 128, 0), new Color(64, 0, 0));
         public static void DrawWorldProgressBar(Vector3 worldPos, Rect screenRect, float progress, Color FG, Color BG)
+            => DrawScreenProgressBar(GetWorldRect(worldPos, screenRect), progress, FG, BG);
+
+
+        public static Rect GetWorldRect(Vector3 worldPos, Rect screenRect)
         {
             Vector3 screenPoint = Camera.main.WorldToScreenPoint(worldPos);
             screenRect.x = screenPoint.x - screenRect.x;
             screenRect.y = Screen.height - screenPoint.y - screenRect.y;
-            DrawScreenProgressBar(screenRect, progress, FG, BG);
+            return screenRect;
         }
     }
 }

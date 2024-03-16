@@ -40,6 +40,15 @@ public class PullAbility : MonoBehaviour
     public float MinRotationForce = 10;
     public float MaxRotationForce = 20;
 
+    [SerializeField]
+    [Tooltip("The maximum distance to raise the anchor in the y position to keep the grabed object from touching the ground.")]
+    private float m_MaxRaiseDistance = 0.5f;
+    [SerializeField]
+    [Tooltip("How fast to raise the grabed object.")]
+    private float m_RaiseSpeed = 6;
+
+    public LayerMask m_RaisingExcludeLayers;
+
     public float GrabTime = 0.25f;
 
     public Collider m_HandBlocker;
@@ -336,17 +345,36 @@ public class PullAbility : MonoBehaviour
         m_RotationRateModifier.Value = rotMult;
 
 
-        if (m_GrabTimer > GrabTime)
-        {
-            SoftJointLimitSpring linearLimitSpring = m_Joint.linearLimitSpring;
-            linearLimitSpring.spring = MMath.RemapClamped(0, GrabTime, StartSpring * 0, EndSpring * 0 + 75, m_GrabTimer);
-            linearLimitSpring.damper = MMath.RemapClamped(0, GrabTime, StartDamper * 0, EndDamper * 0 + 10, m_GrabTimer);
-            m_Joint.linearLimitSpring = linearLimitSpring;
+        SoftJointLimitSpring linearLimitSpring = m_Joint.linearLimitSpring;
+        linearLimitSpring.spring = MMath.RemapClamped(0, GrabTime, StartSpring, EndSpring, m_GrabTimer);
+        linearLimitSpring.damper = MMath.RemapClamped(0, GrabTime, StartDamper, EndDamper, m_GrabTimer);
+        m_Joint.linearLimitSpring = linearLimitSpring;
 
-            m_Joint.linearLimit = new SoftJointLimit() { limit = 0.002f, contactDistance = 0.01f };
-        }
+        m_Joint.linearLimit = new SoftJointLimit() { limit = 0.002f, contactDistance = 0.01f };
+
+
         if (m_GrabTimer > GrabTime)
         {
+
+            // TODO ignore other physics items!
+
+            // Try to raise the rigidbody if its touching the ground, by raising the anchor up
+            Target.position = Target.position + Vector3.up * 0.02f;            // Skin offset to prevent sweeps not registering
+            LayerMask cachedExcludeLayers = Target.excludeLayers;
+            Target.excludeLayers = m_RaisingExcludeLayers;
+            float drive = -1;
+            if (Target.SweepTest(Vector3.down, out RaycastHit hit))
+            {
+                DebugHelper.DrawWireSphere(hit.point, 0.05f, Color.red, Time.fixedDeltaTime, false);
+                drive = MMath.RemapClamped(0, 0.1f, 1, -1, hit.distance);
+            }
+            float anchorY = m_Joint.anchor.y;
+            anchorY = MMath.Clamp(anchorY + drive * m_RaiseSpeed * Time.fixedDeltaTime, 0, m_MaxRaiseDistance);
+            m_Joint.anchor = m_Joint.anchor.FlattenY(anchorY);
+            Target.excludeLayers = cachedExcludeLayers;
+            Target.position = Target.position - Vector3.up * 0.02f;            // Revert skin offset
+
+
             m_Joint.xMotion = ConfigurableJointMotion.Locked;
             m_Joint.yMotion = ConfigurableJointMotion.Limited;
             m_Joint.zMotion = ConfigurableJointMotion.Locked;
@@ -375,10 +403,10 @@ public class PullAbility : MonoBehaviour
     {
         AttachToLocation();
 
-        if (m_Target_GrabPrefs.UseOrientations)
-        {
-            Debug.Log(Quaternion.Angle(targetRotation * Quaternion.Inverse(Target.transform.rotation), m_Joint.connectedBody.transform.rotation));
-        }
+        //if (m_Target_GrabPrefs.UseOrientations)
+        //{
+        //    Debug.Log(Quaternion.Angle(targetRotation * Quaternion.Inverse(Target.transform.rotation), m_Joint.connectedBody.transform.rotation));
+        //}
     }
 
     Component copiedJoint;

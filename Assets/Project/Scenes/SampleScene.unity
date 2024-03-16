@@ -7127,10 +7127,25 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 4231361781513987864, guid: d62bf33f356aaad44b6590ec697f4088,
+    - target: {fileID: 4167129509473240365, guid: d62bf33f356aaad44b6590ec697f4088,
         type: 3}
-      propertyPath: m_LocalPosition.z
+      propertyPath: OverburdenedMovementMult
+      value: 0.6
+      objectReference: {fileID: 0}
+    - target: {fileID: 4167129509473240365, guid: d62bf33f356aaad44b6590ec697f4088,
+        type: 3}
+      propertyPath: OverburdenedRotationMult
       value: 0.7
+      objectReference: {fileID: 0}
+    - target: {fileID: 4167129509473240365, guid: d62bf33f356aaad44b6590ec697f4088,
+        type: 3}
+      propertyPath: m_RaisingExcludeLayers.m_Bits
+      value: 4294967295
+      objectReference: {fileID: 0}
+    - target: {fileID: 4196628262980758534, guid: d62bf33f356aaad44b6590ec697f4088,
+        type: 3}
+      propertyPath: GroundRotationRate
+      value: 0.35
       objectReference: {fileID: 0}
     - target: {fileID: 5176520583305314735, guid: d62bf33f356aaad44b6590ec697f4088,
         type: 3}

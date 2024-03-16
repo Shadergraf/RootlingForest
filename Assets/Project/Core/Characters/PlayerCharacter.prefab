@@ -49,7 +49,7 @@ CapsuleCollider:
   m_LayerOverridePriority: 0
   m_IsTrigger: 0
   m_ProvidesContacts: 0
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 2
   m_Radius: 0.25
   m_Height: 0.8
@@ -112,7 +112,7 @@ Transform:
   m_GameObject: {fileID: 7661988470776047675}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0.6}
+  m_LocalPosition: {x: 0, y: 0, z: 0.7}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 1
   m_Children:
@@ -165,17 +165,17 @@ PrefabInstance:
     - target: {fileID: 1314052735505241016, guid: 10e5fa5dfab45f14ab93f58ee4b2416d,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 8.48
+      value: -12.19
       objectReference: {fileID: 0}
     - target: {fileID: 1314052735505241016, guid: 10e5fa5dfab45f14ab93f58ee4b2416d,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0.9
+      value: 5.56
       objectReference: {fileID: 0}
     - target: {fileID: 1314052735505241016, guid: 10e5fa5dfab45f14ab93f58ee4b2416d,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 17.32
+      value: 3.5
       objectReference: {fileID: 0}
     - target: {fileID: 1314052735505241016, guid: 10e5fa5dfab45f14ab93f58ee4b2416d,
         type: 3}
@@ -356,9 +356,9 @@ MonoBehaviour:
   Target: {fileID: 0}
   Self: {fileID: 4970427809924738771}
   StartSpring: 0
-  EndSpring: 500
+  EndSpring: 150
   StartDamper: 0
-  EndDamper: 50
+  EndDamper: 20
   StartDriveSpring: 0
   EndDriveSpring: 2000
   StartDriveDamper: 0
@@ -383,6 +383,8 @@ MonoBehaviour:
   OverburdenedRotationMult: 0.5
   MinRotationForce: 80
   MaxRotationForce: 100
+  m_MaxRaiseDistance: 0.5
+  m_RaiseSpeed: 0.5
   GrabTime: 0.2
   m_HandBlocker: {fileID: 0}
   m_WalkSpeedAttribute: {fileID: 11400000, guid: b08ce0e4b3536694bbf575ddf6619fa5,
