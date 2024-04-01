@@ -352,11 +352,25 @@ public class PullAbility : MonoBehaviour
 
         m_GrabTimer += Time.fixedDeltaTime;
 
-
-
         m_SmoothPullingForce = Vector3.Lerp(m_SmoothPullingForce, m_Joint.currentForce, Time.fixedDeltaTime * 15);
-
         Debug.DrawLine(m_Joint.transform.TransformPoint(m_Joint.anchor), m_Joint.transform.TransformPoint(m_Joint.anchor) + m_SmoothPullingForce * 0.2f, Color.red, Time.fixedDeltaTime);
+
+        switch (CurrentGrabState)
+        {
+            case GrabState.Idle:
+                Debug.LogError("Grab should be disabled, yet we are FixedUpdating!", gameObject);
+                break;
+            case GrabState.Initializing:
+                Debug.LogError("Grab is still initializing, yet we are FixedUpdating!", gameObject);
+                break;
+            case GrabState.EstablishGrab:
+                UpdateEstablishGrab();
+                break;
+            case GrabState.GrabEstablished:
+                UpdateGrabEstablished();
+                break;
+        }
+
         Vector3 forwardDir = transform.forward;
 
         float moveMult = 1;
@@ -384,114 +398,111 @@ public class PullAbility : MonoBehaviour
         m_Joint.linearLimit = new SoftJointLimit() { limit = 0.002f, contactDistance = 0.01f };
 
 
+
+    }
+
+    private void UpdateEstablishGrab()
+    {
+        if (m_GrabTimer > GrabTime + GrabTimeLeeway)
+        {
+            // Grab could not be established, cancel grab
+            enabled = false;
+            return;
+        }
+
         // TODO check if anchor points overlap instead
         bool anchorsOverlap = Vector3.Distance(m_Joint.transform.TransformPoint(m_Joint.anchor), m_Joint.connectedBody.transform.TransformPoint(m_Joint.connectedAnchor)) < 0.125f;
         bool driveRotationMatches = true; // TODO
-
         if (anchorsOverlap && driveRotationMatches)
         {
             m_GrabState = GrabState.GrabEstablished;
+        }
+    }
+    private void UpdateGrabEstablished()
+    {
+        m_GrabState = GrabState.GrabEstablished;
 
-            // TODO ignore other physics items!
+        // TODO ignore other physics items!
 
-            // Try to raise the rigidbody if its touching the ground, by raising the anchor up
-            //Target.position = Target.position + Vector3.up * 0.02f;            // Skin offset to prevent sweeps not registering
-            //Target.excludeLayers = m_RaisingExcludeLayers;
-            //float targetY = 0;
-            //if (Target.SweepTest(Vector3.down, out RaycastHit hit))
-            //{
-            //    DebugHelper.DrawWireSphere(hit.point, 0.05f, Color.red, Time.fixedDeltaTime, false);
-            //    targetY = MMath.RemapClamped(0, 0.1f, targetY, m_MaxRaiseDistance, m_SmoothPullingForce.y);
-            //}
-            //
-            //targetY = MMath.RemapClamped(1, 30, targetY, 1.0f, m_SmoothPullingForce.y);
-            //targetAnchor.y = MMath.Damp(targetAnchor.y, targetY, m_RaiseSpeed, Time.fixedDeltaTime);
+        // Try to raise the rigidbody if its touching the ground, by raising the anchor up
+        //Target.position = Target.position + Vector3.up * 0.02f;            // Skin offset to prevent sweeps not registering
+        //Target.excludeLayers = m_RaisingExcludeLayers;
+        //float targetY = 0;
+        //if (Target.SweepTest(Vector3.down, out RaycastHit hit))
+        //{
+        //    DebugHelper.DrawWireSphere(hit.point, 0.05f, Color.red, Time.fixedDeltaTime, false);
+        //    targetY = MMath.RemapClamped(0, 0.1f, targetY, m_MaxRaiseDistance, m_SmoothPullingForce.y);
+        //}
+        //
+        //targetY = MMath.RemapClamped(1, 30, targetY, 1.0f, m_SmoothPullingForce.y);
+        //targetAnchor.y = MMath.Damp(targetAnchor.y, targetY, m_RaiseSpeed, Time.fixedDeltaTime);
 
-            Vector3 handRestPos = transform.InverseTransformPoint(HandTransform.position);
-            Vector3 targetAnchor = m_Joint.anchor;
-            targetAnchor += m_SmoothPullingForce * 20.0f;
-            
+        Vector3 handRestPos = transform.InverseTransformPoint(HandTransform.position);
+        Vector3 targetAnchor = m_Joint.anchor;
+        targetAnchor += m_SmoothPullingForce * 20.0f;
 
-            bool isAnchorAtRest = MMath.Approximately(m_Joint.anchor, handRestPos, 0.1f);
-            Debug.Log(m_SmoothPullingForce);
-            Debug.Log(isAnchorAtRest);
-            if (m_SmoothPullingForce.y > 0)
+
+        bool isAnchorAtRest = MMath.Approximately(m_Joint.anchor, handRestPos, 0.1f);
+        Debug.Log(m_SmoothPullingForce);
+        Debug.Log(isAnchorAtRest);
+        if (m_SmoothPullingForce.y > 0)
+        {
+            if ((m_SmoothPullingForce.y > 25 && isAnchorAtRest) || (m_SmoothPullingForce.y > 10 && !isAnchorAtRest))
             {
-                if ((m_SmoothPullingForce.y > 25 && isAnchorAtRest) || (m_SmoothPullingForce.y > 10 && !isAnchorAtRest))
-                {
-                    m_Joint.anchor = Vector3.Lerp(m_Joint.anchor, new Vector3(0, 0.7f, 0.3f), 4 * Time.fixedDeltaTime);
-                    Debug.Log("ACTIVE UP");
-                }
-                else
-                {
-                    m_Joint.anchor = Vector3.Lerp(m_Joint.anchor, handRestPos, 4 * Time.fixedDeltaTime);
-                    Debug.Log("inactive up");
-                }
+                m_Joint.anchor = Vector3.Lerp(m_Joint.anchor, new Vector3(0, 0.7f, 0.3f), 4 * Time.fixedDeltaTime);
+                Debug.Log("ACTIVE UP");
             }
             else
             {
-                if ((m_SmoothPullingForce.y < -70 && isAnchorAtRest) || (m_SmoothPullingForce.y < -40 && !isAnchorAtRest))
-                {
-                    m_Joint.anchor = Vector3.Lerp(m_Joint.anchor, new Vector3(0, -0.3f, 0.5f), 4 * Time.fixedDeltaTime);
-                    Debug.Log("ACTIVE DOWN");
-                }
-                else
-                {
-                    m_Joint.anchor = Vector3.Lerp(m_Joint.anchor, handRestPos, 4 * Time.fixedDeltaTime);
-                    Debug.Log("inactive down");
-                }
-            }
-
-
-            //Target.position = Target.position - Vector3.up * 0.02f;            // Revert skin offset
-
-
-
-            m_Joint.xMotion = ConfigurableJointMotion.Locked;
-            m_Joint.yMotion = ConfigurableJointMotion.Locked;
-            m_Joint.zMotion = ConfigurableJointMotion.Locked;
-
-            if (!copiedJoint && Target.TryGetComponent(out GrabPreferences grabPrefs) && grabPrefs.UseOrientations)
-            {
-                // TODO only weld bodies this way if the target rotation has been reached!
-                // TODO suuuper hacky but allows us to lock the rotation and have the current orientation persist
-                // We want to fuse the hands and the object as much as possible to have them simulated more robustly
-                copiedJoint = CopyComponent(m_Joint, gameObject);
-                (copiedJoint as ConfigurableJoint).angularXMotion = ConfigurableJointMotion.Locked;
-                (copiedJoint as ConfigurableJoint).angularYMotion = ConfigurableJointMotion.Locked;
-                (copiedJoint as ConfigurableJoint).angularZMotion = ConfigurableJointMotion.Locked;
-                Destroy(m_Joint);
-                m_Joint = copiedJoint as ConfigurableJoint;
-            }
-
-
-            if (m_Target_GrabPrefs.UpdateGrabLocation)
-            {
-                UpdateGrab();
+                m_Joint.anchor = Vector3.Lerp(m_Joint.anchor, handRestPos, 4 * Time.fixedDeltaTime);
+                Debug.Log("inactive up");
             }
         }
         else
         {
-            if (m_GrabTimer > GrabTime + GrabTimeLeeway)
+            if ((m_SmoothPullingForce.y < -70 && isAnchorAtRest) || (m_SmoothPullingForce.y < -40 && !isAnchorAtRest))
             {
-                // Grab could not be established, cancel grab
-                enabled = false;
-                return;
+                m_Joint.anchor = Vector3.Lerp(m_Joint.anchor, new Vector3(0, -0.3f, 0.5f), 4 * Time.fixedDeltaTime);
+                Debug.Log("ACTIVE DOWN");
+            }
+            else
+            {
+                m_Joint.anchor = Vector3.Lerp(m_Joint.anchor, handRestPos, 4 * Time.fixedDeltaTime);
+                Debug.Log("inactive down");
             }
         }
 
+
+        //Target.position = Target.position - Vector3.up * 0.02f;            // Revert skin offset
+
+
+
+        m_Joint.xMotion = ConfigurableJointMotion.Locked;
+        m_Joint.yMotion = ConfigurableJointMotion.Locked;
+        m_Joint.zMotion = ConfigurableJointMotion.Locked;
+
+        if (!copiedJoint && Target.TryGetComponent(out GrabPreferences grabPrefs) && grabPrefs.UseOrientations)
+        {
+            // TODO only weld bodies this way if the target rotation has been reached!
+            // TODO suuuper hacky but allows us to lock the rotation and have the current orientation persist
+            // We want to fuse the hands and the object as much as possible to have them simulated more robustly
+            copiedJoint = CopyComponent(m_Joint, gameObject);
+            (copiedJoint as ConfigurableJoint).angularXMotion = ConfigurableJointMotion.Locked;
+            (copiedJoint as ConfigurableJoint).angularYMotion = ConfigurableJointMotion.Locked;
+            (copiedJoint as ConfigurableJoint).angularZMotion = ConfigurableJointMotion.Locked;
+            Destroy(m_Joint);
+            m_Joint = copiedJoint as ConfigurableJoint;
+        }
+
+
+        if (m_Target_GrabPrefs.UpdateGrabLocation)
+        {
+            AttachToLocation();
+        }
     }
 
-    public void UpdateGrab()
-    {
-        AttachToLocation();
 
-        //if (m_Target_GrabPrefs.UseOrientations)
-        //{
-        //    Debug.Log(Quaternion.Angle(targetRotation * Quaternion.Inverse(Target.transform.rotation), m_Joint.connectedBody.transform.rotation));
-        //}
-    }
-
+    #region Utility
     Component copiedJoint;
     T CopyComponent<T>(T original, GameObject destination) where T : Component
     {
@@ -511,6 +522,7 @@ public class PullAbility : MonoBehaviour
         }
         return dst;
     }
+    #endregion
 
 
 
