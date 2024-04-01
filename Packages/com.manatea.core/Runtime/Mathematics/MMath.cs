@@ -81,7 +81,11 @@ namespace Manatea
 		public static readonly float Epsilon = UnityEngineInternal.MathfInternal.IsFlushToZeroEnabled ? UnityEngineInternal.MathfInternal.FloatMinNormal : UnityEngineInternal.MathfInternal.FloatMinDenormal;
 		public const float Infinity = float.PositiveInfinity;
 		public const float NegativeInfinity = float.NegativeInfinity;
-		[MethodImpl(INLINE)] public static bool Approximately(float a, float b) => Abs(b - a) < Max(0.000001f * Max(Abs(a), Abs(b)), Epsilon * 8);
+		[MethodImpl(INLINE)] public static bool Approximately(float a, float b, float epsilon = 0.000001f) => Abs(b - a) < Max(0.000001f * Max(Abs(a), Abs(b)), epsilon);
+		[MethodImpl(INLINE)] public static bool Approximately(Vector2 a, Vector2 b, float epsilon = 0.000001f) => Approximately(a.x, b.x, epsilon) && Approximately(a.y, b.y, epsilon);
+		[MethodImpl(INLINE)] public static bool Approximately(Vector3 a, Vector3 b, float epsilon = 0.000001f) => Approximately(a.x, b.x, epsilon) && Approximately(a.y, b.y, epsilon) && Approximately(a.z, b.z, epsilon);
+		[MethodImpl(INLINE)] public static bool Approximately(Vector4 a, Vector4 b, float epsilon = 0.000001f) => Approximately(a.x, b.x, epsilon) && Approximately(a.y, b.y, epsilon) && Approximately(a.z, b.z, epsilon) && Approximately(a.w, b.w, epsilon);
+		[MethodImpl(INLINE)] public static bool Approximately(Color a, Color b, float epsilon = 0.000001f, bool ignoreAlpha = false) => Approximately(a.r, b.r, epsilon) && Approximately(a.g, b.g, epsilon) && Approximately(a.b, b.b, epsilon) && (Approximately(a.a, b.a, epsilon) || ignoreAlpha);
 
 		#endregion
 

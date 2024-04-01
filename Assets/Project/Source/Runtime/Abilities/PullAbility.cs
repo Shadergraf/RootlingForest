@@ -3,6 +3,11 @@ using Manatea;
 using Manatea.AdventureRoots;
 using Manatea.GameplaySystem;
 using UnityEngine.Events;
+using UnityEngine.Splines;
+using Unity.Mathematics;
+using static UnityEngine.GraphicsBuffer;
+using UnityEditor.Experimental.GraphView;
+using static PullAbility;
 
 // TODO cleanup this file
 
@@ -50,6 +55,7 @@ public class PullAbility : MonoBehaviour
     public LayerMask m_RaisingExcludeLayers;
 
     public float GrabTime = 0.25f;
+    public float GrabTimeLeeway = 0.2f;
 
     public Collider m_HandBlocker;
 
@@ -58,6 +64,12 @@ public class PullAbility : MonoBehaviour
 
     public UnityEvent m_GrabStarted;
     public UnityEvent m_GrabEnded;
+
+    public SplineContainer m_HandSpline;
+
+    public GrabState CurrentGrabState => m_GrabState;
+
+    private GrabState m_GrabState;
 
     private GameplayAttributeOwner m_Attributes;
     private ConfigurableJoint m_Joint;
@@ -76,6 +88,16 @@ public class PullAbility : MonoBehaviour
     private float m_PullingLoad;
 
 
+    public enum GrabState
+    {
+        Idle = -1,
+        Initializing = 0,
+        EstablishGrab = 1,
+        GrabEstablished = 2,
+    }
+
+
+
     private void OnEnable()
     {
         if (!Target.TryGetComponent(out m_Target_GrabPrefs))
@@ -88,6 +110,8 @@ public class PullAbility : MonoBehaviour
             enabled = false;
             return;
         }
+
+        m_GrabState = GrabState.Initializing;
 
         TryGetComponent(out m_Attributes);
 
@@ -149,6 +173,8 @@ public class PullAbility : MonoBehaviour
         //m_HandBlocker.attachedRigidbody.
         //Physics.IgnoreCollision()
 
+        m_SmoothPullingForce = m_Joint.currentForce;
+
         if (m_Attributes)
         {
             m_WalkSpeedModifier = new GameplayAttributeModifier() { Type = GameplayAttributeModifierType.Multiplicative, Value = 1 };
@@ -159,6 +185,7 @@ public class PullAbility : MonoBehaviour
         }
 
         m_GrabStarted.Invoke();
+        m_GrabState = GrabState.EstablishGrab;
     }
 
     public void EstablishGrab()
@@ -221,6 +248,10 @@ public class PullAbility : MonoBehaviour
     private void AttachToLocation()
     {
         Vector3 handPosWorld = m_Joint.transform.TransformPoint(m_Joint.anchor);
+        if (m_Target_GrabPrefs.UpdateGrabLocation)
+        {
+            handPosWorld += Self.velocity * 0.01f;
+        }
         Vector3 targetHandPos = Target.transform.InverseTransformPoint(Target.ClosestPointOnBounds(handPosWorld));
         switch (m_Target_GrabPrefs.LocationRule)
         {
@@ -323,7 +354,7 @@ public class PullAbility : MonoBehaviour
 
 
 
-        m_SmoothPullingForce = Vector3.Lerp(m_SmoothPullingForce, m_Joint.currentForce, Time.fixedDeltaTime * 20);
+        m_SmoothPullingForce = Vector3.Lerp(m_SmoothPullingForce, m_Joint.currentForce, Time.fixedDeltaTime * 15);
 
         Debug.DrawLine(m_Joint.transform.TransformPoint(m_Joint.anchor), m_Joint.transform.TransformPoint(m_Joint.anchor) + m_SmoothPullingForce * 0.2f, Color.red, Time.fixedDeltaTime);
         Vector3 forwardDir = transform.forward;
@@ -346,37 +377,78 @@ public class PullAbility : MonoBehaviour
 
 
         SoftJointLimitSpring linearLimitSpring = m_Joint.linearLimitSpring;
-        linearLimitSpring.spring = MMath.RemapClamped(0, GrabTime, StartSpring, EndSpring, m_GrabTimer);
-        linearLimitSpring.damper = MMath.RemapClamped(0, GrabTime, StartDamper, EndDamper, m_GrabTimer);
+        linearLimitSpring.spring = MMath.LerpClamped(StartSpring, EndSpring, MMath.Pow(m_GrabTimer / GrabTime, 2));
+        linearLimitSpring.damper = MMath.LerpClamped(StartDamper, EndDamper, MMath.Pow(m_GrabTimer / GrabTime, 2));
         m_Joint.linearLimitSpring = linearLimitSpring;
 
         m_Joint.linearLimit = new SoftJointLimit() { limit = 0.002f, contactDistance = 0.01f };
 
 
-        if (m_GrabTimer > GrabTime)
+        // TODO check if anchor points overlap instead
+        bool anchorsOverlap = Vector3.Distance(m_Joint.transform.TransformPoint(m_Joint.anchor), m_Joint.connectedBody.transform.TransformPoint(m_Joint.connectedAnchor)) < 0.125f;
+        bool driveRotationMatches = true; // TODO
+
+        if (anchorsOverlap && driveRotationMatches)
         {
+            m_GrabState = GrabState.GrabEstablished;
 
             // TODO ignore other physics items!
 
             // Try to raise the rigidbody if its touching the ground, by raising the anchor up
-            Target.position = Target.position + Vector3.up * 0.02f;            // Skin offset to prevent sweeps not registering
-            LayerMask cachedExcludeLayers = Target.excludeLayers;
-            Target.excludeLayers = m_RaisingExcludeLayers;
-            float drive = -1;
-            if (Target.SweepTest(Vector3.down, out RaycastHit hit))
+            //Target.position = Target.position + Vector3.up * 0.02f;            // Skin offset to prevent sweeps not registering
+            //Target.excludeLayers = m_RaisingExcludeLayers;
+            //float targetY = 0;
+            //if (Target.SweepTest(Vector3.down, out RaycastHit hit))
+            //{
+            //    DebugHelper.DrawWireSphere(hit.point, 0.05f, Color.red, Time.fixedDeltaTime, false);
+            //    targetY = MMath.RemapClamped(0, 0.1f, targetY, m_MaxRaiseDistance, m_SmoothPullingForce.y);
+            //}
+            //
+            //targetY = MMath.RemapClamped(1, 30, targetY, 1.0f, m_SmoothPullingForce.y);
+            //targetAnchor.y = MMath.Damp(targetAnchor.y, targetY, m_RaiseSpeed, Time.fixedDeltaTime);
+
+            Vector3 handRestPos = transform.InverseTransformPoint(HandTransform.position);
+            Vector3 targetAnchor = m_Joint.anchor;
+            targetAnchor += m_SmoothPullingForce * 20.0f;
+            
+
+            bool isAnchorAtRest = MMath.Approximately(m_Joint.anchor, handRestPos, 0.1f);
+            Debug.Log(m_SmoothPullingForce);
+            Debug.Log(isAnchorAtRest);
+            if (m_SmoothPullingForce.y > 0)
             {
-                DebugHelper.DrawWireSphere(hit.point, 0.05f, Color.red, Time.fixedDeltaTime, false);
-                drive = MMath.RemapClamped(0, 0.1f, 1, -1, hit.distance);
+                if ((m_SmoothPullingForce.y > 25 && isAnchorAtRest) || (m_SmoothPullingForce.y > 10 && !isAnchorAtRest))
+                {
+                    m_Joint.anchor = Vector3.Lerp(m_Joint.anchor, new Vector3(0, 0.7f, 0.3f), 4 * Time.fixedDeltaTime);
+                    Debug.Log("ACTIVE UP");
+                }
+                else
+                {
+                    m_Joint.anchor = Vector3.Lerp(m_Joint.anchor, handRestPos, 4 * Time.fixedDeltaTime);
+                    Debug.Log("inactive up");
+                }
             }
-            float anchorY = m_Joint.anchor.y;
-            anchorY = MMath.Clamp(anchorY + drive * m_RaiseSpeed * Time.fixedDeltaTime, 0, m_MaxRaiseDistance);
-            m_Joint.anchor = m_Joint.anchor.FlattenY(anchorY);
-            Target.excludeLayers = cachedExcludeLayers;
-            Target.position = Target.position - Vector3.up * 0.02f;            // Revert skin offset
+            else
+            {
+                if ((m_SmoothPullingForce.y < -70 && isAnchorAtRest) || (m_SmoothPullingForce.y < -40 && !isAnchorAtRest))
+                {
+                    m_Joint.anchor = Vector3.Lerp(m_Joint.anchor, new Vector3(0, -0.3f, 0.5f), 4 * Time.fixedDeltaTime);
+                    Debug.Log("ACTIVE DOWN");
+                }
+                else
+                {
+                    m_Joint.anchor = Vector3.Lerp(m_Joint.anchor, handRestPos, 4 * Time.fixedDeltaTime);
+                    Debug.Log("inactive down");
+                }
+            }
+
+
+            //Target.position = Target.position - Vector3.up * 0.02f;            // Revert skin offset
+
 
 
             m_Joint.xMotion = ConfigurableJointMotion.Locked;
-            m_Joint.yMotion = ConfigurableJointMotion.Limited;
+            m_Joint.yMotion = ConfigurableJointMotion.Locked;
             m_Joint.zMotion = ConfigurableJointMotion.Locked;
 
             if (!copiedJoint && Target.TryGetComponent(out GrabPreferences grabPrefs) && grabPrefs.UseOrientations)
@@ -391,12 +463,23 @@ public class PullAbility : MonoBehaviour
                 Destroy(m_Joint);
                 m_Joint = copiedJoint as ConfigurableJoint;
             }
+
+
+            if (m_Target_GrabPrefs.UpdateGrabLocation)
+            {
+                UpdateGrab();
+            }
+        }
+        else
+        {
+            if (m_GrabTimer > GrabTime + GrabTimeLeeway)
+            {
+                // Grab could not be established, cancel grab
+                enabled = false;
+                return;
+            }
         }
 
-        if (Target.TryGetComponent(out GrabPreferences prefs))
-        {
-            UpdateGrab();
-        }
     }
 
     public void UpdateGrab()
