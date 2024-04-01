@@ -79,7 +79,10 @@ public class PhysicsDebugger : MonoBehaviour
                 DebugHelper.DrawWireSphere(m_Spring.connectedBody.transform.TransformPoint(m_Spring.connectedAnchor), 0.1f, Color.red, Time.fixedDeltaTime);
                 DebugHelper.DrawWireSphere(m_Spring.transform.TransformPoint(m_Spring.anchor), 0.1f, Color.green, Time.fixedDeltaTime);
 
-                m_Spring.transform.position = m_CurrentGrabPosGlobal;
+                if (!Input.GetKey(KeyCode.LeftShift))
+                {
+                    m_Spring.transform.position = m_CurrentGrabPosGlobal;
+                }
             }
 
             // TODO use a spawned gameobject to create a spring joint
