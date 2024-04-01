@@ -17,7 +17,9 @@ namespace Manatea.AdventureRoots.Cameras
             m_LastTarget = transform.position;
 
             if (Target)
+            {
                 m_LastTarget = Target.transform.position;
+            }
             transform.position = m_LastTarget;
         }
 
@@ -26,7 +28,14 @@ namespace Manatea.AdventureRoots.Cameras
             if (Target)
                 m_LastTarget = Target.transform.position;
 
-            transform.position = MMath.Damp(transform.position, m_LastTarget, Speed, Time.deltaTime);
+            if (Speed > 0)
+            {
+                transform.position = MMath.Damp(transform.position, m_LastTarget, Speed, Time.deltaTime);
+            }
+            else
+            {
+                transform.position = m_LastTarget;
+            }
         }
     }
 }
