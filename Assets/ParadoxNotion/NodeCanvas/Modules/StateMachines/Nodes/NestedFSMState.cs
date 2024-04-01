@@ -8,8 +8,9 @@ namespace NodeCanvas.StateMachines
 
 
     [Name("Sub FSM")]
-    [Description("Execute a nested FSM OnEnter and Stop that FSM OnExit. This state is Finished when the nested FSM is finished as well")]
+    [Description("Execute a sub FSM OnEnter, and Stop that FSM OnExit. This state is Finished only when and if the sub FSM is finished as well.")]
     [DropReferenceType(typeof(FSM))]
+    [ParadoxNotion.Design.Icon("FSM")]
     public class NestedFSMState : FSMStateNested<FSM>
     {
 
@@ -20,7 +21,9 @@ namespace NodeCanvas.StateMachines
         }
 
         [SerializeField, ExposeField, Name("Sub FSM")]
-        protected BBParameter<FSM> _nestedFSM = null; //protected so that derived user types can be reflected correctly
+        private BBParameter<FSM> _nestedFSM = null;
+
+        [Tooltip("What will happen to the sub FSM when this state exits.")]
         public FSMExitMode exitMode;
 
         public override FSM subGraph { get { return _nestedFSM.value; } set { _nestedFSM.value = value; } }

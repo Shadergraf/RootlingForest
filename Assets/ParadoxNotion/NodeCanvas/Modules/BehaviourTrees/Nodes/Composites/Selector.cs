@@ -9,13 +9,15 @@ namespace NodeCanvas.BehaviourTrees
 
     [Name("Selector", 9)]
     [Category("Composites")]
-    [Description("Execute the child nodes in order or randomly until the first that returns Success and return Success as well. If none returns Success, then returns Failure.\nIf is Dynamic, then higher priority children Status are revaluated and if one returns Success the Selector will select that one and bail out immediately in Success too")]
+    [Description("Executes its childrfen in order and returns Failure if all children return Failure. As soon as a child returns Success, the Selector will stop and return Success as well.")]
     [ParadoxNotion.Design.Icon("Selector")]
     [Color("b3ff7f")]
     public class Selector : BTComposite
     {
 
+        [Tooltip("If true, then higher priority children are re-evaluated per frame and if either returns Success, then the Selector will immediately stop and return Success as well.")]
         public bool dynamic;
+        [Tooltip("If true, the children order of execution is shuffled each time the Selector resets.")]
         public bool random;
 
         private int lastRunningNodeIndex;

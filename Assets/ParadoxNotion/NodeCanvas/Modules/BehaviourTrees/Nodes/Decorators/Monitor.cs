@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 using NodeCanvas.Framework;
 using ParadoxNotion.Design;
 
@@ -9,7 +7,7 @@ namespace NodeCanvas.BehaviourTrees
 
     [Category("Decorators")]
     [ParadoxNotion.Design.Icon("Eye")]
-    [Description("Monitors the decorated child node for a returned Status and executes an Action when that is the case.\nThe final Status returned to the parent can either be the original Decorated Child Node Status, or the new Decorator Action Status.")]
+    [Description("Monitors the decorated child for a returned Status and executes an Action when that is the case.\nThe final Status returned to the parent can either be the original decorated child Status, or the new decorator Action Status.")]
     public class Monitor : BTDecorator, ITaskAssignable<ActionTask>
     {
 
@@ -26,9 +24,9 @@ namespace NodeCanvas.BehaviourTrees
             NewDecoratorActionStatus,
         }
 
-        [Name("Monitor")]
+        [Name("Monitor"), Tooltip("The Status to monitor for.")]
         public MonitorMode monitorMode;
-        [Name("Return")]
+        [Name("Return"), Tooltip("The Status to return after (and if) the Action is executed.")]
         public ReturnStatusMode returnMode;
 
         private Status decoratorActionStatus;

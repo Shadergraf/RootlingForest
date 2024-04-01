@@ -358,7 +358,7 @@ namespace NodeCanvas.Editor
                 UndoUtility.SetDirty(contextObject);
             });
 
-            if ( bb is BlackboardSource ) { //TODO: avoid this check (but Im too tired now)
+            if ( bb is BlackboardSource ) { //TODO: avoid this check
                 if ( !data.isPropertyBound ) {
                     menu.AddItem(new GUIContent("Exposed Public"), data.isExposedPublic, () =>
                     {
@@ -447,7 +447,7 @@ namespace NodeCanvas.Editor
             //allow creation of derived classes for abstract classes via button
             if ( o == null && t.IsAbstract && !typeof(UnityEngine.Object).IsAssignableFrom(t) && !t.IsInterface && t != typeof(System.Type) ) {
                 if ( GUILayout.Button("(null) Create", layoutOptions) ) {
-                    EditorUtils.GetTypeSelectionMenu(t, (derived) => { data.value = System.Activator.CreateInstance(derived); }).ShowAsContext();
+                    EditorUtils.GetTypeSelectionMenu(t, (derived) => { data.value = System.Activator.CreateInstance(derived); }).ShowAsBrowser("Select Derived Type");
                 }
                 return o;
             }

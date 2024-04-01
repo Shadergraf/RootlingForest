@@ -82,6 +82,7 @@ namespace NodeCanvas.Tasks.Conditions
 
         void SetTargetField(FieldInfo newField) {
             if ( newField != null ) {
+                UndoUtility.RecordObject(ownerSystem.contextObject, "Set Reflection Member");
                 field = new SerializedFieldInfo(newField);
                 checkValue.SetType(newField.FieldType);
                 comparison = CompareMethod.EqualTo;
@@ -96,7 +97,7 @@ namespace NodeCanvas.Tasks.Conditions
             if ( !Application.isPlaying && GUILayout.Button("Select Field") ) {
                 var menu = new UnityEditor.GenericMenu();
                 if ( agent != null ) {
-                    foreach ( var comp in agent.GetComponents(typeof(Component)).Where(c => c.hideFlags != HideFlags.HideInInspector) ) {
+                    foreach ( var comp in agent.GetComponents(typeof(Component)).Where(c => !c.hideFlags.HasFlag(HideFlags.HideInInspector)) ) {
                         menu = EditorUtils.GetInstanceFieldSelectionMenu(comp.GetType(), typeof(object), SetTargetField, menu);
                     }
                     menu.AddSeparator("/");

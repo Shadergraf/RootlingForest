@@ -10,7 +10,7 @@ namespace NodeCanvas.BehaviourTrees
     [Name("Guard")]
     [Category("Decorators")]
     [ParadoxNotion.Design.Icon("Shield")]
-    [Description("Protect the decorated child from running if another Guard with the same token is already guarding (Running) that token.\nGuarding is global for all of the agent's Behaviour Trees.")]
+    [Description("Protects the decorated child from running if another Guard with the same token is already guarding (Running) that token.\nGuarding is global for all of the agent Behaviour Trees.")]
     public class Guard : BTDecorator
     {
 
@@ -20,7 +20,9 @@ namespace NodeCanvas.BehaviourTrees
             WaitUntilReleased
         }
 
+        [Tooltip("A unique Token to use for guarding.")]
         public BBParameter<string> token;
+        [Tooltip("What to return in case the token is already guarded by another Guard.")]
         public GuardMode ifGuarded = GuardMode.ReturnFailure;
 
         private bool isGuarding;

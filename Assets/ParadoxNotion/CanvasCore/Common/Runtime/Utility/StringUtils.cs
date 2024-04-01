@@ -81,7 +81,7 @@ namespace ParadoxNotion
             return ALPHABET[index].ToString();
         }
 
-        ///<summary>Get the string result within from to</summary>
+        ///<summary>Get the string result within first from and last to</summary>
         public static string GetStringWithinOuter(this string input, char from, char to) {
             var start = input.IndexOf(from) + 1;
             var end = input.LastIndexOf(to);
@@ -89,7 +89,7 @@ namespace ParadoxNotion
             return input.Substring(start, end - start);
         }
 
-        ///<summary>Get the string result within from to</summary>
+        ///<summary>Get the string result within last from and first to</summary>
         public static string GetStringWithinInner(this string input, char from, char to) {
             var end = input.IndexOf(to);
             var start = int.MinValue;
@@ -229,27 +229,9 @@ namespace ParadoxNotion
             var t = o.GetType();
             if ( t.RTIsSubclassOf(typeof(System.Enum)) ) {
                 if ( t.RTIsDefined<System.FlagsAttribute>(true) ) {
-                    var value = string.Empty;
-                    var cnt = 0;
-                    var list = System.Enum.GetValues(t);
-                    for ( var i = 1; i < list.Length; i++ ) {
-                        var e = list.GetValue(i);
-                        if ( ( Convert.ToInt32(e) & Convert.ToInt32(o) ) == Convert.ToInt32(e) ) {
-                            cnt++;
-                            if ( value == string.Empty ) {
-                                value = e.ToString();
-                            } else {
-                                value = "Mixed...";
-                            }
-                        }
-                    }
-                    if ( cnt == 0 ) {
-                        return "Nothing";
-                    }
-                    if ( cnt == list.Length - 1 ) {
-                        return "Everything";
-                    }
-                    return value;
+                    if ( o.ToString() == "0" ) { return "Nothing"; }
+                    if ( o.ToString() == "-1" ) { return "Everything"; }
+                    if ( o.ToString().Contains(',') ) { return "Mixed..."; }
                 }
             }
 

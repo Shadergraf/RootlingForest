@@ -24,6 +24,7 @@ namespace NodeCanvas.Tasks.Actions
             if ( NavMesh.FindClosestEdge(targetPosition.value, out hit, -1) ) {
                 saveFoundPosition.value = hit.position;
                 EndAction(true);
+                return;
             }
 
             EndAction(false);

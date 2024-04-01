@@ -41,9 +41,12 @@ namespace NodeCanvas.Framework
 
         ///----------------------------------------------------------------------------------------------
 
-        internal GenericMenu CallbackOnCanvasContextMenu(GenericMenu menu, Vector2 canvasMousePos) { return OnCanvasContextMenu(menu, canvasMousePos); }
-        internal GenericMenu CallbackOnNodesContextMenu(GenericMenu menu, Node[] nodes) { return OnNodesContextMenu(menu, nodes); }
-        internal void CallbackOnDropAccepted(Object o, Vector2 canvasMousePos) {
+        ///<summary>Editor. Returns a Generic Menu for on canvas click</summary>
+        public GenericMenu CallbackOnCanvasContextMenu(GenericMenu menu, Vector2 canvasMousePos) { return OnCanvasContextMenu(menu, canvasMousePos); }
+        ///<summary>Editor. Returns a Generic menu for on node click</summary>
+        public GenericMenu CallbackOnNodesContextMenu(GenericMenu menu, Node[] nodes) { return OnNodesContextMenu(menu, nodes); }
+        ///<summary>Editor. Invoke drag and drop on canvas for object</summary>
+        public void CallbackOnDropAccepted(Object o, Vector2 canvasMousePos) {
             ///<summary>for all graphs, make possible to drag and drop IGraphAssignables</summary>
             foreach ( var type in Editor.GraphEditorUtility.GetDropedReferenceNodeTypes<IGraphAssignable>(o) ) {
                 if ( baseNodeType.IsAssignableFrom(type) ) {
@@ -54,8 +57,10 @@ namespace NodeCanvas.Framework
             }
             OnDropAccepted(o, canvasMousePos);
         }
-        internal void CallbackOnVariableDropInGraph(IBlackboard bb, Variable variable, Vector2 canvasMousePos) { OnVariableDropInGraph(bb, variable, canvasMousePos); }
-        internal void CallbackOnGraphEditorToolbar() { OnGraphEditorToolbar(); }
+        ///<summary>Editor. Invoke drag and drop on canvas for variable</summary>
+        public void CallbackOnVariableDropInGraph(IBlackboard bb, Variable variable, Vector2 canvasMousePos) { OnVariableDropInGraph(bb, variable, canvasMousePos); }
+        ///<summary>Editor. Allows adding more stuff in graph editor toolbar per graph instance</summary>
+        public void CallbackOnGraphEditorToolbar() { OnGraphEditorToolbar(); }
 
         ///----------------------------------------------------------------------------------------------
 

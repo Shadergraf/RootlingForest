@@ -93,17 +93,19 @@ namespace NodeCanvas.Editor
             //----------------------------------------------------------------------------------------------
 
             GUI.backgroundColor = Color.clear;
-            GUI.color = new Color(1, 1, 1, 0.3f);
-            GUILayout.Label(string.Format("{0} @NodeCanvas Framework v{1}", graph.GetType().Name, NodeCanvas.Framework.Internal.GraphSource.FRAMEWORK_VERSION.ToString("0.00")), EditorStyles.toolbarButton);
-            GUILayout.Space(10);
+            GUI.color = new Color(1, 1, 1, 0.4f);
+            if ( GUILayout.Button(string.Format("{0} @ {1} v{2}", graph.GetType().Name, graphInfoAtt != null ? graphInfoAtt.packageName : "NodeCanvas", NodeCanvas.Framework.Internal.GraphSource.FRAMEWORK_VERSION.ToString("0.00")), EditorStyles.toolbarButton) ) { UnityEditor.Help.BrowseURL("https://paradoxnotion.com"); }
+            EditorGUIUtility.AddCursorRect(GUILayoutUtility.GetLastRect(), MouseCursor.Link);
             GUI.color = Color.white;
             GUI.backgroundColor = Color.white;
+            GUILayout.Space(10);
+
 
             //GRAPHOWNER JUMP SELECTION
             if ( owner != null ) {
                 if ( GUILayout.Button(string.Format("[{0}]", owner.gameObject.name), EditorStyles.toolbarDropDown, GUILayout.Width(120)) ) {
                     var menu = new GenericMenu();
-                    foreach ( var _o in Object.FindObjectsByType<GraphOwner>(FindObjectsSortMode.None).OrderBy(x => x.gameObject != owner.gameObject) ) {
+                    foreach ( var _o in Object.FindObjectsByType<GraphOwner>(FindObjectsSortMode.InstanceID).OrderBy(x => x.gameObject != owner.gameObject) ) {
                         var o = _o;
                         menu.AddItem(new GUIContent(o.gameObject.name + "/" + o.GetType().Name), o == owner, () => { SetReferences(o); });
                     }
@@ -112,6 +114,9 @@ namespace NodeCanvas.Editor
             }
 
             Prefs.isEditorLocked = GUILayout.Toggle(Prefs.isEditorLocked, "Lock", EditorStyles.toolbarButton);
+            GUI.contentColor = EditorGUIUtility.isProSkin ? Color.white : Colors.Grey(0.5f);
+            if ( GUILayout.Button(Icons.helpIcon, EditorStyles.toolbarButton) ) { WelcomeWindow.ShowWindow(graph.GetType()); }
+            GUI.contentColor = Color.white;
 
             GUILayout.Space(4);
 
@@ -148,7 +153,7 @@ namespace NodeCanvas.Editor
 
             menu.AddItem(new GUIContent("Export JSON"), false, () =>
           {
-              var path = EditorUtility.SaveFilePanelInProject(string.Format("Export '{0}' Graph", graph.GetType().Name), string.Empty, graph.GetGraphJSONFileExtension(), string.Empty);
+              var path = EditorUtility.SaveFilePanelInProject(string.Format("Export '{0}' Graph", graph.GetType().Name), graph.name, graph.GetGraphJSONFileExtension(), string.Empty);
               if ( !string.IsNullOrEmpty(path) ) {
                   var json = graph.Serialize(null);
                   json = ParadoxNotion.Serialization.JSONSerializer.PrettifyJson(json);
@@ -156,6 +161,19 @@ namespace NodeCanvas.Editor
                   AssetDatabase.Refresh();
               }
           });
+
+            menu.AddItem(new GUIContent("Export JSON (Include SubGraphs)"), false, () =>
+            {
+                foreach ( var subgraph in graph.GetAllNestedGraphs<Graph>(true).Prepend(graph) ) {
+                    var subpath = EditorUtility.SaveFilePanelInProject(string.Format("Export '{0}' Graph", subgraph.GetType().Name), subgraph.name, subgraph.GetGraphJSONFileExtension(), string.Empty);
+                    if ( !string.IsNullOrEmpty(subpath) ) {
+                        var subjson = subgraph.Serialize(null);
+                        subjson = ParadoxNotion.Serialization.JSONSerializer.PrettifyJson(subjson);
+                        System.IO.File.WriteAllText(subpath, subjson);
+                    }
+                }
+                AssetDatabase.Refresh();
+            });
 
             menu.AddItem(new GUIContent("Show JSON"), false, () =>
            {
@@ -236,8 +254,6 @@ namespace NodeCanvas.Editor
         //PREFS MENU
         static GenericMenu GetToolbarMenu_Prefs(Graph graph, GraphOwner owner) {
             var menu = new GenericMenu();
-            menu.AddItem(new GUIContent("Show Icons"), Prefs.showIcons, () => { Prefs.showIcons = !Prefs.showIcons; });
-            menu.AddItem(new GUIContent("Show Node Help"), Prefs.showNodeInfo, () => { Prefs.showNodeInfo = !Prefs.showNodeInfo; });
             menu.AddItem(new GUIContent("Show Comments"), Prefs.showComments, () => { Prefs.showComments = !Prefs.showComments; });
             menu.AddItem(new GUIContent("Show Summary Info"), Prefs.showTaskSummary, () => { Prefs.showTaskSummary = !Prefs.showTaskSummary; });
             menu.AddItem(new GUIContent("Show Node IDs"), Prefs.showNodeIDs, () => { Prefs.showNodeIDs = !Prefs.showNodeIDs; });
@@ -249,7 +265,7 @@ namespace NodeCanvas.Editor
             menu.AddItem(new GUIContent("Breakpoints Pause Editor"), Prefs.breakpointPauseEditor, () => { Prefs.breakpointPauseEditor = !Prefs.breakpointPauseEditor; });
             menu.AddItem(new GUIContent("Animate Inspector Panel"), Prefs.animatePanels, () => { Prefs.animatePanels = !Prefs.animatePanels; });
             menu.AddItem(new GUIContent("Show Hierarchy Icons"), Prefs.showHierarchyIcons, () => { Prefs.showHierarchyIcons = !Prefs.showHierarchyIcons; });
-            menu.AddItem(new GUIContent("Collapse Generics In Browser"), Prefs.collapseGenericTypes, () => { Prefs.collapseGenericTypes = !Prefs.collapseGenericTypes; EditorUtils.FlushScriptInfos(); });
+            menu.AddItem(new GUIContent("Collapse Generics In Browser"), Prefs.collapseGenericTypes, () => { Prefs.collapseGenericTypes = !Prefs.collapseGenericTypes; });
             menu.AddItem(new GUIContent("Connection Style/Hard"), false, () => { Prefs.connectionsMLT = 1f; });
             menu.AddItem(new GUIContent("Connection Style/Soft"), false, () => { Prefs.connectionsMLT = 0.75f; });
             menu.AddItem(new GUIContent("Connection Style/Softer"), false, () => { Prefs.connectionsMLT = 0.5f; });

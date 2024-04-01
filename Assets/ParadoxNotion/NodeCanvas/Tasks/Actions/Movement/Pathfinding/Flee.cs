@@ -11,10 +11,13 @@ namespace NodeCanvas.Tasks.Actions
     public class Flee : ActionTask<NavMeshAgent>
     {
 
-        [RequiredField]
+        [RequiredField, Tooltip("The target to flee from.")]
         public BBParameter<GameObject> target;
+        [Tooltip("The speed to flee.")]
         public BBParameter<float> speed = 4f;
+        [Tooltip("The distance to flee at.")]
         public BBParameter<float> fledDistance = 10f;
+        [Tooltip("A distance to look away from the target for valid flee destination.")]
         public BBParameter<float> lookAhead = 2f;
 
         protected override string info {
@@ -48,7 +51,6 @@ namespace NodeCanvas.Tasks.Actions
         protected override void OnPause() { OnStop(); }
         protected override void OnStop() {
             if ( agent.gameObject.activeSelf ) {
-                agent.Warp(agent.transform.position);
                 agent.ResetPath();
             }
         }

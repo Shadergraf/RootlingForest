@@ -7,11 +7,12 @@ namespace NodeCanvas.BehaviourTrees
 {
 
     [Category("Decorators")]
-    [Description("Interupts decorated child node and returns Failure if the child node is still Running after the timeout period")]
+    [Description("Interupts decorated child node and returns Failure if the child node is still Running after the timeout period.")]
     [ParadoxNotion.Design.Icon("Timeout")]
     public class Timeout : BTDecorator
     {
 
+        [Tooltip("The timeout period in seconds.")]
         public BBParameter<float> timeout = 1;
 
         protected override Status OnExecute(Component agent, IBlackboard blackboard) {
@@ -39,7 +40,7 @@ namespace NodeCanvas.BehaviourTrees
             GUILayout.Space(25);
             var pRect = new Rect(5, GUILayoutUtility.GetLastRect().y, rect.width - 10, 20);
             var t = 1 - ( elapsedTime / timeout.value );
-            UnityEditor.EditorGUI.ProgressBar(pRect, t, elapsedTime > 0 ? string.Format("Timeouting ({0})", elapsedTime.ToString("0.0")) : "Ready");
+            UnityEditor.EditorGUI.ProgressBar(pRect, t, elapsedTime > 0 ? string.Format("({0})", elapsedTime.ToString("0.0")) : "Ready");
         }
 
 #endif

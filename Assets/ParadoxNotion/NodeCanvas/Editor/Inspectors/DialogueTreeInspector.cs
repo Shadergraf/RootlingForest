@@ -28,7 +28,7 @@ namespace NodeCanvas.Editor
         //static because it's also used from DialogueTreeController
         public static void ShowActorParameters(DialogueTree dialogue) {
             EditorUtils.CoolLabel("Dialogue Actor Parameters");
-            EditorGUILayout.HelpBox("Enter the Key-Value pair for Dialogue Actors involved in the Dialogue.\nThe reference Object must be an IDialogueActor or have an IDialogueActor component. Referencing a Dialogue Actor is optional.", MessageType.Info);
+            EditorGUILayout.HelpBox("Enter the Key-Value pair for Dialogue Actors involved in the Dialogue.\nThe reference Object must be an IDialogueActor or have an IDialogueActor component.\nReferencing a Dialogue Actor is optional.", MessageType.Info);
 
             GUILayout.BeginVertical(GUI.skin.box);
 
@@ -38,7 +38,7 @@ namespace NodeCanvas.Editor
                 UndoUtility.SetDirty(dialogue);
             }
 
-            EditorGUILayout.LabelField("INSTIGATOR --> Replaced by the Actor starting the Dialogue");
+            EditorGUILayout.LabelField(DialogueTree.INSTIGATOR_NAME + " --> Replaced by the Actor starting the Dialogue");
 
             var options = new EditorUtils.ReorderableListOptions();
             options.allowAdd = false;

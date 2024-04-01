@@ -41,7 +41,7 @@ namespace NodeCanvas.BehaviourTrees
         ///<summary>Create a new SubTree out of the branch of the provided root node</summary>
         public static BehaviourTree ConvertToSubTree(this BTNode root) {
 
-            if ( !UnityEditor.EditorUtility.DisplayDialog("Convert to SubTree", "This will create a new SubTree out of this branch.\nThe SubTree can NOT be unpacked later on.\nAre you sure?", "Yes", "No!") ) {
+            if ( !UnityEditor.EditorUtility.DisplayDialog("Convert to SubTree", "This will create a new SubTree out of this branch.\nAre you sure?", "Yes", "No!") ) {
                 return null;
             }
 

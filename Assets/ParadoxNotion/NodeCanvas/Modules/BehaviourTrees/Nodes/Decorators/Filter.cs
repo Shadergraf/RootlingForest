@@ -9,7 +9,7 @@ namespace NodeCanvas.BehaviourTrees
 
     [Name("Filter")]
     [Category("Decorators")]
-    [Description("Filters the access of it's child node either a specific number of times, or every specific amount of time. By default the node is 'Treated as Inactive' to it's parent when child is Filtered. Unchecking this option will instead return Failure when Filtered.")]
+    [Description("Filters the access of its child either a specific number of times, or every specific amount of time.")]
     [ParadoxNotion.Design.Icon("Filter")]
     public class Filter : BTDecorator
     {
@@ -27,15 +27,17 @@ namespace NodeCanvas.BehaviourTrees
             FailureOnly
         }
 
+        [Tooltip("The mode to use.")]
         public FilterMode filterMode = FilterMode.CoolDown;
         [ShowIf("filterMode", 0)]
-        [Name("Max Times")]
+        [Name("Max Times"), Tooltip("The max ammount of times to allow the child to execute until the tree is completely restarted.")]
         public BBParameter<int> maxCount = 1;
         [ShowIf("filterMode", 0)]
-        [Name("Increase Count When")]
+        [Name("Increase Count When"), Tooltip("Only increase count if the selected status is returned from the child.")]
         public Policy policy = Policy.SuccessOrFailure;
-        [ShowIf("filterMode", 1)]
+        [ShowIf("filterMode", 1), Tooltip("The time to disallow execution for.")]
         public BBParameter<float> coolDownTime = 5f;
+        [Name("Optional When Filtered"), Tooltip("If enabled, the Filter Decorator will return an Optional status when it is filtered. Otherwise it will return Failure.")]
         public bool inactiveWhenLimited = true;
 
         private int executedCount;

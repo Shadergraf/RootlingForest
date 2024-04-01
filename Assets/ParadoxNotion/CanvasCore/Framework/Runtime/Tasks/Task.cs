@@ -213,8 +213,8 @@ namespace NodeCanvas.Framework
         ///<summary>The current or last blackboard used by this task</summary>
         public IBlackboard blackboard => ownerSystemBlackboard;
 
-        ///<summary>The cached EventRouter of the current agent used to subscribe/unsubscribe events Use this for custom named events as well -> '.router.onCustomEvent'</summary>
-        public EventRouter router => _eventRouter != null ? _eventRouter : _eventRouter = agent?.gameObject.GetAddComponent<EventRouter>();
+        ///<summary>The cached EventRouter of the current agent used to subscribe/unsubscribe events. Use this for custom named events as well -> '.router.onCustomEvent'</summary>
+        public EventRouter router => _eventRouter != null ? _eventRouter : _eventRouter = agent == null ? null : agent.gameObject.GetAddComponent<EventRouter>();
 
         ///----------------------------------------------------------------------------------------------
 

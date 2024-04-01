@@ -8,14 +8,15 @@ namespace NodeCanvas.BehaviourTrees
 {
 
     [Category("Composites")]
-    [Description("Select a child to execute based on it's chance to be selected and return Success if it returns Success, otherwise pick another.\nReturns Failure if no child returns Success or a direct 'Failure Chance' is introduced")]
+    [Description("Selects a child to execute based on its chance to be selected and returns Success if the child returns Success, otherwise picks another child.\nReturns Failure if all children return Failure, or a direct 'Failure Chance' is introduced.")]
     [ParadoxNotion.Design.Icon("ProbabilitySelector")]
     [Color("b3ff7f")]
     public class ProbabilitySelector : BTComposite
     {
 
-        [AutoSortWithChildrenConnections]
+        [AutoSortWithChildrenConnections, Tooltip("The weights of the children.")]
         public List<BBParameter<float>> childWeights;
+        [Tooltip("A chance for the node to fail immediately.")]
         public BBParameter<float> failChance;
 
         private bool[] indexFailed;

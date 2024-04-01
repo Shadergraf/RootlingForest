@@ -6,7 +6,7 @@ using NodeCanvas.BehaviourTrees;
 namespace NodeCanvas.StateMachines
 {
 
-    [Name("Parallel Sub BehaviourTree", -1)]
+    [Name("Parallel Sub Behaviour Tree", -1)]
     [Description("Execute a Sub Behaviour Tree in parallel and for as long as this FSM is running.")]
     [Category("SubGraphs")]
     [Color("ff64cb")]

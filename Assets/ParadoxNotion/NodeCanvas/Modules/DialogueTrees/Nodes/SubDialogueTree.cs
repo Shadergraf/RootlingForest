@@ -11,6 +11,7 @@ namespace NodeCanvas.DialogueTrees
     [Name("Sub Dialogue Tree")]
     [Description("Execute a Sub Dialogue Tree. When that Dialogue Tree is finished, this node will continue either in Success or Failure if it has any connections. Useful for making reusable and self-contained Dialogue Trees.")]
     [DropReferenceType(typeof(DialogueTree))]
+    [ParadoxNotion.Design.Icon("Dialogue")]
     public class SubDialogueTree : DTNodeNested<DialogueTree>, IUpdatable
     {
 

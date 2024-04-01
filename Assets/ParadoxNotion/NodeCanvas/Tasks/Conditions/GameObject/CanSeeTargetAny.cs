@@ -15,6 +15,7 @@ namespace NodeCanvas.Tasks.Conditions
 
         public BBParameter<List<GameObject>> targetObjects;
         public BBParameter<float> maxDistance = 50;
+        public BBParameter<LayerMask> layerMask = (LayerMask)( -1 );
         public BBParameter<float> awarnessDistance = 0f;
         [SliderField(1, 180)]
         public BBParameter<float> viewAngle = 70f;
@@ -40,24 +41,32 @@ namespace NodeCanvas.Tasks.Conditions
                 if ( o == agent.gameObject ) { continue; }
 
                 var t = o.transform;
+
+                if ( !t.gameObject.activeInHierarchy ) { continue; }
+
+                if ( Vector3.Distance(agent.position, t.position) < awarnessDistance.value ) {
+                    if ( Physics.Linecast(agent.position + offset, t.position + offset, out hit, layerMask.value) ) {
+                        if ( hit.collider != t.GetComponent<Collider>() ) { continue; }
+                    }
+                    if ( store ) { temp.Add(o); }
+                    r = true;
+                    continue;
+                }
+
                 if ( Vector3.Distance(agent.position, t.position) > maxDistance.value ) {
                     continue;
                 }
 
-                if ( Physics.Linecast(agent.position + offset, t.position + offset, out hit) ) {
+                if ( Vector3.Angle(t.position - agent.position, agent.forward) > viewAngle.value ) {
+                    continue;
+                }
+
+                if ( Physics.Linecast(agent.position + offset, t.position + offset, out hit, layerMask.value) ) {
                     if ( hit.collider != t.GetComponent<Collider>() ) { continue; }
                 }
 
-                if ( Vector3.Angle(t.position - agent.position, agent.forward) < viewAngle.value ) {
-                    if ( store ) { temp.Add(o); }
-                    r = true;
-                }
-
-                if ( Vector3.Distance(agent.position, t.position) < awarnessDistance.value ) {
-                    if ( store ) { temp.Add(o); }
-                    r = true;
-                }
-
+                if ( store ) { temp.Add(o); }
+                r = true;
             }
 
             if ( store ) {

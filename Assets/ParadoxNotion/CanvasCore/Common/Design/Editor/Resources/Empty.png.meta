@@ -54,3 +54,10 @@ TextureImporter:
   userData: 
   assetBundleName: 
   assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 14914
+  packageName: NodeCanvas
+  packageVersion: 3.3.0
+  assetPath: Assets/ParadoxNotion/CanvasCore/Common/Design/Editor/Resources/Empty.png
+  uploadId: 650784

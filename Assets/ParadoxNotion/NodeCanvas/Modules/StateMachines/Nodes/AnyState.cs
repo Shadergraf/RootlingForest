@@ -6,11 +6,12 @@ namespace NodeCanvas.StateMachines
 {
 
     [Name("Any State")]
-    [Description("The Transitions of this node will constantly be checked. If any becomes true, the target connected State will Enter regardless of the current State. This node can have no incomming transitions.")]
+    [Description("The transitions of this node will be constantly checked. If any becomes true, that transition will take place. This is not a state.")]
     [Color("b3ff7f")]
     public class AnyState : FSMNode, IUpdatable
     {
 
+        [Tooltip("If enabled, a transition to an already running state will not happen.")]
         public bool dontRetriggerStates = false;
 
         public override string name { //yei for caps

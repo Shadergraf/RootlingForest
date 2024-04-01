@@ -71,7 +71,7 @@ namespace ParadoxNotion.Design
         public static string SearchField(string search) {
             GUILayout.BeginHorizontal();
             search = EditorGUILayout.TextField(search, Styles.toolbarSearchTextField);
-            if ( GUILayout.Button(string.Empty, Styles.toolbarSearchCancelButton) ) {
+            if ( !string.IsNullOrEmpty(search) && GUILayout.Button(string.Empty, Styles.toolbarSearchCancelButton) ) {
                 search = string.Empty;
                 GUIUtility.keyboardControl = 0;
             }

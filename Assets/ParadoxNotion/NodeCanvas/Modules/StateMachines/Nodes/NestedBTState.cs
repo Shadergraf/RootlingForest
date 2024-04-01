@@ -10,6 +10,7 @@ namespace NodeCanvas.StateMachines
     [Name("Sub BehaviourTree")]
     [Description("Execute a Behaviour Tree OnEnter. OnExit that Behavior Tree will be stoped or paused based on the relevant specified setting. You can optionaly specify a Success Event and a Failure Event which will be sent when the BT's root node status returns either of the two. If so, use alongside with a CheckEvent on a transition.")]
     [DropReferenceType(typeof(BehaviourTree))]
+    [ParadoxNotion.Design.Icon("BT")]
     public class NestedBTState : FSMStateNested<BehaviourTree>
     {
 
@@ -27,11 +28,15 @@ namespace NodeCanvas.StateMachines
 
         [SerializeField, ExposeField, Name("Sub Tree")]
         private BBParameter<BehaviourTree> _nestedBT = null;
+        [Tooltip("What will happen to the BT when this state exits.")]
         public BTExitMode exitMode = BTExitMode.StopAndRestart;
+        [Tooltip("Sould the BT repeat?")]
         public BTExecutionMode executionMode = BTExecutionMode.Repeat;
 
-        [DimIfDefault] public string successEvent;
-        [DimIfDefault] public string failureEvent;
+        [DimIfDefault, Tooltip("The event to send when the BT finish in Success.")]
+        public string successEvent;
+        [DimIfDefault, Tooltip("The event to send when the BT finish in Failure.")]
+        public string failureEvent;
 
         public override BehaviourTree subGraph { get { return _nestedBT.value; } set { _nestedBT.value = value; } }
         public override BBParameter subGraphParameter => _nestedBT;

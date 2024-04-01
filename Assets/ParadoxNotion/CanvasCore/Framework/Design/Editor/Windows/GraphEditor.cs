@@ -40,7 +40,7 @@ namespace NodeCanvas.Editor
         const int TOP_MARGIN = TAB_HEIGHT + 0;
         const int BOTTOM_MARGIN = 5;
         const int SIDE_MARGIN = 5;
-        const int GRID_SIZE = 15;
+        const int GRID_SIZE = 20;
         private static Rect canvasRect; //rect within which the graph is drawn (the window)
         private static Rect viewRect; //the panning rect that is drawn within canvasRect
         private static Rect minimapRect; //rect to show minimap within
@@ -68,6 +68,7 @@ namespace NodeCanvas.Editor
         private static float _zoomVelocity = 1;
         private static float pingValue;
         private static Rect pingRect;
+        private static GraphInfoAttribute graphInfoAtt;
 
         ///----------------------------------------------------------------------------------------------
 
@@ -163,7 +164,7 @@ namespace NodeCanvas.Editor
 
             willRepaint = true;
             fullDrawPass = true;
-            wantsMouseMove = true;
+            wantsMouseMove = false;
             minSize = new Vector2(700, 300);
 
             EditorApplication.playModeStateChanged -= OnPlayModeChange;
@@ -202,7 +203,6 @@ namespace NodeCanvas.Editor
             Selection.selectionChanged -= OnUnityObjectSelectionChange;
             Logger.RemoveListener(OnLogMessageReceived);
             Undo.undoRedoPerformed -= OnUndoRedoPerformed;
-            // AssetDatabase.SaveAssets();
         }
 
         //...
@@ -233,7 +233,7 @@ namespace NodeCanvas.Editor
 
 #if UNITY_2018_3_OR_NEWER
         void OnPrefabStageClosing(UnityEditor.SceneManagement.PrefabStage stage) {
-            //when exiting prefab state we are left with a floating graph instance which can creat confusion
+            //when exiting prefab stage we are left with a floating graph instance which can creat confusion
             SetReferences(null, null, null);
         }
 #endif
@@ -274,6 +274,7 @@ namespace NodeCanvas.Editor
 
         //Whenever the graph we are viewing has changed and after the fact.
         void OnCurrentGraphChanged() {
+            graphInfoAtt = currentGraph?.GetType().RTGetAttributesRecursive<GraphInfoAttribute>().LastOrDefault();
             UpdateReferencesAndNodeIDs();
             GraphEditorUtility.activeElement = null;
             willRepaint = true;
@@ -322,7 +323,7 @@ namespace NodeCanvas.Editor
         public static GraphEditor OpenWindow(Graph newGraph, GraphOwner owner, IBlackboard blackboard) {
             var window = GetWindow<GraphEditor>();
             SetReferences(newGraph, owner, blackboard);
-            if ( Prefs.showWelcomeWindow && !Application.isPlaying && welcomeShown == false ) {
+            if ( !Prefs.hideWelcomeWindow && !Application.isPlaying && welcomeShown == false ) {
                 welcomeShown = true;
                 var graphType = newGraph != null ? newGraph.GetType() : null;
                 WelcomeWindow.ShowWindow(graphType);
@@ -377,12 +378,11 @@ namespace NodeCanvas.Editor
             }
 
             var targetPan = (Vector2)smoothPan;
-            if ( ( targetPan - pan ).magnitude < 0.1f ) {
+            if ( ( targetPan - pan ).magnitude <= 0.1f ) {
                 smoothPan = null;
                 return false;
             }
 
-            targetPan = new Vector2(Mathf.FloorToInt(targetPan.x), Mathf.FloorToInt(targetPan.y));
             pan = Vector2.SmoothDamp(pan, targetPan, ref _panVelocity, 0.08f, Mathf.Infinity, deltaTime);
             return true;
         }
@@ -395,13 +395,13 @@ namespace NodeCanvas.Editor
             }
 
             var targetZoom = (float)smoothZoomFactor;
-            if ( Mathf.Abs(targetZoom - zoomFactor) < 0.00001f ) {
+            if ( Mathf.Abs(targetZoom - zoomFactor) < 0.0001f ) {
                 smoothZoomFactor = null;
                 return false;
             }
 
             zoomFactor = Mathf.SmoothDamp(zoomFactor, targetZoom, ref _zoomVelocity, 0.08f, Mathf.Infinity, deltaTime);
-            if ( Mathf.Abs(1 - zoomFactor) < 0.00001f ) { zoomFactor = 1; }
+            if ( Mathf.Abs(1 - zoomFactor) < 0.0001f ) { zoomFactor = 1; }
             return true;
         }
 
@@ -454,7 +454,7 @@ namespace NodeCanvas.Editor
             //canvas an minimap rects
             canvasRect = Rect.MinMaxRect(SIDE_MARGIN, TOP_MARGIN, position.width - SIDE_MARGIN, position.height - BOTTOM_MARGIN);
             var aspect = canvasRect.width / canvasRect.height;
-            minimapRect = Rect.MinMaxRect(canvasRect.xMax - ( Prefs.minimapSize.y * aspect ), canvasRect.yMax - Prefs.minimapSize.y, canvasRect.xMax - 2, canvasRect.yMax - 2);
+            minimapRect = Rect.MinMaxRect(canvasRect.xMax - ( Prefs.minimapSize * aspect ), canvasRect.yMax - Prefs.minimapSize, canvasRect.xMax - 2, canvasRect.yMax - 2);
             //canvas bg
             Styles.Draw(canvasRect, StyleSheet.canvasBG);
 
@@ -538,7 +538,7 @@ namespace NodeCanvas.Editor
             }
 
             //repaint?
-            if ( willRepaint || e.type == EventType.MouseMove || rootGraph.isRunning ) {
+            if ( willRepaint || rootGraph.isRunning /*|| e.type == EventType.MouseMove*/ ) {
                 Repaint();
             }
 
@@ -916,7 +916,7 @@ namespace NodeCanvas.Editor
 
 
         ///<summary>Canvas groups</summary>
-        static void DoCanvasGroups() {
+        static void DoCanvasGroups() { // TODO: rewrite...
 
             if ( currentGraph.canvasGroups == null ) {
                 return;
@@ -925,8 +925,9 @@ namespace NodeCanvas.Editor
             for ( var i = 0; i < currentGraph.canvasGroups.Count; i++ ) {
                 var group = currentGraph.canvasGroups[i];
                 var headerRect = new Rect(group.rect.x, group.rect.y, group.rect.width, 25);
-                var autoRect = new Rect(headerRect.xMax - 50, headerRect.y + 2, 50, headerRect.height);
+                var autoRect = new Rect(headerRect.xMax - 68, headerRect.y + 1, 68, headerRect.height);
                 var scaleRectBR = new Rect(group.rect.xMax - 20, group.rect.yMax - 20, 20, 20);
+                var notesRect = new Rect(group.rect.x, headerRect.yMax, group.rect.width, group.rect.height - headerRect.height);
 
                 GUI.color = EditorGUIUtility.isProSkin ? new Color(1, 1, 1, 0.4f) : new Color(0.5f, 0.5f, 0.5f, 0.3f);
                 Styles.Draw(group.rect, StyleSheet.editorPanel);
@@ -939,16 +940,17 @@ namespace NodeCanvas.Editor
                 GUI.color = Color.white;
                 GUI.Box(new Rect(scaleRectBR.x + 10, scaleRectBR.y + 10, 6, 6), string.Empty, StyleSheet.scaleArrowBR);
 
-                if ( group.editState != CanvasGroup.EditState.Renaming ) {
+
+                if ( group.editState != CanvasGroup.EditState.RenamingTitle ) {
                     var size = StyleSheet.canvasGroupHeader.fontSize / zoomFactor;
                     var name = string.Format("<size={0}><b>{1}</b></size>", size, group.name);
                     GUI.Label(headerRect, name, StyleSheet.canvasGroupHeader);
 
-                    EditorGUIUtility.AddCursorRect(headerRect, group.editState == CanvasGroup.EditState.Renaming ? MouseCursor.Text : MouseCursor.Link);
+                    EditorGUIUtility.AddCursorRect(headerRect, group.editState == CanvasGroup.EditState.RenamingTitle ? MouseCursor.Text : MouseCursor.Link);
                     EditorGUIUtility.AddCursorRect(scaleRectBR, MouseCursor.ResizeUpLeft);
 
                     GUI.color = GUI.color.WithAlpha(0.25f);
-                    var newAutoValue = GUI.Toggle(autoRect, group.autoGroup, "Auto");
+                    var newAutoValue = GUI.Toggle(autoRect, group.autoGroup, "Autosize");
                     if ( newAutoValue != group.autoGroup ) {
                         UndoUtility.RecordObject(currentGraph, "AutoGroup");
                         group.autoGroup = newAutoValue;
@@ -958,7 +960,19 @@ namespace NodeCanvas.Editor
                     GUI.color = Color.white;
                 }
 
-                if ( group.editState == CanvasGroup.EditState.Renaming ) {
+                if ( !string.IsNullOrEmpty(group.notes) ) {
+                    GUI.color = group.color.grayscale > 0.6f ? Color.black : Color.white;
+                    if ( group.editState == CanvasGroup.EditState.EditingComments ) {
+                        GUI.SetNextControlName("GroupComments" + i);
+                        group.notes = GUI.TextArea(group.rect.ExpandBy(-5, -35, -5, -5), group.notes, Styles.topLeftLabel);
+                        GUI.FocusControl("GroupComments" + i);
+                    } else {
+                        GUI.Label(group.rect.ExpandBy(-5, -35, -5, -5), group.notes, Styles.topLeftLabel);
+                    }
+                    GUI.color = Color.white;
+                }
+
+                if ( group.editState == CanvasGroup.EditState.RenamingTitle ) {
                     GUI.SetNextControlName("GroupRename" + i);
                     group.name = EditorGUI.TextField(headerRect, group.name, StyleSheet.canvasGroupHeader);
                     GUI.FocusControl("GroupRename" + i);
@@ -967,6 +981,10 @@ namespace NodeCanvas.Editor
                         GUIUtility.hotControl = 0;
                         GUIUtility.keyboardControl = 0;
                     }
+                }
+
+                if ( group.editState == CanvasGroup.EditState.EditingComments && e.type == EventType.MouseDown && !group.rect.Contains(e.mousePosition) ) {
+                    group.editState = CanvasGroup.EditState.None;
                 }
 
                 if ( e.type == EventType.MouseDown && GraphEditorUtility.allowClick ) {
@@ -981,15 +999,20 @@ namespace NodeCanvas.Editor
 
                         if ( e.button == 1 ) {
                             var menu = new GenericMenu();
-                            menu.AddItem(new GUIContent("Rename"), false, () => { group.editState = CanvasGroup.EditState.Renaming; });
+                            menu.AddItem(new GUIContent("Rename"), false, () => { group.editState = CanvasGroup.EditState.RenamingTitle; });
                             menu.AddItem(new GUIContent("Edit Color"), false, () => { DoPopup(() => { group.color = EditorGUILayout.ColorField(group.color); }); });
-                            menu.AddItem(new GUIContent("Select Nodes"), false, () => { GraphEditorUtility.activeElements = tempCanvasGroupNodes.Cast<IGraphElement>().ToList(); });
-                            menu.AddItem(new GUIContent("Delete Group"), false, () => { currentGraph.canvasGroups.Remove(group); });
+                            menu.AddItem(new GUIContent("Make Notes"), false, () =>
+                            {
+                                group.editState = CanvasGroup.EditState.EditingComments;
+                                if ( string.IsNullOrEmpty(group.notes) ) { group.notes = "..."; }
+                                if ( group.color == default(Color) ) { group.color = CanvasGroup.DEFAULT_NOTES_COLOR; }
+                            });
+                            menu.AddItem(new GUIContent("Delete"), false, () => { currentGraph.canvasGroups.Remove(group); });
                             GraphEditorUtility.PostGUI += () => { menu.ShowAsContext(); };
                         } else if ( e.button == 0 ) {
                             group.editState = CanvasGroup.EditState.Dragging;
                             if ( e.clickCount == 2 ) {
-                                group.editState = CanvasGroup.EditState.Renaming;
+                                group.editState = CanvasGroup.EditState.RenamingTitle;
                                 GUI.FocusControl("GroupRename" + i);
                             }
                         }
@@ -1003,6 +1026,13 @@ namespace NodeCanvas.Editor
                         group.editState = CanvasGroup.EditState.Scaling;
                         UndoUtility.SetDirty(currentGraph);
                         e.Use();
+                    }
+
+                    if ( !string.IsNullOrEmpty(group.notes) && notesRect.Contains(e.mousePosition) ) {
+                        if ( e.button == 0 && e.clickCount == 2 ) {
+                            group.editState = CanvasGroup.EditState.EditingComments;
+                            e.Use();
+                        }
                     }
                 }
 
@@ -1029,10 +1059,10 @@ namespace NodeCanvas.Editor
                     }
                 }
 
-                if ( e.rawType == EventType.MouseUp && group.editState != CanvasGroup.EditState.Renaming ) {
+                if ( e.rawType == EventType.MouseUp && group.editState != CanvasGroup.EditState.RenamingTitle && group.editState != CanvasGroup.EditState.EditingComments ) {
                     if ( group.editState == CanvasGroup.EditState.Dragging ) {
                         foreach ( var node in group.GatherContainedNodes(currentGraph) ) {
-                            node.TrySortConnectionsByPositionX();
+                            node.TrySortConnectionsByRelativePosition();
                         }
                         group.FlushContainedNodes();
                     }
@@ -1046,7 +1076,6 @@ namespace NodeCanvas.Editor
                 }
             }
         }
-
 
         //Snap all nodes either to grid if option enabled
         static void SnapNodesToGrid(Graph graph) {
@@ -1076,7 +1105,7 @@ namespace NodeCanvas.Editor
                 isResizingMinimap = false;
             }
             if ( isResizingMinimap && e.type == EventType.MouseDrag ) {
-                Prefs.minimapSize -= e.delta;
+                Prefs.minimapSize -= e.delta.y;
                 e.Use();
             }
 
@@ -1104,7 +1133,7 @@ namespace NodeCanvas.Editor
         }
 
         ///<summary>after nodes, a cool minimap</summary>
-        static void DrawMinimap(Rect container) {
+        public static void DrawMinimap(Rect container) {
 
             GUI.color = Colors.Grey(0.5f).WithAlpha(0.85f);
             Styles.Draw(container, StyleSheet.windowShadow);
@@ -1232,7 +1261,7 @@ namespace NodeCanvas.Editor
             var bWidth = 96;
             var bHeight = 22;
 
-#if !UNITY_2019_3_OR_NEWER
+#if !UNITY_2019_3_OR_NEWER // O.o
             bWidth = 98;
             bHeight = 25;
 #endif
@@ -1285,7 +1314,7 @@ namespace NodeCanvas.Editor
         //an idea but it's taking up space i dont like
         void ShowConsoleLog() {
             var rect = Rect.MinMaxRect(canvasRect.xMin + 2, canvasRect.yMax + 5, canvasRect.xMax, canvasRect.yMax + 20);
-            var msg = GraphConsole.GetFirstMessageForGraph(currentGraph);
+            var msg = GraphConsole.GetLastMessageForGraph(currentGraph);
             if ( msg.IsValid() ) {
                 EditorGUIUtility.AddCursorRect(rect, MouseCursor.Link);
                 if ( GUI.Button(rect, GraphConsole.GetFormatedGUIContentForMessage(msg), StyleSheet.labelOnCanvas) ) {
@@ -1298,7 +1327,7 @@ namespace NodeCanvas.Editor
         //TODO: Add something like a menu to create graphs from here?
         void ShowEmptyGraphGUI() {
             if ( targetOwner != null ) {
-                var text = string.Format("The selected {0} does not have a {1} assigned.\n Please create or assign a new one in it's inspector.", targetOwner.GetType().Name, targetOwner.graphType.Name);
+                var text = string.Format("The selected {0} does not have a {1} assigned.\n Please create or assign a new one in its inspector.", targetOwner.GetType().Name, targetOwner.graphType.Name);
                 ShowNotification(new GUIContent(text));
                 return;
             }

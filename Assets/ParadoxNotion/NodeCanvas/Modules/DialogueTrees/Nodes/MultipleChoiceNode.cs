@@ -63,7 +63,7 @@ namespace NodeCanvas.DialogueTrees
             }
 
             var optionsInfo = new MultipleChoiceRequestInfo(finalActor, finalOptions, availableTime, OnOptionSelected);
-            optionsInfo.showLastStatement = inConnections.Count > 0 && inConnections[0].sourceNode is StatementNode;
+            optionsInfo.showLastStatement = true;
             DialogueTree.RequestMultipleChoices(optionsInfo);
             return Status.Running;
         }
@@ -88,7 +88,7 @@ namespace NodeCanvas.DialogueTrees
 #if UNITY_EDITOR
 
         public override void OnConnectionInspectorGUI(int i) {
-            DoChoiceGUI(availableChoices[i]);
+            if ( i >= 0 ) { DoChoiceGUI(availableChoices[i]); }
         }
 
         public override string GetConnectionInfo(int i) {

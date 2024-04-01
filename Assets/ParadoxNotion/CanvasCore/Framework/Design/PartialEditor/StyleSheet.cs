@@ -82,8 +82,8 @@ namespace NodeCanvas.Editor
 
         ///----------------------------------------------------------------------------------------------
 
-        public Styles styles;
-        public Icons icons;
+        [SerializeField] private Styles styles;
+        [SerializeField] private Icons icons;
 
         ///----------------------------------------------------------------------------------------------
 

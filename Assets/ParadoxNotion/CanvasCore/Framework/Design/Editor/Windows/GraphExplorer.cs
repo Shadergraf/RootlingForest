@@ -89,7 +89,7 @@ namespace NodeCanvas.Editor
                 RemoveNotification();
             }
 
-            EditorGUILayout.HelpBox("A flat meta graph structure including nodes, connections, tasks and parameters. This is not a hierarchical tree representation of the graph. Use this utility window to quickly search, find and jump focus to the related element. Please note that keeping this utility window open, will slow down the graph editor.", MessageType.Info);
+            EditorGUILayout.HelpBox("A flat meta graph structure including nodes, connections, tasks and parameters. Use this utility window to quickly search, find and jump focus to the related element. Please note that keeping this utility window open, will slow down the graph editor.", MessageType.Info);
 
             GUILayout.BeginHorizontal();
             GUILayout.Space(5);

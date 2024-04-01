@@ -11,7 +11,7 @@ namespace NodeCanvas.BehaviourTrees
 
     [Name("Iterate")]
     [Category("Decorators")]
-    [Description("Iterate any type of list and execute the child node for each element in the list. Keeps iterating until the Termination Condition is met or the whole list is iterated, in which case the last interation's child status is returned.")]
+    [Description("Iterates a list and executes its child once for each element in that list. Keeps iterating until the Termination Policy is met or until the whole list is iterated, in which case the last iteration child status is returned.")]
     [ParadoxNotion.Design.Icon("List")]
     public class Iterator : BTDecorator
     {
@@ -25,26 +25,26 @@ namespace NodeCanvas.BehaviourTrees
 
         [RequiredField]
         [BlackboardOnly]
-        [Tooltip("The list to iterate")]
+        [Tooltip("The list to iterate.")]
         public BBParameter<IList> targetList;
 
         [BlackboardOnly]
         [Name("Current Element")]
-        [Tooltip("Store the current element")]
+        [Tooltip("Store the currently iterated list element in a variable.")]
         public BBObjectParameter current;
 
         [BlackboardOnly]
         [Name("Current Index")]
-        [Tooltip("Store the current index")]
+        [Tooltip("Store the currently iterated list index in a variable.")]
         public BBParameter<int> storeIndex;
 
-        [Tooltip("The maximum count of iterations. Leave at -1 to iterate the whole list")]
-        public BBParameter<int> maxIteration = -1;
-
-        [Tooltip("The condition when to terminate the iteration and return status")]
+        [Name("Termination Policy"), Tooltip("The condition for when to terminate the iteration and return status.")]
         public TerminationConditions terminationCondition = TerminationConditions.None;
 
-        [Tooltip("Should the iteration start from the begining after a node reset?")]
+        [Tooltip("The maximum allowed iterations. Leave at -1 to iterate the whole list.")]
+        public BBParameter<int> maxIteration = -1;
+
+        [Tooltip("Should the iteration start from the begining after the Iterator node resets?")]
         public bool resetIndex = true;
 
         private int currentIndex;

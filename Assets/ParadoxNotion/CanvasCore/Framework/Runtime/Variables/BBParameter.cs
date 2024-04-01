@@ -166,7 +166,7 @@ namespace NodeCanvas.Framework
         }
 #endif
 
-        ///<summary>Is the parameter -set or should- to read from a blackboard variable?</summary>
+        ///<summary>Is the parameter -set to or should- read from a blackboard variable?</summary>
         public bool useBlackboard {
             get { return name != null; }
             set
@@ -211,8 +211,9 @@ namespace NodeCanvas.Framework
 
         ///----------------------------------------------------------------------------------------------
 
-        //TODO: seriously...refactor global bbs
-        internal void SetTargetVariable(IBlackboard targetBB, Variable targetVariable) {
+        //TODO: refactor global bbs
+        ///<summary>Set the target blackboard variable to link this parameter with</summary>
+        public void SetTargetVariable(IBlackboard targetBB, Variable targetVariable) {
             if ( targetVariable != null ) {
                 _targetVariableID = targetVariable.ID;
                 _name = ( targetBB is GlobalBlackboard ) ? string.Format("{0}/{1}", targetBB.identifier, targetVariable.name) : targetVariable.name;

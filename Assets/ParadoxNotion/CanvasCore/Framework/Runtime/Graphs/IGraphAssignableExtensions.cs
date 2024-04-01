@@ -122,20 +122,20 @@ namespace NodeCanvas.Framework
             }
         }
 
-        ///<summary>Link subgraph variables to parent graph variables matching name and type</summary>
-        public static void AutoLinkByName(this IGraphAssignable assignable) {
-            if ( assignable.subGraph == null || assignable.variablesMap == null ) { return; }
-            foreach ( var bbParam in assignable.variablesMap ) {
-                var thatVariable = assignable.subGraph.blackboard.GetVariableByID(bbParam.targetSubGraphVariableID);
-                if ( thatVariable != null && thatVariable.isExposedPublic && !thatVariable.isPropertyBound ) {
-                    var thisVariable = assignable.graph.blackboard.GetVariable(thatVariable.name, thatVariable.varType);
-                    if ( thisVariable != null ) {
-                        bbParam.SetType(thatVariable.varType);
-                        bbParam.name = thatVariable.name;
-                    }
-                }
-            }
-        }
+        // ///<summary>Link subgraph variables to parent graph variables matching name and type. This is not used.</summary>
+        // public static void AutoLinkByName(this IGraphAssignable assignable) {
+        //     if ( assignable.subGraph == null || assignable.variablesMap == null ) { return; }
+        //     foreach ( var bbParam in assignable.variablesMap ) {
+        //         var thatVariable = assignable.subGraph.blackboard.GetVariableByID(bbParam.targetSubGraphVariableID);
+        //         if ( thatVariable != null && thatVariable.isExposedPublic && !thatVariable.isPropertyBound ) {
+        //             var thisVariable = assignable.graph.blackboard.GetVariable(thatVariable.name, thatVariable.varType);
+        //             if ( thisVariable != null ) {
+        //                 bbParam.SetType(thatVariable.varType);
+        //                 bbParam.name = thatVariable.name;
+        //             }
+        //         }
+        //     }
+        // }
 
         ///----------------------------------------------------------------------------------------------
 
@@ -177,9 +177,9 @@ namespace NodeCanvas.Framework
                     EditorUtils.DrawEditorFieldDirect(new GUIContent(variable.name), variable.value, variable.varType, default(InspectedFieldInfo));
                     GUI.enabled = true;
                     int tmp = 0;
-                    if ( GUILayout.Button(EditorUtils.GetTempContent("▽", null, "Write (In)"), Styles.centerLabel, GUILayout.Width(12)) ) { tmp = 1; }
+                    if ( GUILayout.Button(EditorUtils.GetTempContent("▽", null, "Write (In)"), Styles.centerLabel, GUILayout.Width(13)) ) { tmp = 1; }
                     UnityEditor.EditorGUIUtility.AddCursorRect(GUILayoutUtility.GetLastRect(), UnityEditor.MouseCursor.Link);
-                    if ( GUILayout.Button(EditorUtils.GetTempContent("△", null, "Read (Out)"), Styles.centerLabel, GUILayout.Width(12)) ) { tmp = -1; }
+                    if ( GUILayout.Button(EditorUtils.GetTempContent("△", null, "Read (Out)"), Styles.centerLabel, GUILayout.Width(13)) ) { tmp = -1; }
                     if ( tmp != 0 ) {
                         UndoUtility.RecordObject(assignable.graph, "Override Variable");
                         bbParam = new BBMappingParameter(variable);
@@ -205,13 +205,13 @@ namespace NodeCanvas.Framework
                 if ( bbParam.canRead && !bbParam.useBlackboard ) { EditorUtils.MarkLastFieldWarning("The parameter is set to Read Out, but is not linked to any Variable."); }
                 GUI.enabled = true;
 
-                if ( GUILayout.Button(EditorUtils.GetTempContent(bbParam.canWrite ? "▼" : "▽", null, "Write (In)"), Styles.centerLabel, GUILayout.Width(12)) ) {
+                if ( GUILayout.Button(EditorUtils.GetTempContent(bbParam.canWrite ? "▼" : "▽", null, "Write (In)"), Styles.centerLabel, GUILayout.Width(13)) ) {
                     UndoUtility.RecordObject(assignable.graph, "Set Write In");
                     bbParam.canWrite = !bbParam.canWrite;
                     UndoUtility.SetDirty(assignable.graph);
                 }
                 UnityEditor.EditorGUIUtility.AddCursorRect(GUILayoutUtility.GetLastRect(), UnityEditor.MouseCursor.Link);
-                if ( GUILayout.Button(EditorUtils.GetTempContent(bbParam.canRead ? "▲" : "△", null, "Read (Out)"), Styles.centerLabel, GUILayout.Width(12)) ) {
+                if ( GUILayout.Button(EditorUtils.GetTempContent(bbParam.canRead ? "▲" : "△", null, "Read (Out)"), Styles.centerLabel, GUILayout.Width(13)) ) {
                     UndoUtility.RecordObject(assignable.graph, "Set Read Out");
                     bbParam.canRead = !bbParam.canRead;
                     UndoUtility.SetDirty(assignable.graph);

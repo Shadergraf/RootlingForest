@@ -8,7 +8,7 @@ namespace NodeCanvas.BehaviourTrees
 
     [Name("Invert")]
     [Category("Decorators")]
-    [Description("Inverts Success to Failure and Failure to Success")]
+    [Description("Inverts Success to Failure and Failure to Success.")]
     [ParadoxNotion.Design.Icon("Remap")]
     public class Inverter : BTDecorator
     {

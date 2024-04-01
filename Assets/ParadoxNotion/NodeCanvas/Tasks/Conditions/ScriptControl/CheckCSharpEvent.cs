@@ -57,10 +57,12 @@ namespace NodeCanvas.Tasks.Conditions
 
         ///----------------------------------------------------------------------------------------------
         void IMigratable<CheckCSharpEvent_0>.Migrate(CheckCSharpEvent_0 model) {
-            this.SetTargetEvent(model.targetType?.RTGetEvent(model.eventName));
+            var info = model.targetType?.RTGetEvent(model.eventName);
+            if ( info != null ) { this.eventInfo = new SerializedEventInfo(info); }
         }
         void IMigratable<CheckStaticCSharpEvent>.Migrate(CheckStaticCSharpEvent model) {
-            this.SetTargetEvent(model.targetType?.RTGetEvent(model.eventName));
+            var info = model.targetType?.RTGetEvent(model.eventName);
+            if ( info != null ) { this.eventInfo = new SerializedEventInfo(info); }
         }
         ///----------------------------------------------------------------------------------------------
 
@@ -111,6 +113,7 @@ namespace NodeCanvas.Tasks.Conditions
 
         void SetTargetEvent(EventInfo info) {
             if ( info != null ) {
+                UndoUtility.RecordObject(ownerSystem.contextObject, "Set Reflection Member");
                 eventInfo = new SerializedEventInfo(info);
             }
         }
@@ -124,7 +127,7 @@ namespace NodeCanvas.Tasks.Conditions
             if ( !Application.isPlaying && GUILayout.Button("Select Event") ) {
                 var menu = new UnityEditor.GenericMenu();
                 if ( agent != null ) {
-                    foreach ( var comp in agent.GetComponents(typeof(Component)).Where(c => c.hideFlags == 0) ) {
+                    foreach ( var comp in agent.GetComponents(typeof(Component)).Where(c => !c.hideFlags.HasFlag(HideFlags.HideInInspector)) ) {
                         menu = EditorUtils.GetInstanceEventSelectionMenu(comp.GetType(), null, SetTargetEvent, menu);
                     }
                     menu.AddSeparator("/");

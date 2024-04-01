@@ -10,3 +10,10 @@ MonoImporter:
   userData: 
   assetBundleName: 
   assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 14914
+  packageName: NodeCanvas
+  packageVersion: 3.3.0
+  assetPath: Assets/ParadoxNotion/CanvasCore/Framework/Design/PartialEditor/Drawers/BlackboardSourceDrawer.cs
+  uploadId: 650784

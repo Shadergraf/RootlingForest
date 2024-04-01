@@ -16,7 +16,7 @@ namespace NodeCanvas.StateMachines
         public override int maxOutConnections { get { return -1; } }
         sealed public override System.Type outConnectionType { get { return typeof(FSMConnection); } }
         sealed public override Alignment2x2 commentsAlignment { get { return Alignment2x2.Bottom; } }
-        sealed public override Alignment2x2 iconAlignment { get { return Alignment2x2.Default; } }
+        sealed public override Alignment2x2 iconAlignment { get { return Alignment2x2.Bottom; } }
 
         ///<summary>The FSM this state belongs to</summary>
         public FSM FSM { get { return (FSM)graph; } }

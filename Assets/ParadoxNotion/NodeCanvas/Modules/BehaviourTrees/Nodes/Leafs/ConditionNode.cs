@@ -7,8 +7,9 @@ namespace NodeCanvas.BehaviourTrees
 {
 
     [Name("Condition")]
-    [Description("Check a condition and return Success or Failure")]
+    [Description("Checks a condition and returns Success or Failure.")]
     [ParadoxNotion.Design.Icon("Condition")]
+    // [Color("ff6d53")]
     public class ConditionNode : BTNode, ITaskAssignable<ConditionTask>
     {
 

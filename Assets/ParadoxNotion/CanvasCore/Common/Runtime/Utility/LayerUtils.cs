@@ -1,6 +1,4 @@
-﻿///<summary> Modified version of https://wiki.unity3d.com/index.php/LayerMaskExtensions</summary>
-
-using UnityEngine;
+﻿using UnityEngine;
 using System.Collections.Generic;
 
 namespace ParadoxNotion

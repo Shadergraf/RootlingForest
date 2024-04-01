@@ -8,7 +8,7 @@ namespace NodeCanvas.BehaviourTrees
 
     [Name("Remap")]
     [Category("Decorators")]
-    [Description("Remap the child node's status to another status. Used to either invert the child's return status or to always return a specific status.")]
+    [Description("Remaps the child status to another status. Used to either invert the child's return status or to always return a specific status.")]
     [ParadoxNotion.Design.Icon("Remap")]
     public class Remapper : BTDecorator
     {

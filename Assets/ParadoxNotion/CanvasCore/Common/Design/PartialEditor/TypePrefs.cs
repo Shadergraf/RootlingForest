@@ -67,6 +67,7 @@ namespace ParadoxNotion.Design
 			//Unity Objects
 			typeof(UnityEngine.Object),
             typeof(UnityEngine.MonoBehaviour),
+            typeof(UnityEngine.ScriptableObject),
             typeof(GameObject),
             typeof(Transform),
             typeof(Animator),
@@ -393,6 +394,9 @@ namespace ParadoxNotion.Design
                 texture = Resources.Load<Texture>(EXPLICIT_ICONS_PATH + iconAttribute.iconName);
                 if ( texture == null ) { //for user made icons where user don't have to know the path
                     texture = Resources.Load<Texture>(iconAttribute.iconName);
+                }
+                if ( texture == null ) { //for user made icons where user provide a non resources path
+                    texture = AssetDatabase.LoadAssetAtPath<Texture>(iconAttribute.iconName);
                 }
             }
             return typeIcons[iconAttribute.iconName] = texture;

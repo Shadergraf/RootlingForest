@@ -107,8 +107,9 @@ namespace ParadoxNotion.Design
 
             ///----------------------------------------------------------------------------------------------
             bool handled;
+            EditorGUI.BeginChangeCheck();
             var newValue = DirectFieldControl(content, value, t, info.unityObjectContext, info.attributes, out handled);
-            var changed = !object.Equals(newValue, value);
+            var changed = !object.Equals(newValue, value) || EditorGUI.EndChangeCheck();
             if ( changed ) { UndoUtility.RecordObjectComplete(info.unityObjectContext, content.text + "Field Change"); }
             value = newValue;
             if ( changed ) { UndoUtility.SetDirty(info.unityObjectContext); }
@@ -140,7 +141,7 @@ namespace ParadoxNotion.Design
 
             } else {
 
-                EditorGUILayout.LabelField(content, GetTempContent(string.Format("NonInspectable ({0})", t.FriendlyName())));
+                EditorGUILayout.LabelField(content, new GUIContent(string.Format("NonInspectable ({0})", t.FriendlyName())));
             }
 
             return value;
@@ -154,7 +155,7 @@ namespace ParadoxNotion.Design
             //Check scene object type for UnityObjects. Consider Interfaces as scene object type. Assume that user uses interfaces with UnityObjects
             if ( typeof(UnityObject).IsAssignableFrom(t) || t.IsInterface ) {
                 if ( value == null || value is UnityObject ) { //check this to avoid case of interface but no unityobject
-                    var isSceneObjectType = ( typeof(Component).IsAssignableFrom(t) || t == typeof(GameObject) || t.IsInterface );
+                    var isSceneObjectType = ( typeof(Component).IsAssignableFrom(t) || t == typeof(GameObject) || t == typeof(UnityObject) || t.IsInterface );
                     var newValue = EditorGUILayout.ObjectField(content, (UnityObject)value, t, isSceneObjectType, options);
                     if ( unityObjectContext != null && newValue != null ) {
                         if ( !Application.isPlaying && EditorUtility.IsPersistent(unityObjectContext) && !EditorUtility.IsPersistent(newValue as UnityEngine.Object) ) {

@@ -19,8 +19,9 @@ namespace NodeCanvas.Tasks.Actions
             Random
         }
 
-        [RequiredField]
+        [RequiredField, Tooltip("A list of gameobjects patrol points.")]
         public BBParameter<List<GameObject>> targetList;
+        [Tooltip("The mode to use for patrol (progressive or random)")]
         public BBParameter<PatrolMode> patrolMode = PatrolMode.Random;
         public BBParameter<float> speed = 4;
         public BBParameter<float> keepDistance = 0.1f;
@@ -93,7 +94,6 @@ namespace NodeCanvas.Tasks.Actions
         protected override void OnPause() { OnStop(); }
         protected override void OnStop() {
             if ( lastRequest != null && agent.gameObject.activeSelf ) {
-                agent.Warp(agent.transform.position);
                 agent.ResetPath();
             }
             lastRequest = null;

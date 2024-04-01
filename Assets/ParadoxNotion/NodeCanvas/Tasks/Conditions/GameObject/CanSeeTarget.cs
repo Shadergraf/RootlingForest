@@ -13,7 +13,11 @@ namespace NodeCanvas.Tasks.Conditions
 
         [RequiredField]
         public BBParameter<GameObject> target;
+        [Tooltip("Distance within which to look out for.")]
         public BBParameter<float> maxDistance = 50;
+        [Tooltip("A layer mask to use for line of sight check.")]
+        public BBParameter<LayerMask> layerMask = (LayerMask)( -1 );
+        [Tooltip("Distance within which the target can be seen (or rather sensed) regardless of view angle.")]
         public BBParameter<float> awarnessDistance = 0f;
         [SliderField(1, 180)]
         public BBParameter<float> viewAngle = 70f;
@@ -28,25 +32,35 @@ namespace NodeCanvas.Tasks.Conditions
         protected override bool OnCheck() {
 
             var t = target.value.transform;
+
+            if ( !t.gameObject.activeInHierarchy ) {
+                return false;
+            }
+
+            if ( Vector3.Distance(agent.position, t.position) <= awarnessDistance.value ) {
+                if ( Physics.Linecast(agent.position + offset, t.position + offset, out hit, layerMask.value) ) {
+                    if ( hit.collider != t.GetComponent<Collider>() ) {
+                        return false;
+                    }
+                }
+                return true;
+            }
+
             if ( Vector3.Distance(agent.position, t.position) > maxDistance.value ) {
                 return false;
             }
 
-            if ( Physics.Linecast(agent.position + offset, t.position + offset, out hit) ) {
+            if ( Vector3.Angle(t.position - agent.position, agent.forward) > viewAngle.value ) {
+                return false;
+            }
+
+            if ( Physics.Linecast(agent.position + offset, t.position + offset, out hit, layerMask.value) ) {
                 if ( hit.collider != t.GetComponent<Collider>() ) {
                     return false;
                 }
             }
 
-            if ( Vector3.Angle(t.position - agent.position, agent.forward) < viewAngle.value ) {
-                return true;
-            }
-
-            if ( Vector3.Distance(agent.position, t.position) < awarnessDistance.value ) {
-                return true;
-            }
-
-            return false;
+            return true;
         }
 
         public override void OnDrawGizmosSelected() {

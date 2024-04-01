@@ -10,3 +10,10 @@ MonoImporter:
   userData: 
   assetBundleName: 
   assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 14914
+  packageName: NodeCanvas
+  packageVersion: 3.3.0
+  assetPath: Assets/ParadoxNotion/NodeCanvas/Tasks/Actions/Movement/Pathfinding/Flee.cs
+  uploadId: 650784

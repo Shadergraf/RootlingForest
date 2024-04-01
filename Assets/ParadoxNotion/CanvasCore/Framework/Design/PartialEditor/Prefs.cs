@@ -22,10 +22,8 @@ namespace NodeCanvas.Editor
             public bool showNodePanel = true;
             public float inspectorPanelWidth = 330;
             public float blackboardPanelWidth = 350;
-            public bool showWelcomeWindow2 = true;
+            public bool hideWelcomeWindow = false;
 
-            public bool showNodeInfo = true;
-            public bool showIcons = true;
             public bool showTaskSummary = true;
             public bool showComments = true;
             public bool showNodeIDs = false;
@@ -48,7 +46,7 @@ namespace NodeCanvas.Editor
             public bool consoleClearOnPlay = true;
             public ConsoleLogOrder consoleLogOrder = ConsoleLogOrder.Ascending;
             public bool explorerShowTypeNames = true;
-            public UnityEngine.Vector2 minimapSize = new UnityEngine.Vector2(170, 100);
+            public float minimapSizeY = 100f;
         }
 
         private static SerializedData _data;
@@ -69,8 +67,8 @@ namespace NodeCanvas.Editor
 
         ///----------------------------------------------------------------------------------------------
 
-        public readonly static UnityEngine.Vector2 MINIMAP_MIN_SIZE = new UnityEngine.Vector2(50, 30);
-        public readonly static UnityEngine.Vector2 MINIMAP_MAX_SIZE = new UnityEngine.Vector2(500, 300);
+        public const float MINIMAP_MIN_SIZE = 30;
+        public const float MINIMAP_MAX_SIZE = 300;
 
         ///----------------------------------------------------------------------------------------------
 
@@ -93,16 +91,6 @@ namespace NodeCanvas.Editor
         public static bool showNodePanel {
             get { return data.showNodePanel; }
             set { if ( data.showNodePanel != value ) { data.showNodePanel = value; Save(); } }
-        }
-
-        public static bool showNodeInfo {
-            get { return data.showNodeInfo; }
-            set { if ( data.showNodeInfo != value ) { data.showNodeInfo = value; Save(); } }
-        }
-
-        public static bool showIcons {
-            get { return data.showIcons; }
-            set { if ( data.showIcons != value ) { data.showIcons = value; Save(); } }
         }
 
         public static bool showTaskSummary {
@@ -145,9 +133,9 @@ namespace NodeCanvas.Editor
             set { if ( data.useExternalInspector != value ) { data.useExternalInspector = value; Save(); } }
         }
 
-        public static bool showWelcomeWindow {
-            get { return data.showWelcomeWindow2; }
-            set { if ( data.showWelcomeWindow2 != value ) { data.showWelcomeWindow2 = value; Save(); } }
+        public static bool hideWelcomeWindow {
+            get { return data.hideWelcomeWindow; }
+            set { if ( data.hideWelcomeWindow != value ) { data.hideWelcomeWindow = value; Save(); } }
         }
 
         public static bool logEventsInfo {
@@ -172,7 +160,7 @@ namespace NodeCanvas.Editor
 
         public static bool collapseGenericTypes {
             get { return data.collapseGenericTypes; }
-            set { if ( data.collapseGenericTypes != value ) { data.collapseGenericTypes = value; Save(); } }
+            set { if ( data.collapseGenericTypes != value ) { data.collapseGenericTypes = value; ParadoxNotion.Design.EditorUtils.FlushScriptInfos(); Save(); } }
         }
 
         ///----------------------------------------------------------------------------------------------
@@ -233,19 +221,12 @@ namespace NodeCanvas.Editor
 
         ///----------------------------------------------------------------------------------------------
 
-        public static UnityEngine.Vector2 minimapSize {
-            get
-            {
-                var result = data.minimapSize;
-                result = UnityEngine.Vector2.Max(result, MINIMAP_MIN_SIZE);
-                result = UnityEngine.Vector2.Min(result, MINIMAP_MAX_SIZE);
-                return result;
-            }
+        public static float minimapSize {
+            get { return UnityEngine.Mathf.Clamp(data.minimapSizeY, MINIMAP_MIN_SIZE, MINIMAP_MAX_SIZE); }
             set
             {
-                if ( data.minimapSize != value ) {
-                    data.minimapSize = UnityEngine.Vector2.Max(value, MINIMAP_MIN_SIZE);
-                    data.minimapSize = UnityEngine.Vector2.Min(value, MINIMAP_MAX_SIZE);
+                if ( data.minimapSizeY != value ) {
+                    data.minimapSizeY = UnityEngine.Mathf.Clamp(value, MINIMAP_MIN_SIZE, MINIMAP_MAX_SIZE);
                     Save();
                 }
             }

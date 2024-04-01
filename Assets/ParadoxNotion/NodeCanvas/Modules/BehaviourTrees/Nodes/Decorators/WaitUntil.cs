@@ -7,7 +7,7 @@ namespace NodeCanvas.BehaviourTrees
 {
 
     [Category("Decorators")]
-    [Description("Returns Running until the assigned condition becomes true")]
+    [Description("Returns Running until the assigned condition becomes true, after which the decorated child is executed.")]
     [ParadoxNotion.Design.Icon("Halt")]
     public class WaitUntil : BTDecorator, ITaskAssignable<ConditionTask>
     {
@@ -29,7 +29,7 @@ namespace NodeCanvas.BehaviourTrees
         protected override Status OnExecute(Component agent, IBlackboard blackboard) {
 
             if ( decoratedConnection == null ) {
-                //this part is so that Wait node can be used as leaf too
+                //this part is so that Wait node can be used as a leaf too, by user request
                 if ( condition != null ) {
                     if ( status == Status.Resting ) {
                         condition.Enable(agent, blackboard);

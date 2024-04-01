@@ -48,7 +48,7 @@ namespace NodeCanvas.Framework
 
         ///----------------------------------------------------------------------------------------------
 
-        readonly private static Vector2 MIN_SIZE = new Vector2(105, 20);
+        readonly private static Vector2 MIN_SIZE = new Vector2(80, 20);
         private const string DEFAULT_HEX_COLOR_LIGHT = "eed9a7";
         private const string DEFAULT_HEX_COLOR_DARK = "333333";
         private static GUIPort clickedPort { get; set; }
@@ -130,14 +130,10 @@ namespace NodeCanvas.Framework
         }
 
         ///<summary>EDITOR! is the node selected or part of the multi selection?</summary>
-        public bool isSelected {
-            get { return GraphEditorUtility.activeElement == this || GraphEditorUtility.activeElements.Contains(this); }
-        }
+        public bool isSelected { get { return GraphEditorUtility.activeElement == this || GraphEditorUtility.activeElements.Contains(this); } }
 
-        ///<summary>EDITOR! Is NC in icon mode and node has an icon?</summary>
-        private bool showIcon {
-            get { return Prefs.showIcons && icon != null; }
-        }
+        ///<summary>EDITOR! Node has an icon?</summary>
+        private bool hasIcon { get { return icon != null; } }
 
         ///<summary>EDITOR! cached GUIContent for node header name</summary>
         private GUIContent cachedHeaderContent {
@@ -152,7 +148,7 @@ namespace NodeCanvas.Framework
                     }
                     var finalTitle = this is IGraphAssignable ? string.Format("{{ {0} }}", name) : name;
                     var text = string.Format("<b><color=#{0}>{1}</color></b>", hex, finalTitle);
-                    var image = showIcon && iconAlignment == Alignment2x2.Left ? icon : null;
+                    var image = hasIcon && iconAlignment == Alignment2x2.Left ? icon : null;
                     _cachedHeaderContent = new GUIContent(text, image);
                 }
                 return _cachedHeaderContent;
@@ -260,6 +256,7 @@ namespace NodeCanvas.Framework
                 DrawNodeComments(node);
                 DrawNodeElapsedTime(node);
                 DrawNodeID(node);
+                DrawBreakpoint(node);
             }
 
             DrawReferenceLinks(node);
@@ -281,7 +278,7 @@ namespace NodeCanvas.Framework
 
             GUI.color = node.isActive ? Color.white : new Color(0.9f, 0.9f, 0.9f, 0.8f);
             GUI.color = GraphEditorUtility.activeElement == node ? new Color(0.9f, 0.9f, 1) : GUI.color;
-            //Remark: using MaxWidth and MaxHeight makes GUILayout window contract width and height
+            //Remark: using MaxWidth and MaxHeight makes GUILayout window contract width and height \o/
             node.rect = GUILayout.Window(node.ID, node.rect, (ID) => { NodeWindowGUI(node, ID); }, string.Empty, StyleSheet.window, GUILayout.MaxHeight(MIN_SIZE.y), GUILayout.MaxWidth(MIN_SIZE.x));
 
             GUI.color = Color.white;
@@ -318,7 +315,6 @@ namespace NodeCanvas.Framework
             ShowPossibleWarningError(node);
             HandleEvents(node, e);
             ShowStatusIcons(node);
-            ShowBreakpointMark(node);
             ShowNodeContents(node);
             HandleContextMenu(node, e);
             HandleNodePosition(node, e);
@@ -328,14 +324,14 @@ namespace NodeCanvas.Framework
         static void ShowHeader(Node node) {
 
             //text
-            if ( !node.showIcon || node.iconAlignment != Alignment2x2.Default ) {
+            if ( !node.hasIcon || node.iconAlignment != Alignment2x2.Default ) {
                 if ( node.name != null ) {
                     EditorGUIUtility.SetIconSize(new Vector2(16, 16));
                     //Remark: CalcHeight does not take into account SetIconSize. CalcSize does.
                     var headerHeight = StyleSheet.windowTitle.CalcSize(node.cachedHeaderContent).y;
-                    if ( node.rect.height <= 35 ) { headerHeight = 35; }
                     if ( node.nodeColor != default(Color) ) {
                         GUI.color = node.nodeColor;
+                        if ( node.rect.height <= 35 ) { headerHeight = 35; }
                         Styles.Draw(new Rect(0, 0, node.rect.width, headerHeight), StyleSheet.windowHeader);
                         GUI.color = Color.white;
                     } else {
@@ -349,7 +345,7 @@ namespace NodeCanvas.Framework
             }
 
             //icon
-            if ( node.showIcon && ( node.iconAlignment == Alignment2x2.Default || node.iconAlignment == Alignment2x2.Bottom ) ) {
+            if ( node.hasIcon && ( node.iconAlignment == Alignment2x2.Default || node.iconAlignment == Alignment2x2.Bottom ) ) {
                 GUI.color = node.nodeColor.a > 0.2f ? node.nodeColor : Color.white;
                 //TODO: can be expensive for the light theme -> handle somehow else
                 if ( !EditorGUIUtility.isProSkin ) {
@@ -432,7 +428,7 @@ namespace NodeCanvas.Framework
             //Mouse up
             if ( e.type == EventType.MouseUp ) {
                 if ( node.nodeIsPressed ) {
-                    node.TrySortConnectionsByPositionX();
+                    node.TrySortConnectionsByRelativePosition();
                 }
                 if ( adjustingBoundCanvasGroups != null ) {
                     foreach ( var group in adjustingBoundCanvasGroups ) { group.FlushContainedNodes(); }
@@ -459,14 +455,6 @@ namespace NodeCanvas.Framework
                     GUI.color = EditorGUIUtility.isProSkin ? StyleSheet.GetStatusColor(Status.Failure) : Colors.Grey(0.25f);
                     GUI.DrawTexture(markRect, StyleSheet.statusFailure);
                 }
-            }
-        }
-
-        //Shows the breakpoint mark icon if node is set as a breakpoint
-        static void ShowBreakpointMark(Node node) {
-            if ( node.isBreakpoint ) {
-                var rect = new Rect(node.rect.width - 15, 5, 13, 13);
-                GUI.DrawTexture(rect, Icons.redCircle);
             }
         }
 
@@ -635,7 +623,7 @@ namespace NodeCanvas.Framework
                     var hierarchicalMove = Prefs.hierarchicalMove != e.shift;
                     //snap to grid
                     if ( !hierarchicalMove && Prefs.snapToGrid && GraphEditorUtility.activeElements.Count == 0 ) {
-                        node.position = new Vector2(Mathf.Round(node.position.x / 15) * 15, Mathf.Round(node.position.y / 15) * 15);
+                        node.position = new Vector2(Mathf.Round(node.position.x / 20) * 20, Mathf.Round(node.position.y / 20) * 20);
                     }
 
                     //recursive drag
@@ -722,6 +710,14 @@ namespace NodeCanvas.Framework
             }
         }
 
+        //Shows the breakpoint mark icon if node is set as a breakpoint
+        static void DrawBreakpoint(Node node) {
+            if ( node.isBreakpoint ) {
+                var rect = new Rect(node.rect.xMax - 18, node.rect.y - 18, 16, 16);
+                GUI.DrawTexture(rect, Icons.redCircle);
+            }
+        }
+
         //Function to pan the node with children recursively
         static void RecursivePanNode(Node node, Vector2 delta) {
             node.position += delta;
@@ -750,15 +746,13 @@ namespace NodeCanvas.Framework
 
             UndoUtility.CheckUndo(node.graph, "Node Inspector");
 
-            if ( Prefs.showNodeInfo ) {
-                GUI.backgroundColor = Colors.lightBlue;
-                EditorGUILayout.HelpBox(node.description, MessageType.None);
-                GUI.backgroundColor = Color.white;
-            }
+            GUI.backgroundColor = Colors.lightBlue;
+            EditorGUILayout.HelpBox(node.description, MessageType.None);
+            GUI.backgroundColor = Color.white;
 
             GUILayout.BeginHorizontal();
             GUI.color = Color.white.WithAlpha(0.5f);
-            if ( !node.showIcon && node.allowAsPrime ) {
+            if ( node.allowAsPrime && ( !node.hasIcon || node.iconAlignment != Alignment2x2.Default ) ) {
                 node.customName = EditorGUILayout.TextField(node.customName);
                 EditorUtils.CommentLastTextField(node.customName, "Name...");
             }
@@ -861,13 +855,18 @@ namespace NodeCanvas.Framework
         }
 
 
-        //Editor. Sorts the parent node connections based on all child nodes X position. Possible only when not in play mode.
-        public void TrySortConnectionsByPositionX() {
-            if ( !Application.isPlaying && graph != null && graph.isTree ) {
+        //Editor. Sorts the parent node connections based on all child nodes position according to flow direction. Possible only when not in play mode.
+        public void TrySortConnectionsByRelativePosition() {
+            if ( !Application.isPlaying && graph != null && graph.isTree && graph.flowDirection != PlanarDirection.Auto ) {
                 foreach ( var connection in inConnections.ToArray() ) {
                     var node = connection.sourceNode;
                     var original = node.outConnections.ToList();
-                    node.outConnections = node.outConnections.OrderBy(c => c.targetNode.rect.center.x).ToList();
+                    if ( graph.flowDirection == PlanarDirection.Horizontal ) {
+                        node.outConnections = node.outConnections.OrderBy(c => c.targetNode.rect.center.y).ToList();
+                    }
+                    if ( graph.flowDirection == PlanarDirection.Vertical ) {
+                        node.outConnections = node.outConnections.OrderBy(c => c.targetNode.rect.center.x).ToList();
+                    }
                     var oldIndeces = node.outConnections.Select(x => original.IndexOf(x)).ToArray();
                     foreach ( var field in node.GetType().RTGetFields() ) {
                         if ( field.RTIsDefined<AutoSortWithChildrenConnections>(true) ) {
@@ -955,28 +954,35 @@ namespace NodeCanvas.Framework
                 return;
             }
 
-            if ( fullDrawPass || drawCanvas.Overlaps(rect) ) {
+            var portOffset = 6;
 
-                var nodeOutputBox = new Rect(rect.x, rect.yMax - 4, rect.width, 12);
+            if ( fullDrawPass || drawCanvas.Overlaps(rect) ) {
+                var canHaveMoreOutConnection = outConnections.Count < maxOutConnections || maxOutConnections == -1;
+                Rect nodeOutputBox = default(Rect);
+                if ( graph.flowDirection == PlanarDirection.Vertical ) {
+                    nodeOutputBox = new Rect(rect.x, rect.yMax - 2, rect.width, canHaveMoreOutConnection ? 12 : 10);
+                }
+                if ( graph.flowDirection == PlanarDirection.Horizontal ) {
+                    nodeOutputBox = new Rect(rect.xMax, rect.yMin, canHaveMoreOutConnection ? 12 : 10, rect.height);
+                }
                 Styles.Draw(nodeOutputBox, StyleSheet.nodePortContainer);
 
-                //draw the ports
-                if ( outConnections.Count < maxOutConnections || maxOutConnections == -1 ) {
-                    for ( var i = 0; i < outConnections.Count + 1; i++ ) {
-                        var portRect = new Rect(0, 0, 10, 10);
-                        portRect.center = new Vector2(( ( rect.width / ( outConnections.Count + 1 ) ) * ( i + 0.5f ) ) + rect.xMin, rect.yMax + 6);
-                        GUI.Box(portRect, string.Empty, StyleSheet.nodePortEmpty);
+                if ( !collapsed ) {
+                    var portRect = new Rect(0, 0, 12, 12);
+                    if ( graph.flowDirection == PlanarDirection.Vertical ) {
+                        portRect.center = new Vector2(rect.center.x, rect.yMax + portOffset);
+                    }
+                    if ( graph.flowDirection == PlanarDirection.Horizontal ) {
+                        portRect.center = new Vector2(rect.xMax + portOffset, rect.center.y);
+                    }
+                    Styles.Draw(portRect, outConnections.Count > 0 ? StyleSheet.nodePortConnected : StyleSheet.nodePortEmpty);
 
-                        if ( collapsed ) {
-                            continue;
-                        }
-
-                        if ( GraphEditorUtility.allowClick ) {
-                            //start a connection by clicking a port
-                            EditorGUIUtility.AddCursorRect(portRect, MouseCursor.ArrowPlus);
-                            if ( e.type == EventType.MouseDown && e.button == 0 && portRect.Contains(e.mousePosition) ) {
+                    if ( GraphEditorUtility.allowClick && canHaveMoreOutConnection ) {
+                        EditorGUIUtility.AddCursorRect(nodeOutputBox, MouseCursor.ArrowPlus);
+                        if ( e.type == EventType.MouseDown && e.button == 0 ) {
+                            if ( portRect.Contains(e.mousePosition) || nodeOutputBox.Contains(e.mousePosition) ) {
                                 dragDropMisses = 0;
-                                clickedPort = new GUIPort(i, this, portRect.center);
+                                clickedPort = new GUIPort(-1, this, portRect.center);
                                 e.Use();
                             }
                         }
@@ -984,63 +990,63 @@ namespace NodeCanvas.Framework
                 }
             }
 
-
             //draw the new drag&drop connection line
             if ( clickedPort != null && clickedPort.parent == this ) {
                 var tangA = default(Vector2);
                 var tangB = default(Vector2);
-                ParadoxNotion.CurveUtils.ResolveTangents(clickedPort.pos, e.mousePosition, Prefs.connectionsMLT, PlanarDirection.Vertical, out tangA, out tangB);
+                ParadoxNotion.CurveUtils.ResolveTangents(clickedPort.pos, e.mousePosition, Prefs.connectionsMLT, graph.flowDirection, out tangA, out tangB);
                 Handles.DrawBezier(clickedPort.pos, e.mousePosition, clickedPort.pos + tangA, e.mousePosition + tangB, StyleSheet.GetStatusColor(Status.Resting).WithAlpha(0.8f), StyleSheet.bezierTexture, 3);
             }
-
 
             //draw all connected lines
             for ( var i = 0; i < outConnections.Count; i++ ) {
 
                 var connection = outConnections[i];
-                if ( connection != null ) {
+                if ( connection == null || connection.targetNode is Internal.MissingNode ) {
+                    continue;
+                }
 
-                    if ( connection.targetNode is Internal.MissingNode ) {
+                Vector2 sourcePos = rect.center;
+                Vector2 targetPos = rect.center;
+                if ( graph.flowDirection == PlanarDirection.Vertical ) {
+                    sourcePos = new Vector2(rect.center.x, rect.yMax + portOffset);
+                    targetPos = new Vector2(connection.targetNode.rect.center.x, connection.targetNode.rect.y);
+                }
+                if ( graph.flowDirection == PlanarDirection.Horizontal ) {
+                    sourcePos = new Vector2(rect.xMax + portOffset, rect.center.y);
+                    targetPos = new Vector2(connection.targetNode.rect.xMin, connection.targetNode.rect.center.y);
+                }
+
+                var sourcePortRect = new Rect(0, 0, 12, 12);
+                sourcePortRect.center = sourcePos;
+
+                var targetPortRect = new Rect(0, 0, 15, 15);
+                targetPortRect.center = targetPos;
+
+                var boundRect = RectUtils.GetBoundRect(sourcePortRect, targetPortRect);
+                if ( fullDrawPass || drawCanvas.Overlaps(boundRect) ) {
+
+                    if ( collapsed || connection.targetNode.isHidden ) {
                         continue;
                     }
 
-                    var sourcePos = new Vector2(( ( rect.width / ( outConnections.Count + 1 ) ) * ( i + 1 ) ) + rect.xMin, rect.yMax + 6);
-                    var targetPos = new Vector2(connection.targetNode.rect.center.x, connection.targetNode.rect.y);
+                    connection.DrawConnectionGUI(sourcePos, targetPos);
 
-                    var sourcePortRect = new Rect(0, 0, 12, 12);
-                    sourcePortRect.center = sourcePos;
-
-                    var targetPortRect = new Rect(0, 0, 15, 15);
-                    targetPortRect.center = targetPos;
-
-                    var boundRect = RectUtils.GetBoundRect(sourcePortRect, targetPortRect);
-                    if ( fullDrawPass || drawCanvas.Overlaps(boundRect) ) {
-
-                        GUI.Box(sourcePortRect, string.Empty, StyleSheet.nodePortConnected);
-
-                        if ( collapsed || connection.targetNode.isHidden ) {
-                            continue;
+                    if ( GraphEditorUtility.allowClick ) {
+                        //On right click disconnect connection from the source.
+                        if ( e.type == EventType.ContextClick && sourcePortRect.Contains(e.mousePosition) ) {
+                            graph.RemoveConnection(connection);
+                            e.Use();
+                            return;
                         }
 
-                        connection.DrawConnectionGUI(sourcePos, targetPos);
-
-                        if ( GraphEditorUtility.allowClick ) {
-                            //On right click disconnect connection from the source.
-                            if ( e.type == EventType.ContextClick && sourcePortRect.Contains(e.mousePosition) ) {
-                                graph.RemoveConnection(connection);
-                                e.Use();
-                                return;
-                            }
-
-                            //On right click disconnect connection from the target.
-                            if ( e.type == EventType.ContextClick && targetPortRect.Contains(e.mousePosition) ) {
-                                graph.RemoveConnection(connection);
-                                e.Use();
-                                return;
-                            }
+                        //On right click disconnect connection from the target.
+                        if ( e.type == EventType.ContextClick && targetPortRect.Contains(e.mousePosition) ) {
+                            graph.RemoveConnection(connection);
+                            e.Use();
+                            return;
                         }
                     }
-
                 }
             }
         }

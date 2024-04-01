@@ -25,7 +25,7 @@ namespace NodeCanvas.Tasks.Actions
         protected override void OnExecute() {
             if ( target.value == null ) { EndAction(false); return; }
             agent.speed = speed.value;
-            if ( Vector3.Distance(agent.transform.position, target.value.transform.position) < agent.stoppingDistance + keepDistance.value ) {
+            if ( Vector3.Distance(agent.transform.position, target.value.transform.position) <= agent.stoppingDistance + keepDistance.value ) {
                 EndAction(true);
                 return;
             }
@@ -48,11 +48,9 @@ namespace NodeCanvas.Tasks.Actions
             }
         }
 
-
         protected override void OnPause() { OnStop(); }
         protected override void OnStop() {
-            if ( lastRequest != null && agent.gameObject.activeSelf ) {
-                agent.Warp(agent.transform.position);
+            if ( agent.gameObject.activeSelf ) {
                 agent.ResetPath();
             }
             lastRequest = null;

@@ -40,7 +40,15 @@ namespace NodeCanvas.Framework
         ///<summary>Self Serialize blackboard</summary>
         public void SelfSerialize() {
 
-            if ( haltForUndo || ParadoxNotion.Services.Threader.applicationIsPlaying || Application.isPlaying ) {
+#if UNITY_EDITOR
+            //This fixes an edge case of cycle referencing prefab blackboards when the Library folder is deleted
+            //which was basically due to the prefabs being serialized before the database was re-built.
+            if ( UnityEditor.EditorApplication.isUpdating ) {
+                return;
+            }
+#endif
+
+            if ( haltForUndo /*|| ParadoxNotion.Services.Threader.applicationIsPlaying*/ ) {
                 return;
             }
 
@@ -175,7 +183,22 @@ namespace NodeCanvas.Framework
 
         ///----------------------------------------------------------------------------------------------
 
-        virtual protected void OnValidate() { _identifier = gameObject.name; }
+        virtual protected void OnValidate() {
+            _identifier = gameObject.name;
+            // if ( UnityEditor.PrefabUtility.IsPartOfPrefabInstance(this) ) {
+            //     var serializedContext = new UnityEditor.SerializedObject(this);
+            //     var variablesProperty = serializedContext.FindProperty(nameof(_serializedVariables));
+            //     var prefabAssetPath = UnityEditor.PrefabUtility.GetPrefabAssetPathOfNearestInstanceRoot(this);
+            //     var prefab = UnityEditor.AssetDatabase.LoadAssetAtPath<Blackboard>(prefabAssetPath);
+            //     for ( var i = 0; i < _serializedVariables.Length; i++ ) {
+            //         if ( i >= prefab._serializedVariables.Length ) { break; }
+            //         var varProp = variablesProperty.GetArrayElementAtIndex(i);
+            //         var instVariable = JSONSerializer.Deserialize<Variable>(_serializedVariables[i]._json);
+            //         var prefVariable = JSONSerializer.Deserialize<Variable>(prefab._serializedVariables[i]._json);
+            //     }
+            // }
+        }
+
         public override string ToString() { return _identifier; }
     }
 }

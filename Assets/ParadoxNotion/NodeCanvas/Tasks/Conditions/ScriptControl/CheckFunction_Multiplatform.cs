@@ -107,6 +107,7 @@ namespace NodeCanvas.Tasks.Conditions
             if ( method == null ) {
                 return;
             }
+            UndoUtility.RecordObject(ownerSystem.contextObject, "Set Reflection Member");
             this.method = new SerializedMethodInfo(method);
             this.parameters.Clear();
             var methodParameters = method.GetParameters();
@@ -132,7 +133,7 @@ namespace NodeCanvas.Tasks.Conditions
             if ( !Application.isPlaying && GUILayout.Button("Select Method") ) {
                 var menu = new UnityEditor.GenericMenu();
                 if ( agent != null ) {
-                    foreach ( var comp in agent.GetComponents(typeof(Component)).Where(c => c.hideFlags == 0) ) {
+                    foreach ( var comp in agent.GetComponents(typeof(Component)).Where(c => !c.hideFlags.HasFlag(HideFlags.HideInInspector)) ) {
                         menu = EditorUtils.GetInstanceMethodSelectionMenu(comp.GetType(), typeof(object), typeof(object), SetMethod, 10, false, true, menu);
                     }
                     menu.AddSeparator("/");

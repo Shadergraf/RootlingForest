@@ -17,7 +17,7 @@ namespace NodeCanvas.Tasks.Actions
         public BBParameter<float> completionTime = 1;
 
         private GraphOwner[] owners;
-        private List<GraphOwner> receivedOwners;
+        private bool[] receivedOwners;
         private float traveledDistance;
 
         protected override string info {
@@ -26,16 +26,17 @@ namespace NodeCanvas.Tasks.Actions
 
         protected override void OnExecute() {
             owners = Object.FindObjectsByType<GraphOwner>(FindObjectsSortMode.None);
-            receivedOwners = new List<GraphOwner>();
+            receivedOwners = new bool[owners.Length];
         }
 
         protected override void OnUpdate() {
             traveledDistance = Mathf.Lerp(0, shoutRange.value, elapsedTime / completionTime.value);
-            foreach ( var owner in owners ) {
+            for ( var i = 0; i < owners.Length; i++ ) {
+                var owner = owners[i];
                 var distance = ( agent.position - owner.transform.position ).magnitude;
-                if ( distance <= traveledDistance && !receivedOwners.Contains(owner) ) {
+                if ( distance <= traveledDistance && receivedOwners[i] == false ) {
                     owner.SendEvent(eventName.value, null, this);
-                    receivedOwners.Add(owner);
+                    receivedOwners[i] = true;
                 }
             }
 

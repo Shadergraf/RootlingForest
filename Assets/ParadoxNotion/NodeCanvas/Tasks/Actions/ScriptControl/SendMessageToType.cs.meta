@@ -7,3 +7,10 @@ MonoImporter:
   icon: {instanceID: 0}
   userData: 
   assetBundleName: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 14914
+  packageName: NodeCanvas
+  packageVersion: 3.3.0
+  assetPath: Assets/ParadoxNotion/NodeCanvas/Tasks/Actions/ScriptControl/SendMessageToType.cs
+  uploadId: 650784

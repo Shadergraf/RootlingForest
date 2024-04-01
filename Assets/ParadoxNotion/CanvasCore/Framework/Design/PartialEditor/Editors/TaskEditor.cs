@@ -160,7 +160,7 @@ namespace NodeCanvas.Editor
 
             if ( !showTitlebar || ShowTitlebar(callback) == true ) {
 
-                if ( Prefs.showNodeInfo && !string.IsNullOrEmpty(task.description) ) {
+                if ( !string.IsNullOrEmpty(task.description) ) {
                     EditorGUILayout.HelpBox(task.description, MessageType.None);
                 }
 
@@ -171,6 +171,7 @@ namespace NodeCanvas.Editor
                 onTaskInspectorGUI.Invoke();
 
                 UndoUtility.CheckDirty(task.ownerSystem.contextObject);
+                if ( GUI.changed ) { task.OnValidate(task.ownerSystem); }
             }
         }
 

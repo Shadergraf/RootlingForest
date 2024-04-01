@@ -8,7 +8,7 @@ namespace NodeCanvas.BehaviourTrees
 {
 
     [Name("Sub Dialogue")]
-    [Description("Will Execute the nested dialogue assigned and return Success or Failure depending on the Dialogue Tree end state. This can be controled by using the 'Finish' Dialogue Node inside the Dialogue Tree. By default a Dialogue Tree ends in Success. The 'Instigator' Actor of the Dialogue Tree will be set to this graph's agent.")]
+    [Description("Executes a sub Dialogue Tree. Returns Running while the sub Dialogue Tree is active. You can Finish the Dialogue Tree with the 'Finish' node and return Success or Failure.")]
     [ParadoxNotion.Design.Icon("Dialogue")]
     [DropReferenceType(typeof(DialogueTree))]
     public class NestedDT : BTNodeNested<DialogueTree>

@@ -8,7 +8,7 @@ namespace NodeCanvas.BehaviourTrees
 
     [Name("Repeat")]
     [Category("Decorators")]
-    [Description("Repeat the child either x times or until it returns the specified status, or forever")]
+    [Description("Repeats the child either x times or until it returns the specified status, or forever.")]
     [ParadoxNotion.Design.Icon("Repeat")]
     public class Repeater : BTDecorator
     {
@@ -40,7 +40,7 @@ namespace NodeCanvas.BehaviourTrees
                 return Status.Optional;
             }
 
-            if ( decoratedConnection.status == Status.Success || decoratedConnection.status == Status.Failure ) {
+            if ( decoratedConnection.status != Status.Running ) {
                 decoratedConnection.Reset();
             }
 

@@ -48,7 +48,6 @@ namespace NodeCanvas.Tasks.Actions
         protected override void OnPause() { OnStop(); }
         protected override void OnStop() {
             if ( lastRequest != null && agent.gameObject.activeSelf ) {
-                agent.Warp(agent.transform.position);
                 agent.ResetPath();
             }
             lastRequest = null;

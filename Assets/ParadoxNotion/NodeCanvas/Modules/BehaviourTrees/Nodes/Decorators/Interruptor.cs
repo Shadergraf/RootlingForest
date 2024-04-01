@@ -8,7 +8,7 @@ namespace NodeCanvas.BehaviourTrees
 
     [Name("Interrupt")]
     [Category("Decorators")]
-    [Description("Interrupt the child node and return Failure if the condition is or becomes true while running. Otherwise execute and return the child Status")]
+    [Description("Executes and returns the child status. If the condition is or becomes true, the child is interrupted and returns Failure.")]
     [ParadoxNotion.Design.Icon("Interruptor")]
     public class Interruptor : BTDecorator, ITaskAssignable<ConditionTask>
     {
@@ -32,11 +32,15 @@ namespace NodeCanvas.BehaviourTrees
                 return Status.Optional;
             }
 
+            if ( condition == null ) {
+                return decoratedConnection.Execute(agent, blackboard);
+            }
+
             if ( status == Status.Resting ) {
                 condition.Enable(agent, blackboard);
             }
 
-            if ( condition == null || condition.Check(agent, blackboard) == false ) {
+            if ( condition.Check(agent, blackboard) == false ) {
                 return decoratedConnection.Execute(agent, blackboard);
             }
 

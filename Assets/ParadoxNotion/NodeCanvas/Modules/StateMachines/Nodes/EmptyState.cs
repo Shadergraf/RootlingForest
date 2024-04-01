@@ -3,9 +3,9 @@ using ParadoxNotion.Design;
 namespace NodeCanvas.StateMachines
 {
 
-    [Description("This node has no functionality and you can use this for organization.\nOutgoing transitions are immediately evaluated in the same frame that this node is entered, in comparison to an empty Action State which always yields one frame even if empty.")]
+    [Description("This node has no functionality and you can use this for organization.\nIn comparison to an empty Action State, Transitions here are immediately evaluated in the same frame that this node is entered.")]
     [Color("6ebbff")]
-    [Name("Pass")]
+    [Name("Pass", 98)]
     public class EmptyState : FSMState
     {
 

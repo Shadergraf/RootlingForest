@@ -7,7 +7,7 @@ namespace NodeCanvas.BehaviourTrees
 {
 
     [Name("Sub Tree")]
-    [Description("SubTree Node can be assigned an entire Sub BehaviorTree. The status of the root node in the SubTree will be returned.")]
+    [Description("Executes a sub Behaviour Tree. The status of the root node in the SubTree will be returned.")]
     [ParadoxNotion.Design.Icon("BT")]
     [DropReferenceType(typeof(BehaviourTree))]
     public class SubTree : BTNodeNested<BehaviourTree>

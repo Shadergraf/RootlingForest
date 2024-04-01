@@ -7,6 +7,7 @@ namespace NodeCanvas.StateMachines
 {
 
     ///<summary> Base class for fsm nodes that are actually states</summary>
+    // [Color("ff6d53")]
     abstract public class FSMState : FSMNode, IState
     {
 
@@ -86,25 +87,24 @@ namespace NodeCanvas.StateMachines
                 }
 
                 OnEnter();
+
+            } else {
+
+                var case1 = transitionEvaluation == TransitionEvaluationMode.CheckContinuously;
+                var case2 = transitionEvaluation == TransitionEvaluationMode.CheckAfterStateFinished && status != Status.Running;
+                if ( case1 || case2 ) {
+                    CheckTransitions();
+                }
+
+                if ( status == Status.Running ) {
+                    OnUpdate();
+                }
             }
 
             return status;
         }
 
-        //OnUpdate...
-        public void Update() {
-            var case1 = transitionEvaluation == TransitionEvaluationMode.CheckContinuously;
-            var case2 = transitionEvaluation == TransitionEvaluationMode.CheckAfterStateFinished && status != Status.Running;
-            if ( case1 || case2 ) {
-                CheckTransitions();
-            }
-
-            if ( status == Status.Running ) {
-                OnUpdate();
-            }
-        }
-
-        ///<summary>Returns true if a transitions was valid and thus made</summary>
+        ///<summary>Checks and performs possible transition. Returns true if a transition was performed.</summary>
         public bool CheckTransitions() {
 
             for ( var i = 0; i < outConnections.Count; i++ ) {
@@ -157,6 +157,11 @@ namespace NodeCanvas.StateMachines
         ///----------------------------------------------------------------------------------------------
         ///---------------------------------------UNITY EDITOR-------------------------------------------
 #if UNITY_EDITOR
+
+        //just a default orange color
+        public override void OnCreate(Graph assignedGraph) {
+            base.customColor = new Color(1, 0.42f, 0.32f);
+        }
 
         //...
         protected override void OnNodeInspectorGUI() {

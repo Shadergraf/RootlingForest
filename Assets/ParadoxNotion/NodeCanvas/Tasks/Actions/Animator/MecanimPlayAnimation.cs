@@ -32,7 +32,7 @@ namespace NodeCanvas.Tasks.Actions
             }
             played = false;
             var current = agent.GetCurrentAnimatorStateInfo(layerIndex.value);
-            agent.CrossFade(stateName.value, transitTime / current.length, layerIndex.value);
+            agent.CrossFade(stateName.value, transitTime / current.length, layerIndex.value, 0, 0);
         }
 
         protected override void OnUpdate() {
