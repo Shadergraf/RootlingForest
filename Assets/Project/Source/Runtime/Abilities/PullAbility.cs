@@ -396,8 +396,12 @@ public class PullAbility : MonoBehaviour
 
         m_Joint.linearLimit = new SoftJointLimit() { limit = 0.002f, contactDistance = 0.01f };
 
-
-
+		
+		if (m_GrabTimer > GrabTime + GrabTimeLeeway)
+		{
+			enabled = false;
+			return;
+		}
 
         if (false /* debug target orientation */)
         {
