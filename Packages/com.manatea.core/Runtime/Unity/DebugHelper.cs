@@ -1,5 +1,6 @@
 ﻿using UnityEditor;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace Manatea
 {
@@ -29,6 +30,14 @@ namespace Manatea
             DrawWireCircle(position, radius, Vector3.right, color, duration, depthTest, iterations);
             DrawWireCircle(position, radius, Vector3.up, color, duration, depthTest, iterations);
             DrawWireCircle(position, radius, Vector3.forward, color, duration, depthTest, iterations);
+        }
+
+
+        public static void DrawQuaternion(Vector3 position, Quaternion quaternion, float scale = 1, float duration = 0.0f, bool depthTest = true)
+        {
+            Debug.DrawLine(position, position + quaternion * Vector3.right   * scale, Color.red,   duration, depthTest);
+            Debug.DrawLine(position, position + quaternion * Vector3.up      * scale, Color.green, duration, depthTest);
+            Debug.DrawLine(position, position + quaternion * Vector3.forward * scale, Color.blue,  duration, depthTest);
         }
     }
 }
