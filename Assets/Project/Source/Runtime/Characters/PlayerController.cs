@@ -146,17 +146,25 @@ namespace Manatea
                 }
                 else
                 {
-                    PullAbility.enabled = false;
+                    if (m_MovementAction.ReadValue<Vector2>().magnitude > 0.3f)
+                    {
+                        PullAbility.Throw();
+                    }
+                    else
+                    {
+                        PullAbility.enabled = false;
+                    }
                 }
             }
 
-            if (m_ThrowAction.WasPressedThisFrame())
-            {
-                if (PullAbility.enabled)
-                {
-                    PullAbility.Throw();
-                }
-            }
+            // TODO test if single button grab/throw input feels good
+            //if (m_ThrowAction.WasPressedThisFrame())
+            //{
+            //    if (PullAbility.enabled)
+            //    {
+            //        PullAbility.Throw();
+            //    }
+            //}
         }
 
 
