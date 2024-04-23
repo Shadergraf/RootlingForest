@@ -86,12 +86,12 @@ public class AttachToContacts : MonoBehaviour
         //joint.anchor = transform.InverseTransformPoint(collision.contacts[0].point);
         //joint.autoConfigureConnectedAnchor = false;
 
-        joint.xMotion = ConfigurableJointMotion.Limited;
-        joint.yMotion = ConfigurableJointMotion.Limited;
-        joint.zMotion = ConfigurableJointMotion.Limited;
-        joint.angularXMotion = ConfigurableJointMotion.Limited;
-        joint.angularYMotion = ConfigurableJointMotion.Limited;
-        joint.angularZMotion = ConfigurableJointMotion.Limited;
+        joint.xMotion = ConfigurableJointMotion.Locked;
+        joint.yMotion = ConfigurableJointMotion.Locked;
+        joint.zMotion = ConfigurableJointMotion.Locked;
+        joint.angularXMotion = ConfigurableJointMotion.Locked;
+        joint.angularYMotion = ConfigurableJointMotion.Locked;
+        joint.angularZMotion = ConfigurableJointMotion.Locked;
 
         //joint.xMotion = ConfigurableJointMotion.Limited;
         //joint.yMotion = ConfigurableJointMotion.Limited;
@@ -112,6 +112,11 @@ public class AttachToContacts : MonoBehaviour
 
         joint.breakForce    = 100000000;
         joint.breakTorque   = 100000000;
+
+        joint.autoConfigureConnectedAnchor = true;
+        Vector3 anchor = joint.connectedAnchor;
+        joint.autoConfigureConnectedAnchor = false;
+        joint.connectedAnchor = anchor;
 
         m_ConnectedJoints.Add(joint);
 

@@ -380,9 +380,14 @@ public class PullAbility : MonoBehaviour
                 break;
         }
 
+        // Check joint again, as it could have been destroyed in update steps
+        if (m_Joint == null)
+        {
+            enabled = false;
+            return;
+        }
 
-        //m_HandBlocker.transform.position = m_Joint.transform.InverseTransformPoint(m_Joint.anchor);
-        //Vector3 handDir = m_HandBlocker.transform.position - transform.position;
+        // Orient hand blocker to hand anchor
         m_HandBlocker.transform.rotation = Quaternion.LookRotation(transform.TransformDirection(m_Joint.anchor.normalized));
         m_HandBlocker.transform.localScale = new Vector3(1, 1, m_Joint.anchor.magnitude);
     }
@@ -417,8 +422,8 @@ public class PullAbility : MonoBehaviour
 
         // check if target is in correct anchor position and orientation
         Vector3 posDelta = m_Joint.transform.TransformPoint(m_Joint.anchor) - m_Joint.connectedBody.transform.TransformPoint(m_Joint.connectedAnchor);
-        bool anchorsOverlap = posDelta.magnitude < 0.125f;
-        bool driveRotationMatches = !m_Target_GrabPrefs.UseOrientations || Quaternion.Angle(transform.rotation, Target.transform.rotation * Quaternion.Inverse(targetRotation) * startRotation) < 5;
+        bool anchorsOverlap = posDelta.magnitude < 0.15f;
+        bool driveRotationMatches = !m_Target_GrabPrefs.UseOrientations || Quaternion.Angle(transform.rotation, Target.transform.rotation * Quaternion.Inverse(targetRotation) * startRotation) < 10;
         if (anchorsOverlap && driveRotationMatches)
         {
             // line up grabbed object with it's target position and rotation

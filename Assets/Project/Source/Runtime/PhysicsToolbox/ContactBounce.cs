@@ -1,6 +1,7 @@
 using Manatea;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 [DefaultExecutionOrder(100)]
@@ -15,10 +16,16 @@ public class ContactBounce : MonoBehaviour
     [SerializeField]
     private bool m_RedirectVelocity = false;
 
+    private HashSet<Rigidbody> m_BlockerRigids = new HashSet<Rigidbody>();
+
+
     private void OnCollisionEnter(Collision collision)
     {
-        if (collision.body is Rigidbody rb)
+        if (collision.body is Rigidbody rb && !m_BlockerRigids.Contains(collision.body))
         {
+            Debug.Log("Contact bounce");
+            StartCoroutine(TimedBlock(collision.body as Rigidbody, 0.1f));
+
             Vector3 bounceDir = Vector3.up;
             Vector3 preciseBounce = (collision.contacts[0].point - transform.position).normalized;
             Vector3 horizontalBounce = Vector3.ProjectOnPlane(preciseBounce, Vector3.up).normalized;
@@ -40,8 +47,16 @@ public class ContactBounce : MonoBehaviour
                 rb.velocity = Vector3.ProjectOnPlane(rb.velocity, bounceDir);
             }
 
-            rb.AddForceAtPosition(bounceDir * force, collision.contacts[0].point, m_UseMass ? ForceMode.Impulse : ForceMode.VelocityChange);
+            //rb.AddForceAtPosition(bounceDir * force, collision.contacts[0].point, m_UseMass ? ForceMode.Impulse : ForceMode.VelocityChange);
+            rb.velocity = bounceDir * force;
             rb.AddForceAtPosition(bounceDir * velChange, collision.contacts[0].point, ForceMode.VelocityChange);
         }
+    }
+
+    private IEnumerator TimedBlock(Rigidbody rb, float blockTime)
+    {
+        m_BlockerRigids.Add(rb);
+        yield return new WaitForSeconds(blockTime);
+        m_BlockerRigids.Remove(rb);
     }
 }
