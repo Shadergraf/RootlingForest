@@ -47,9 +47,15 @@ public class ContactBounce : MonoBehaviour
                 rb.velocity = Vector3.ProjectOnPlane(rb.velocity, bounceDir);
             }
 
-            //rb.AddForceAtPosition(bounceDir * force, collision.contacts[0].point, m_UseMass ? ForceMode.Impulse : ForceMode.VelocityChange);
             rb.velocity = bounceDir * force;
-            rb.AddForceAtPosition(bounceDir * velChange, collision.contacts[0].point, ForceMode.VelocityChange);
+            //rb.AddForceAtPosition(bounceDir * velChange, collision.contacts[0].point, ForceMode.VelocityChange);
+
+
+            if (collision.collider.TryGetComponent(out PullAbility pullAbility) && pullAbility.Target)
+            {
+                pullAbility.Target.velocity = bounceDir * force * 1.0f;
+                //pullAbility.Target.AddForce(bounceDir * velChange, ForceMode.VelocityChange);
+            }
         }
     }
 

@@ -24,6 +24,11 @@ public class ForceDetector : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
+        if (!enabled)
+        {
+            return;
+        }
+
         if (collision.impulse.magnitude > m_ImpulseMagnitude)
         {
             ForceDetected();
@@ -31,6 +36,11 @@ public class ForceDetector : MonoBehaviour
     }
     private void OnCollisionStay(Collision collision)
     {
+        if (!enabled)
+        {
+            return;
+        }
+
         if (collision.impulse.magnitude > m_ImpulseMagnitude)
         {
             ForceDetected();
