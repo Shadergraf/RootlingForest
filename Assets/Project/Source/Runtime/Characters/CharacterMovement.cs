@@ -142,7 +142,6 @@ namespace Manatea.AdventureRoots
             // Ground detection
             bool groundDetected = DetectGround(out RaycastHit groundHitResult, out RaycastHit preciseGroundHitResult);
             Vector3 feetPos = Collider.ClosestPoint(transform.position + Physics.gravity * 10000);
-            // TODO where is m_IsGrounded set??????
             m_IsStableGrounded = groundDetected;
             m_IsStableGrounded &= m_ForceAirborneTimer <= 0;
             m_IsSliding = m_IsStableGrounded && MMath.Acos(Vector3.Dot(preciseGroundHitResult.normal, -Physics.gravity.normalized)) * MMath.Rad2Deg > MaxSlopeAngle;
@@ -278,9 +277,19 @@ namespace Manatea.AdventureRoots
             // Feet drag
             if (m_IsStableGrounded && !m_IsSliding)
             {
-                m_RigidBody.velocity *= Mathf.Clamp01(1 - FeetLinearResistance * dt);
-                m_RigidBody.angularVelocity *= Mathf.Clamp01(1 - FeetAngularResistance * dt);
+                /* TODO find better approach for this...
+                 * When applying an upwards force to a character the feet dampening kicks in and limits the upwards motion
+                 * However, when simply not dampening the y component of the velocity, walking up slopes causes issues
+                 * In other words: Correctly walking up slopes is only possible because of the dampening applied here.
+                 * That is weird and should not be the case, so walking up slopes needs a fix!
+                */
+                float lerpFactor = MMath.InverseLerpClamped(4f, 6f, MMath.Abs(m_RigidBody.velocity.y));
 
+                float feetLinearResistance = Mathf.Clamp01(1 - FeetLinearResistance * dt);
+                m_RigidBody.velocity = Vector3.Scale(m_RigidBody.velocity, Vector3.Lerp(Vector3.one * feetLinearResistance, new Vector3(feetLinearResistance, 1, feetLinearResistance), lerpFactor));
+                
+                m_RigidBody.angularVelocity *= Mathf.Clamp01(1 - FeetAngularResistance * dt);
+                
                 //Vector3 accVel = (m_RigidBody.GetAccumulatedForce() * Mathf.Clamp01(1 - FeetLinearResistance * dt)) - m_RigidBody.GetAccumulatedForce();
                 //m_RigidBody.AddForceAtPosition(accVel, feetPos, ForceMode.Force);
                 //Vector3 accTorque = m_RigidBody.GetAccumulatedTorque() - (m_RigidBody.GetAccumulatedTorque() * Mathf.Clamp01(1 - FeetAngularResistance * dt));
