@@ -17,7 +17,7 @@ public class ContactBounce : MonoBehaviour
     {
         if (collision.body is Rigidbody rb && !m_BlockerRigids.Contains(collision.body))
         {
-            Debug.Log("Contact bounce with: " + collision.body.gameObject.name);
+            //Debug.Log("Contact bounce with: " + collision.body.gameObject.name);
             StartCoroutine(TimedBlock(collision.body as Rigidbody, 0.1f));
 
             Vector3 targetVelocity = Vector3.up * m_BounceForce;

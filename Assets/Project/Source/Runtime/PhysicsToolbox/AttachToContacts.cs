@@ -4,6 +4,9 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
+using static UnityEngine.GraphicsBuffer;
+
+// TODO attach to contact breaks when using the bounce pads
 
 public class AttachToContacts : MonoBehaviour
 {
@@ -13,8 +16,12 @@ public class AttachToContacts : MonoBehaviour
     private List<Joint> m_ConnectedJoints = new List<Joint>();
     private Dictionary<Joint, float> m_ConnectedJointMultiplier = new Dictionary<Joint, float>();
 
-    private const float maxBreakForce = 150;
-    private const float targetForce = 60;
+    [SerializeField]
+    private float maxBreakForce = 150;
+    [SerializeField]
+    private float targetForce = 60;
+    [SerializeField]
+    private float randomDisconnectForce = 10;
 
     private void FixedUpdate()
     {
@@ -24,6 +31,8 @@ public class AttachToContacts : MonoBehaviour
             {
                 m_ConnectedJoints.RemoveAt(i);
                 i--;
+                GetComponent<Rigidbody>().AddForce(Random.onUnitSphere * randomDisconnectForce, ForceMode.VelocityChange);
+                Debug.Log("NOT connected anymore!");
                 continue;
             }
             Joint joint = m_ConnectedJoints[i];
@@ -38,7 +47,6 @@ public class AttachToContacts : MonoBehaviour
             {
                 joint.breakForce = MMath.Damp(joint.breakForce, targetForce * m_ConnectedJointMultiplier[joint], 0.5f, Time.fixedDeltaTime);
             }
-            
             joint.breakTorque = joint.breakForce;
         }
     }
@@ -50,6 +58,35 @@ public class AttachToContacts : MonoBehaviour
         {
             return;
         }
+
+        Rigidbody rigid = GetComponent<Rigidbody>();
+        rigid.position = rigid.position + Vector3.up * 0.02f;            // Skin offset to prevent sweeps not registering
+        RaycastHit[] hits = rigid.SweepTestAll(-collision.contacts[0].normal, 0.2f);
+        rigid.position = rigid.position - Vector3.up * 0.02f;            // Revert skin offset
+        if (hits.Length == 0)
+        {
+            return;
+        }
+        RaycastHit relevantHit = new();
+        bool relevantHitFound = false;
+        for (int i = 0; i < hits.Length; i++)
+        {
+            if (hits[i].collider.attachedRigidbody == otherRb)
+            {
+                relevantHit = hits[i];
+                relevantHitFound = true;
+            }
+        }
+        if (!relevantHitFound)
+        {
+            return;
+        }
+
+        DebugHelper.DrawWireSphere(collision.contacts[0].point, 0.05f, Color.green);
+        DebugHelper.DrawWireSphere(relevantHit.point, 0.05f, Color.blue);
+
+        Vector3 contactOffset = relevantHit.point - collision.contacts[0].point;
+        rigid.position += contactOffset;
 
         float stickiness = 1;
         if (m_StickyAttribute && otherRb.TryGetComponent(out GameplayAttributeOwner attributes) && attributes.TryGetAttributeEvaluatedValue(m_StickyAttribute, out float stickinessAttr))
@@ -81,11 +118,6 @@ public class AttachToContacts : MonoBehaviour
         ConfigurableJoint joint = gameObject.AddComponent<ConfigurableJoint>();
         joint.connectedBody = otherRb;
 
-        //Vector3 anchor = joint.connectedAnchor;
-        //joint.connectedAnchor = otherRb.transform.InverseTransformPoint(collision.contacts[0].point + Vector3.up * 0.01f);
-        //joint.anchor = transform.InverseTransformPoint(collision.contacts[0].point);
-        //joint.autoConfigureConnectedAnchor = false;
-
         joint.xMotion = ConfigurableJointMotion.Locked;
         joint.yMotion = ConfigurableJointMotion.Locked;
         joint.zMotion = ConfigurableJointMotion.Locked;
@@ -93,22 +125,6 @@ public class AttachToContacts : MonoBehaviour
         joint.angularYMotion = ConfigurableJointMotion.Locked;
         joint.angularZMotion = ConfigurableJointMotion.Locked;
 
-        //joint.xMotion = ConfigurableJointMotion.Limited;
-        //joint.yMotion = ConfigurableJointMotion.Limited;
-        //joint.zMotion = ConfigurableJointMotion.Limited;
-        //joint.angularXMotion = ConfigurableJointMotion.Limited;
-        //joint.angularYMotion = ConfigurableJointMotion.Limited;
-        //joint.angularZMotion = ConfigurableJointMotion.Limited;
-        //joint.linearLimit = new SoftJointLimit()
-        //{
-        //    contactDistance = 0.001f,
-        //    limit = 0.001f,
-        //};
-        //joint.linearLimitSpring = new SoftJointLimitSpring()
-        //{
-        //    damper = 100,
-        //    spring = 1000,
-        //};
 
         joint.breakForce    = 100000000;
         joint.breakTorque   = 100000000;
@@ -125,6 +141,8 @@ public class AttachToContacts : MonoBehaviour
         // You can test this on the bounce pad
 
         m_ConnectedJointMultiplier.Add(joint, stickiness);
+
+        Debug.Log("Connected!");
     }
 
     private void OnGUI()

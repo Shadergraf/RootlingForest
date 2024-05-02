@@ -200,7 +200,7 @@ PrefabInstance:
     - target: {fileID: 2820277903825203249, guid: 8262b2170c2f0da4387d50da78b2fc03,
         type: 3}
       propertyPath: m_Name
-      value: BasePhysicsObject_1 Variant
+      value: Burdock
       objectReference: {fileID: 0}
     - target: {fileID: 4741099696618946961, guid: 8262b2170c2f0da4387d50da78b2fc03,
         type: 3}
@@ -265,6 +265,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_StickyAttribute: {fileID: 11400000, guid: d62daeae609380a4e93f192aae3830a9, type: 2}
+  maxBreakForce: 150
+  targetForce: 60
+  randomDisconnectForce: 0.1
 --- !u!4 &2755372887845172784 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1838099394805908932, guid: 8262b2170c2f0da4387d50da78b2fc03,
