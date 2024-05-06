@@ -2,7 +2,10 @@ using Manatea;
 using Manatea.GameplaySystem;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.Serialization;
 using UnityEngine.UIElements;
 using static UnityEngine.GraphicsBuffer;
 
@@ -14,14 +17,26 @@ public class AttachToContacts : MonoBehaviour
     private GameplayAttribute m_StickyAttribute;
 
     private List<Joint> m_ConnectedJoints = new List<Joint>();
-    private Dictionary<Joint, float> m_ConnectedJointMultiplier = new Dictionary<Joint, float>();
+    private Dictionary<Joint, float> m_ConnectedJointMultiplier = new();
+    private Dictionary<Rigidbody, float> m_ConnectedCooldown = new();
 
     [SerializeField]
-    private float maxBreakForce = 150;
+    [FormerlySerializedAs("maxBreakForce")]
+    private float m_MaxBreakForce = 150;
     [SerializeField]
-    private float targetForce = 60;
+    [FormerlySerializedAs("targetForce")]
+    private float m_TargetForce = 60;
     [SerializeField]
-    private float randomDisconnectForce = 10;
+    [FormerlySerializedAs("randomDisconnectForce")]
+    private float m_RandomDisconnectForce = 10;
+    [SerializeField]
+    [FormerlySerializedAs("reconnectionDelay")]
+    private float m_ReconnectionDelay = 0.2f;
+    [SerializeField]
+    private LayerMask m_LayerMask = ~0;
+    [SerializeField]
+    private bool m_OrientToNormal;
+
 
     private void FixedUpdate()
     {
@@ -31,8 +46,9 @@ public class AttachToContacts : MonoBehaviour
             {
                 m_ConnectedJoints.RemoveAt(i);
                 i--;
-                GetComponent<Rigidbody>().AddForce(Random.onUnitSphere * randomDisconnectForce, ForceMode.VelocityChange);
-                Debug.Log("NOT connected anymore!");
+                GetComponent<Rigidbody>().AddForce(Random.onUnitSphere * m_RandomDisconnectForce, ForceMode.VelocityChange);
+                //Debug.Log("NOT connected anymore!");
+
                 continue;
             }
             Joint joint = m_ConnectedJoints[i];
@@ -41,13 +57,31 @@ public class AttachToContacts : MonoBehaviour
             
             if (joint.breakForce >= 100000000)
             {
-                joint.breakForce = maxBreakForce;
+                joint.breakForce = m_MaxBreakForce;
             }
             else
             {
-                joint.breakForce = MMath.Damp(joint.breakForce, targetForce * m_ConnectedJointMultiplier[joint], 0.5f, Time.fixedDeltaTime);
+                joint.breakForce = MMath.Damp(joint.breakForce, m_TargetForce * m_ConnectedJointMultiplier[joint], 0.5f, Time.fixedDeltaTime);
             }
             joint.breakTorque = joint.breakForce;
+
+
+            m_ConnectedCooldown[joint.connectedBody] = m_ReconnectionDelay;
+        }
+
+        List<Rigidbody> keysToDelete = new List<Rigidbody>();
+        var keys = m_ConnectedCooldown.Keys.ToArray();
+        foreach (Rigidbody key in keys)
+        {
+            m_ConnectedCooldown[key] = m_ConnectedCooldown[key] - Time.fixedDeltaTime;
+            if (m_ConnectedCooldown[key] <= 0)
+            {
+                keysToDelete.Add(key);
+            }
+        }
+        for (int i = 0; i < keysToDelete.Count; i++)
+        {
+            m_ConnectedCooldown.Remove(keysToDelete[i]);
         }
     }
 
@@ -55,6 +89,15 @@ public class AttachToContacts : MonoBehaviour
     {
         Rigidbody otherRb = collision.collider.attachedRigidbody;
         if (!otherRb)
+        {
+            otherRb = collision.collider.gameObject.AddComponent<Rigidbody>();
+            otherRb.isKinematic = true;
+        }
+        if (m_ConnectedCooldown.ContainsKey(otherRb))
+        {
+            return;
+        }
+        if (!m_LayerMask.ContainsLayer(otherRb.gameObject.layer))
         {
             return;
         }
@@ -87,6 +130,12 @@ public class AttachToContacts : MonoBehaviour
 
         Vector3 contactOffset = relevantHit.point - collision.contacts[0].point;
         rigid.position += contactOffset;
+
+        // TODO super hacky, pls do properly
+        if (m_OrientToNormal)
+        {
+            rigid.rotation = Quaternion.LookRotation(relevantHit.normal);
+        }
 
         float stickiness = 1;
         if (m_StickyAttribute && otherRb.TryGetComponent(out GameplayAttributeOwner attributes) && attributes.TryGetAttributeEvaluatedValue(m_StickyAttribute, out float stickinessAttr))
@@ -142,7 +191,9 @@ public class AttachToContacts : MonoBehaviour
 
         m_ConnectedJointMultiplier.Add(joint, stickiness);
 
-        Debug.Log("Connected!");
+        m_ConnectedCooldown.Add(otherRb, m_ReconnectionDelay);
+
+        //Debug.Log("Connected!");
     }
 
     private void OnGUI()
@@ -154,7 +205,7 @@ public class AttachToContacts : MonoBehaviour
         {
             if (m_ConnectedJoints[i])
             {
-                MGUI.DrawWorldProgressBar(transform.position + Vector3.up * 0.2f, new Rect(0, i * 5, 20 * m_ConnectedJointMultiplier[m_ConnectedJoints[i]], 4), MMath.InverseLerp(0, maxBreakForce, m_ConnectedJoints[i].breakForce));
+                MGUI.DrawWorldProgressBar(transform.position + Vector3.up * 0.2f, new Rect(0, i * 5, 20 * m_ConnectedJointMultiplier[m_ConnectedJoints[i]], 4), MMath.InverseLerp(0, m_MaxBreakForce, m_ConnectedJoints[i].breakForce));
             }
         }
     }
