@@ -752,6 +752,7 @@ MonoBehaviour:
   m_DestroyObject: 1
   m_Force: 5
   m_RadialForce: 1
+  m_ImpulseForceContribution: 0.3
   m_UseMass: 1
   m_ForceDetected:
     m_PersistentCalls:

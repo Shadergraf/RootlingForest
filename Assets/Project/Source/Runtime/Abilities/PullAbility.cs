@@ -1,15 +1,7 @@
 using UnityEngine;
 using Manatea;
-using Manatea.AdventureRoots;
 using Manatea.GameplaySystem;
 using UnityEngine.Events;
-using UnityEngine.Splines;
-using Unity.Mathematics;
-using static UnityEngine.GraphicsBuffer;
-using UnityEditor.Experimental.GraphView;
-using static PullAbility;
-using static UnityEngine.InputManagerEntry;
-using UnityEngine.InputSystem;
 
 // TODO cleanup this file
 

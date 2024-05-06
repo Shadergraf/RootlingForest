@@ -140,6 +140,8 @@ namespace Manatea
                         Rigidbody rigid = Colliders[i].attachedRigidbody;
                         if (rigid == null)
                             continue;
+                        if (!rigid.GetComponent<GrabPreferences>())
+                            continue;
                         PullAbility.Target = rigid;
                         PullAbility.enabled = true;
                         break;

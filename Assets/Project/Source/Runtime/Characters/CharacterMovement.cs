@@ -289,7 +289,7 @@ namespace Manatea.AdventureRoots
                 m_RigidBody.velocity = Vector3.Scale(m_RigidBody.velocity, Vector3.Lerp(Vector3.one * feetLinearResistance, new Vector3(feetLinearResistance, 1, feetLinearResistance), lerpFactor));
                 
                 m_RigidBody.angularVelocity *= Mathf.Clamp01(1 - FeetAngularResistance * dt);
-                
+
                 //Vector3 accVel = (m_RigidBody.GetAccumulatedForce() * Mathf.Clamp01(1 - FeetLinearResistance * dt)) - m_RigidBody.GetAccumulatedForce();
                 //m_RigidBody.AddForceAtPosition(accVel, feetPos, ForceMode.Force);
                 //Vector3 accTorque = m_RigidBody.GetAccumulatedTorque() - (m_RigidBody.GetAccumulatedTorque() * Mathf.Clamp01(1 - FeetAngularResistance * dt));

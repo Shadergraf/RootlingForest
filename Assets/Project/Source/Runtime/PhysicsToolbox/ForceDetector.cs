@@ -17,10 +17,39 @@ public class ForceDetector : MonoBehaviour
     [SerializeField, Range(0, 1)]
     private float m_RadialForce = 1;
     [SerializeField]
+    private float m_ImpulseForceContribution = 0;
+    [SerializeField]
     private bool m_UseMass;
 
     [SerializeField]
     private UnityEvent m_ForceDetected;
+
+    private Rigidbody m_Rigidbody;
+    private Vector3 m_LastVelocity;
+    private float m_AccumulatedForces;
+
+    private void Awake()
+    {
+        m_Rigidbody = GetComponent<Rigidbody>();
+    }
+    private void OnEnable()
+    {
+        m_LastVelocity = m_Rigidbody.velocity;
+        m_AccumulatedForces = 0;
+    }
+
+    private void FixedUpdate()
+    {
+        m_AccumulatedForces *= 0.1f;
+        m_AccumulatedForces += Vector3.Distance(m_LastVelocity, m_Rigidbody.velocity);
+
+        if (m_AccumulatedForces > m_ImpulseMagnitude)
+        {
+            ForceDetected();
+        }
+
+        m_LastVelocity = m_Rigidbody.velocity;
+    }
 
     private void OnCollisionEnter(Collision collision)
     {
@@ -29,10 +58,10 @@ public class ForceDetector : MonoBehaviour
             return;
         }
 
-        if (collision.impulse.magnitude > m_ImpulseMagnitude)
-        {
-            ForceDetected();
-        }
+        //f (collision.impulse.magnitude > m_ImpulseMagnitude)
+        //
+        //   ForceDetected();
+        //
     }
     private void OnCollisionStay(Collision collision)
     {
@@ -41,10 +70,10 @@ public class ForceDetector : MonoBehaviour
             return;
         }
 
-        if (collision.impulse.magnitude > m_ImpulseMagnitude)
-        {
-            ForceDetected();
-        }
+        //if (collision.impulse.magnitude > m_ImpulseMagnitude)
+        //{
+        //    ForceDetected();
+        //}
     }
 
     public void ForceDetected()
@@ -66,9 +95,9 @@ public class ForceDetector : MonoBehaviour
             {
                 radialDir = randomDir;
             }
-            Vector3 force = Vector3.Lerp(randomDir, radialDir, m_RadialForce).normalized;
+            Vector3 forceDir = Vector3.Lerp(randomDir, radialDir, m_RadialForce).normalized;
             //rigid.AddForce(force * m_Force, m_UseMass ? ForceMode.Impulse : ForceMode.VelocityChange);
-            rigid.velocity += force * m_Force;
+            rigid.velocity += forceDir * (m_Force + m_AccumulatedForces * m_ImpulseForceContribution);
         }
 
         if (m_DestroyObject)

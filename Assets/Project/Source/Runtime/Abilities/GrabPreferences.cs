@@ -1,6 +1,7 @@
 using Manatea;
 using UnityEngine;
 
+[RequireComponent(typeof(Rigidbody))]
 public class GrabPreferences : MonoBehaviour
 {
     [SerializeField]
