@@ -15,7 +15,6 @@ using UnityEngine.InputSystem;
 
 public class PullAbility : MonoBehaviour
 {
-    public Rigidbody Target;
     public Rigidbody Self;
     public float StartSpring = 10;
     public float EndSpring = 500;
@@ -67,6 +66,21 @@ public class PullAbility : MonoBehaviour
     public bool m_DisableHandRaise;
 
 
+    private Rigidbody m_Target;
+    public Rigidbody Target
+    {
+        get => m_Target;
+        set
+        {
+            if (enabled)
+            {
+                Debug.Assert(false, "Target can only be set if the ability is disabled!");
+                return;
+            }
+            m_Target = value;
+        }
+    }
+
 
     private GrabState m_GrabState;
 
@@ -87,7 +101,6 @@ public class PullAbility : MonoBehaviour
 
     private float m_HeavyLoad;
     private float m_PullingLoad;
-
 
 
     public enum GrabState
@@ -298,7 +311,7 @@ public class PullAbility : MonoBehaviour
             Target.excludeLayers = new LayerMask();
         }
 
-        Target = null;
+        m_Target = null;
         m_Target_GrabPrefs = null;
 
         m_HandBlocker.gameObject.SetActive(false);
@@ -438,7 +451,7 @@ public class PullAbility : MonoBehaviour
             // TODO only weld bodies this way if the target rotation has been reached!
             // TODO suuuper hacky but allows us to lock the rotation and have the current orientation persist
             // We want to fuse the hands and the object (by locking the joint instead of limiting it) to have them simulated more robustly
-            copiedJoint = CopyComponent(m_Joint, gameObject);
+            Component copiedJoint = m_Joint.CopyComponent(gameObject);
             Destroy(m_Joint);
             m_Joint = copiedJoint as ConfigurableJoint;
             
@@ -627,32 +640,6 @@ public class PullAbility : MonoBehaviour
         m_WalkSpeedModifier.Value = moveMult;
         m_RotationRateModifier.Value = rotMult;
     }
-
-
-    #region Utility
-
-    Component copiedJoint;
-    T CopyComponent<T>(T original, GameObject destination) where T : Component
-    {
-        System.Type type = original.GetType();
-        var dst = destination.AddComponent(type) as T;
-        var fields = type.GetFields();
-        foreach (var field in fields)
-        {
-            if (field.IsStatic) continue;
-            field.SetValue(dst, field.GetValue(original));
-        }
-        var props = type.GetProperties();
-        foreach (var prop in props)
-        {
-            if (!prop.CanWrite || !prop.CanWrite || prop.Name == "name") continue;
-            prop.SetValue(dst, prop.GetValue(original, null), null);
-        }
-        return dst;
-    }
-
-    #endregion
-
 
 
     private void OnGUI()

@@ -142,6 +142,7 @@ namespace Manatea
                             continue;
                         PullAbility.Target = rigid;
                         PullAbility.enabled = true;
+                        break;
                     }
                 }
                 else

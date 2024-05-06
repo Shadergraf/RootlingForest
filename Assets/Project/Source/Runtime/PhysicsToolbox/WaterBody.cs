@@ -21,6 +21,11 @@ public class WaterBody : MonoBehaviour
 
     private void OnTriggerStay(Collider other)
     {
+        if (!other.attachedRigidbody || other.attachedRigidbody.isKinematic)
+        {
+            return;
+        }
+
         float waterLine = transform.TransformPoint(Vector3.up *  m_WaterLine).y;
         Vector3[] corners = other.bounds.GetCorners();
         for (int i = 0; i < corners.Length; i++)

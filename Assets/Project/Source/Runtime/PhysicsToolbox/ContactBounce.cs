@@ -8,7 +8,13 @@ using UnityEngine;
 public class ContactBounce : MonoBehaviour
 {
     [SerializeField]
-    private float m_BounceForce = 1f;
+    private Vector3 m_Direction = Vector3.forward;
+    [SerializeField]
+    private bool m_NormalizeDirection = true;
+    [SerializeField]
+    private bool m_UseGlobalSpace = false;
+    [SerializeField]
+    private float m_Force = 1f;
 
     private HashSet<Rigidbody> m_BlockerRigids = new HashSet<Rigidbody>();
 
@@ -20,7 +26,18 @@ public class ContactBounce : MonoBehaviour
             //Debug.Log("Contact bounce with: " + collision.body.gameObject.name);
             StartCoroutine(TimedBlock(collision.body as Rigidbody, 0.1f));
 
-            Vector3 targetVelocity = Vector3.up * m_BounceForce;
+            Vector3 targetVelocity = m_Direction;
+            if (!m_UseGlobalSpace)
+            {
+                targetVelocity = transform.TransformDirection(targetVelocity);
+            }
+            if (m_NormalizeDirection)
+            {
+                targetVelocity.Normalize();
+            }
+            targetVelocity *= m_Force;
+            Debug.DrawLine(transform.position, transform.position + targetVelocity.normalized, Color.blue, 0.5f);
+
             StartCoroutine(CO_ApplyVelocityRepeated(rb, targetVelocity, 1));
 
             if (rb.TryGetComponent(out PullAbility pullAbility) && pullAbility.Target)
@@ -41,7 +58,10 @@ public class ContactBounce : MonoBehaviour
     {
         while (amountOfTimes > 0 && rb != null)
         {
-            rb.velocity = velocity;
+            if (!rb.isKinematic)
+            {
+                rb.velocity = velocity;
+            }
             amountOfTimes--;
             yield return new WaitForFixedUpdate();
         }
