@@ -20,6 +20,16 @@ public class GrabPreferences : MonoBehaviour
     private bool m_UpdateGrabLocation;
     [SerializeField]
     private bool m_AllowOverlapAfterDrop = true;
+    [SerializeField]
+    private bool m_UseCustomThrow = false;
+    [SerializeField]
+    private float m_ThrowRotation = 0;
+    [SerializeField]
+    private bool m_UseDropThrow = false;
+    [SerializeField]
+    private Vector3 m_DropForce;
+    [SerializeField]
+    private float m_DropTorque;
 
     public bool CollisionEnabled => m_CollisionEnabled;
     public LocationRule LocationRule => m_LocationRule;
@@ -29,6 +39,11 @@ public class GrabPreferences : MonoBehaviour
     public GrabOrientation[] Orientations => m_Orientations;
     public bool UpdateGrabLocation => m_UpdateGrabLocation;
     public bool AllowOverlapAfterDrop => m_AllowOverlapAfterDrop;
+    public bool UseCustomThrow => m_UseCustomThrow;
+    public float ThrowRotation => m_ThrowRotation;
+    public bool UseDropThrow => m_UseDropThrow;
+    public Vector3 DropForce => m_DropForce;
+    public float DropTorque => m_DropTorque;
 }
 
 public enum LocationRule

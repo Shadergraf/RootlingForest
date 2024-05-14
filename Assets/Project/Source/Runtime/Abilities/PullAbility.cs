@@ -640,18 +640,38 @@ public class PullAbility : MonoBehaviour
         MGUI.DrawWorldProgressBar(transform.position, new Rect(10, 20, 50, 9), m_PullingLoad);
     }
 
+
     public void Throw()
     {
         Debug.Assert(enabled, "Ability is not active!", gameObject);
-        Destroy(m_Joint);
-
+    
         float throwForce = ThrowForce / MMath.Max(Target.mass, 1);
-        Vector3 throwDir = transform.right * ThrowDir.x + transform.up * ThrowDir.y + transform.forward * ThrowDir.z;
-        Target.velocity += throwDir * throwForce;
-        float massMult = MMath.RemapClamped(0.2f, 0.6f, 1, 0.25f, Target.mass);
-        Target.AddForceAtPosition(Vector3.up * ThrowRotation * massMult, Target.worldCenterOfMass - transform.forward, ForceMode.VelocityChange);
-        Target.AddForceAtPosition(Vector3.down * ThrowRotation * massMult, Target.worldCenterOfMass + transform.forward, ForceMode.VelocityChange);
-
+        float throwRotation = ThrowRotation;
+        if (m_Target_GrabPrefs.UseCustomThrow)
+        {
+            throwRotation = m_Target_GrabPrefs.ThrowRotation;
+        }
+        ThrowInternal(ThrowDir * throwForce, throwRotation);
+    
         enabled = false;
+    }
+    public void Drop()
+    {
+        // Initiate drop throw
+        if (m_Target_GrabPrefs.UseDropThrow)
+        {
+            ThrowInternal(m_Target_GrabPrefs.DropForce, m_Target_GrabPrefs.DropTorque);
+        } 
+    
+        enabled = false;
+    }
+
+    private void ThrowInternal(Vector3 velocity, float torque)
+    {
+        Target.velocity += transform.right * velocity.x + transform.up * velocity.y + transform.forward * velocity.z;
+
+        float massMult = MMath.RemapClamped(0.2f, 0.6f, 1, 0.25f, Target.mass);
+        Target.AddForceAtPosition(Vector3.up * torque * massMult, Target.worldCenterOfMass - transform.forward, ForceMode.VelocityChange);
+        Target.AddForceAtPosition(Vector3.down * torque * massMult, Target.worldCenterOfMass + transform.forward, ForceMode.VelocityChange);
     }
 }

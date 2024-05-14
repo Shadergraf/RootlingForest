@@ -358,7 +358,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f81fbd012d71834489105277a4e41c3f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Target: {fileID: 0}
   Self: {fileID: 4970427809924738771}
   StartSpring: 10
   EndSpring: 3000
@@ -373,7 +372,7 @@ MonoBehaviour:
   TargetPosition: {x: 0, y: 1, z: 0}
   AutoTargetPosition: 1
   ThrowForce: 6
-  ThrowRotation: 4
+  ThrowRotation: 2
   ThrowDir: {x: 0, y: 1, z: 1}
   BreakForce: 500
   BreakTorque: 500

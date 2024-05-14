@@ -155,7 +155,7 @@ namespace Manatea
                     }
                     else
                     {
-                        PullAbility.enabled = false;
+                        PullAbility.Drop();
                     }
                 }
             }

@@ -72,11 +72,11 @@ public class ContactBounce : MonoBehaviour
         targetVelocity *= m_Force;
         Debug.DrawLine(transform.position, transform.position + targetVelocity.normalized, Color.blue, 0.5f);
 
-        StartCoroutine(CO_ApplyVelocityRepeated(rb, targetVelocity, 1));
+        StartCoroutine(CO_ApplyVelocityRepeated(rb, targetVelocity, 4));
         if (m_OppositeForce != 0 && TryGetComponent(out Rigidbody selfRigid))
         {
-            StartCoroutine(CO_ApplyVelocityRepeated(selfRigid, targetVelocity * -1 * m_OppositeForce, 1));
-            StartCoroutine(TimedBlock(collision.body as Rigidbody, 0.05f));
+            StartCoroutine(CO_ApplyVelocityRepeated(selfRigid, targetVelocity * -1 * m_OppositeForce, 4));
+            StartCoroutine(TimedBlock(collision.body as Rigidbody, 0.1f));
         }
 
         if (rb.TryGetComponent(out PullAbility pullAbility) && pullAbility.Target)
