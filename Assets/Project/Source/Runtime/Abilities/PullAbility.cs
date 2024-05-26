@@ -9,10 +9,13 @@ using System.Collections;
 public class PullAbility : MonoBehaviour
 {
     public Rigidbody Self;
+    public bool m_UseTargetPosition;
     public float StartSpring = 10;
     public float EndSpring = 500;
     public float StartDamper = 50;
     public float EndDamper = 2;
+    public float SnapPositionThreshold = 0.15f;
+    public float SnapRotationThreshold = 10f;
     public float StartDriveSpring = 10;
     public float EndDriveSpring = 500;
     public float StartDriveDamper = 50;
@@ -247,8 +250,8 @@ public class PullAbility : MonoBehaviour
 
 
 
-        m_Joint.linearLimit = new SoftJointLimit() { limit = LinearLimit, contactDistance = 0.1f };
-        m_Joint.linearLimitSpring = new SoftJointLimitSpring() { spring = StartSpring, damper = StartDamper };
+        //m_Joint.linearLimit = new SoftJointLimit() { limit = LinearLimit, contactDistance = 0.1f };
+        //m_Joint.linearLimitSpring = new SoftJointLimitSpring() { spring = StartSpring, damper = StartDamper };
 
         var drive = m_Joint.slerpDrive;
         drive.positionSpring = DriverSpring;
@@ -408,12 +411,16 @@ public class PullAbility : MonoBehaviour
 
     private void UpdateEstablishGrab()
     {
-        SoftJointLimitSpring linearLimitSpring = m_Joint.linearLimitSpring;
-        linearLimitSpring.spring = MMath.LerpClamped(StartSpring, EndSpring, MMath.Pow(m_GrabTimer / GrabTime, 2));
-        linearLimitSpring.damper = MMath.LerpClamped(StartDamper, EndDamper, MMath.Pow(m_GrabTimer / GrabTime, 2));
-        m_Joint.linearLimitSpring = linearLimitSpring;
+        //SoftJointLimitSpring linearLimitSpring = m_Joint.linearLimitSpring;
+        //linearLimitSpring.spring = MMath.LerpClamped(StartSpring, EndSpring, MMath.Pow(m_GrabTimer / GrabTime, 2));
+        //linearLimitSpring.damper = MMath.LerpClamped(StartDamper, EndDamper, MMath.Pow(m_GrabTimer / GrabTime, 2));
+        //m_Joint.linearLimitSpring = linearLimitSpring;
 
-        m_Joint.linearLimit = new SoftJointLimit() { limit = 0.002f, contactDistance = 0.01f };
+        m_Joint.linearLimit = new SoftJointLimit() { limit = 10.002f, contactDistance = 0.01f };
+
+        m_Joint.xDrive = new JointDrive() { positionSpring = MMath.LerpClamped(StartSpring, EndSpring, MMath.Pow(m_GrabTimer / GrabTime, 2)) };
+        m_Joint.yDrive = m_Joint.xDrive;
+        m_Joint.zDrive = m_Joint.xDrive;
 
         // stop grab attempt if too much time passed
         if (m_GrabTimer > GrabTime + GrabTimeLeeway)
@@ -436,8 +443,8 @@ public class PullAbility : MonoBehaviour
 
         // check if target is in correct anchor position and orientation
         Vector3 posDelta = m_Joint.transform.TransformPoint(m_Joint.anchor) - m_Joint.connectedBody.transform.TransformPoint(m_Joint.connectedAnchor);
-        bool anchorsOverlap = posDelta.magnitude < 0.15f;
-        bool driveRotationMatches = !m_Target_GrabPrefs.UseOrientations || Quaternion.Angle(transform.rotation, Target.transform.rotation * Quaternion.Inverse(targetRotation) * startRotation) < 10;
+        bool anchorsOverlap = posDelta.magnitude < SnapPositionThreshold;
+        bool driveRotationMatches = !m_Target_GrabPrefs.UseOrientations || Quaternion.Angle(transform.rotation, Target.transform.rotation * Quaternion.Inverse(targetRotation) * startRotation) < SnapRotationThreshold;
         if (anchorsOverlap && driveRotationMatches)
         {
             // line up grabbed object with it's target position and rotation

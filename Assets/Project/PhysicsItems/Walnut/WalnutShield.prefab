@@ -148,7 +148,7 @@ Transform:
   m_GameObject: {fileID: 1720274234330460976}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0.9659259, z: -0.258819, w: 0}
-  m_LocalPosition: {x: 0, y: -0.006000042, z: 0.21999979}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -247,7 +247,7 @@ Transform:
   m_GameObject: {fileID: 2374581718344739307}
   serializedVersion: 2
   m_LocalRotation: {x: -0.00000033506956, y: 0.707107, z: -0.70710665, w: -0.0000003289755}
-  m_LocalPosition: {x: 0, y: 0.5, z: -0.1539998}
+  m_LocalPosition: {x: -0, y: 0.1, z: -0.15}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -431,7 +431,7 @@ Transform:
   m_GameObject: {fileID: 3061294543952646356}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: -0.1539998}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -476,7 +476,7 @@ Transform:
   m_GameObject: {fileID: 4277595372957043005}
   serializedVersion: 2
   m_LocalRotation: {x: -0.965926, y: -0.00000039895605, z: 0.00000051017287, w: -0.2588186}
-  m_LocalPosition: {x: 0, y: -0.006000042, z: 0.21999979}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -880,7 +880,7 @@ PrefabInstance:
     - target: {fileID: 2820277903825203249, guid: 8262b2170c2f0da4387d50da78b2fc03,
         type: 3}
       propertyPath: m_Name
-      value: Walnut Variant
+      value: WalnutShield
       objectReference: {fileID: 0}
     - target: {fileID: 4741099696618946961, guid: 8262b2170c2f0da4387d50da78b2fc03,
         type: 3}

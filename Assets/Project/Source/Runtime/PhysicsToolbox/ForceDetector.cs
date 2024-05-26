@@ -129,46 +129,53 @@ public class ForceDetector : MonoBehaviour
 
         float time = 0.2f * 0.005f;
 
+        // Draw graph
         Debug.DrawLine(cam.ViewportToWorldPoint(new Vector3(xPos, 0.15f, zPos)), cam.ViewportToWorldPoint(new Vector3(0.1f, 0.85f, zPos)));
         Debug.DrawLine(cam.ViewportToWorldPoint(new Vector3(xPos, 0.5f, zPos)), cam.ViewportToWorldPoint(new Vector3(0.9f, 0.5f, zPos)));
 
+        // Draw current time
+        Debug.DrawLine(cam.ViewportToWorldPoint(new Vector3(xPos + sample * time, 0.15f, zPos)), cam.ViewportToWorldPoint(new Vector3(xPos + sample * time, 0.85f, zPos)), new Color(0, 0, 0, 0.5f));
+
         float maxD = float.NegativeInfinity;
         float maxE = float.NegativeInfinity;
-
         for (int i = 0; i < m_GraphA.Count - 1; i++)
         {
+            // Break continous graph on current time sample
             if (i == sample)
             {
                 continue;
             }
 
+            // Graph position
             Debug.DrawLine(cam.ViewportToWorldPoint(new Vector3(xPos + i * time, yPos + m_GraphA[i], zPos)), cam.ViewportToWorldPoint(new Vector3(xPos + (i + 1) * time, yPos + m_GraphA[i + 1], zPos)), Color.red);
-
+            // Graph velocity
             Debug.DrawLine(cam.ViewportToWorldPoint(new Vector3(xPos + i * time, yPos + m_GraphB[i], zPos)), cam.ViewportToWorldPoint(new Vector3(xPos + (i + 1) * time, yPos + m_GraphB[i + 1], zPos)), Color.green);
-
+            // Graph acceleration
             Debug.DrawLine(cam.ViewportToWorldPoint(new Vector3(xPos + i * time, yPos + m_GraphC[i], zPos)), cam.ViewportToWorldPoint(new Vector3(xPos + (i + 1) * time, yPos + m_GraphC[i + 1], zPos)), Color.blue);
 
-
+            // Graph jerk
             maxD = MMath.Max(maxD, MMath.Abs(m_GraphD[i]));
             Debug.DrawLine(cam.ViewportToWorldPoint(new Vector3(xPos + i * time, yPos + m_GraphD[i], zPos)), cam.ViewportToWorldPoint(new Vector3(xPos + (i + 1) * time, yPos + m_GraphD[i + 1], zPos)), Color.yellow);
 
-
+            // Graph accumulated forces
             maxE = MMath.Max(maxE, MMath.Abs(m_GraphE[i]));
             Debug.DrawLine(cam.ViewportToWorldPoint(new Vector3(xPos + i * time, yPos + m_GraphE[i], zPos)), cam.ViewportToWorldPoint(new Vector3(xPos + (i + 1) * time, yPos + m_GraphE[i + 1], zPos)), Color.cyan);
         }
 
+        // Max jerk line
         if (!float.IsInfinity(maxD))
         {
             Debug.DrawLine(cam.ViewportToWorldPoint(new Vector3(0.1f, yPos + maxD, zPos)), cam.ViewportToWorldPoint(new Vector3(0.9f, yPos + maxD, zPos)), new Color(1, 1, 1, 0.5f));
             Debug.DrawLine(cam.ViewportToWorldPoint(new Vector3(0.1f, yPos - maxD, zPos)), cam.ViewportToWorldPoint(new Vector3(0.9f, yPos - maxD, zPos)), new Color(1, 1, 1, 0.5f));
         }
+        // Max accumulated forces line
         if (!float.IsInfinity(maxE))
         {
             Debug.DrawLine(cam.ViewportToWorldPoint(new Vector3(0.1f, yPos + maxE, zPos)), cam.ViewportToWorldPoint(new Vector3(0.9f, yPos + maxE, zPos)), new Color(1, 1, 1, 0.2f));
         }
 
+        // Cross this line with accumulated forces to trigger the break response
         Debug.DrawLine(cam.ViewportToWorldPoint(new Vector3(xPos, yPos + m_ImpulseMagnitude * 0.005f, zPos)), cam.ViewportToWorldPoint(new Vector3(0.9f, yPos + m_ImpulseMagnitude * 0.005f, zPos)), m_DisableDetection ? Color.red : Color.green);
 
-        Debug.DrawLine(cam.ViewportToWorldPoint(new Vector3(xPos + sample * time, 0.15f, zPos)), cam.ViewportToWorldPoint(new Vector3(xPos + sample * time, 0.85f, zPos)), new Color(0, 0, 0, 0.5f));
     }
 }

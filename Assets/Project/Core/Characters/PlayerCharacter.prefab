@@ -372,7 +372,7 @@ MonoBehaviour:
   TargetPosition: {x: 0, y: 1, z: 0}
   AutoTargetPosition: 1
   ThrowForce: 7.5
-  ThrowRotation: 3
+  ThrowRotation: 6
   ThrowDir: {x: 0, y: 1, z: 1}
   BreakForce: 500
   BreakTorque: 500
