@@ -14,6 +14,8 @@ namespace Manatea
         public InputActionAsset m_InputAsset;
         public int m_Player = -1;
 
+        public LayerMask m_GrabLayerMask;
+
         private Collider[] Colliders;
         private int OverlapCount;
 
@@ -127,7 +129,7 @@ namespace Manatea
 
 
             TriggerCollider.GetGlobalParams(out Vector3 p1, out Vector3 p2, out float radius);
-            OverlapCount = Physics.OverlapCapsuleNonAlloc(p1, p2, radius, Colliders);
+            OverlapCount = Physics.OverlapCapsuleNonAlloc(p1, p2, radius, Colliders, m_GrabLayerMask);
             // TODO capsule cast to find nearest collider
             if (m_GrabAction.WasPressedThisFrame())
             {
@@ -151,7 +153,7 @@ namespace Manatea
                 {
                     if (m_MovementAction.ReadValue<Vector2>().magnitude > 0.3f)
                     {
-                        PullAbility.Throw();
+                        PullAbility.Throw(false);
                     }
                     else
                     {
@@ -160,6 +162,10 @@ namespace Manatea
                 }
             }
 
+            if (Input.GetMouseButtonDown(1))
+            {
+                PullAbility.Throw(true);
+            }
             // TODO test if single button grab/throw input feels good
             //if (m_ThrowAction.WasPressedThisFrame())
             //{

@@ -2,6 +2,7 @@ using UnityEngine;
 using Manatea;
 using Manatea.GameplaySystem;
 using UnityEngine.Events;
+using System.Collections;
 
 // TODO cleanup this file
 
@@ -84,6 +85,7 @@ public class PullAbility : MonoBehaviour
 
     private Quaternion startRotation;
     private Quaternion targetRotation;
+    private Vector3 targetLocalPosition;
     private float m_GrabTimer;
 
     private GameplayAttributeModifier m_WalkSpeedModifier;
@@ -126,7 +128,35 @@ public class PullAbility : MonoBehaviour
         // HACK solves an issue with "enableCollision" property of the joint
         Target.detectCollisions = false;
 
-        PreEstablishGrab();
+
+
+        targetLocalPosition = Vector3.zero;
+        if (m_Target_GrabPrefs.UseOrientations)
+        {
+            float bestMatch = float.NegativeInfinity;
+            GrabOrientation bestOrientationMatch = null;
+            for (int i = 0; i < m_Target_GrabPrefs.Orientations.Length; i++)
+            {
+                float match = -Quaternion.Angle(transform.rotation, m_Target_GrabPrefs.Orientations[i].transform.rotation) / MMath.Max(MMath.Epsilon, m_Target_GrabPrefs.Orientations[i].Weight);
+                if (match < bestMatch)
+                {
+                    continue;
+                }
+                bestMatch = match;
+                bestOrientationMatch = m_Target_GrabPrefs.Orientations[i];
+            }
+
+            if (bestOrientationMatch != null)
+            {
+                targetLocalPosition = Target.transform.InverseTransformPoint(bestOrientationMatch.transform.position);
+                Debug.Log(targetLocalPosition);
+                startRotation = transform.rotation;
+                Quaternion deltaQuat = startRotation * Quaternion.Inverse(bestOrientationMatch.transform.rotation);
+                targetRotation = deltaQuat * Target.rotation;
+            }
+        }
+
+
 
         m_Joint = gameObject.AddComponent<ConfigurableJoint>();
         m_Joint.connectedBody = Target;
@@ -156,50 +186,10 @@ public class PullAbility : MonoBehaviour
         {
             m_Joint.connectedAnchor = TargetPosition;
         }
-        //m_Joint.anchor = transform.InverseTransformPoint(Target.transform.TransformPoint(m_Joint.connectedAnchor));
 
 
 
-        EstablishGrab();
 
-        m_Joint.linearLimit = new SoftJointLimit() { limit = LinearLimit, contactDistance = 0.1f };
-        m_Joint.linearLimitSpring = new SoftJointLimitSpring() { spring = StartSpring, damper = StartDamper };
-
-        var drive = m_Joint.slerpDrive;
-        drive.positionSpring = DriverSpring;
-        drive.positionDamper = DriverDamper;
-        m_Joint.slerpDrive = drive;
-
-
-        Target.detectCollisions = true;
-
-        m_GrabTimer = 0;
-
-
-        // TODO ignore hand blocker and hold item
-        //m_Joint.connectedBody.excludeLayers |= LayerMask.NameToLayer("HandBlocker");
-        //Physics.IgnoreCollision()
-
-        m_SmoothPullingForce = m_Joint.currentForce;
-
-        if (m_Attributes)
-        {
-            m_WalkSpeedModifier = new GameplayAttributeModifier() { Type = GameplayAttributeModifierType.Multiplicative, Value = 1 };
-            m_Attributes.AddAttributeModifier(m_WalkSpeedAttribute, m_WalkSpeedModifier);
-
-            m_RotationRateModifier = new GameplayAttributeModifier() { Type = GameplayAttributeModifierType.Multiplicative, Value = 1 };
-            m_Attributes.AddAttributeModifier(m_RotationRateAttribute, m_RotationRateModifier);
-        }
-
-        m_HandBlocker.gameObject.SetActive(true);
-        Target.excludeLayers |= m_HandExcludeLayers;
-
-        m_GrabStarted.Invoke();
-        m_GrabState = GrabState.EstablishGrab;
-    }
-
-    public void EstablishGrab()
-    {
         m_Joint.enableCollision = m_Target_GrabPrefs.CollisionEnabled;
 
         m_Joint.xMotion = ConfigurableJointMotion.Limited;
@@ -253,6 +243,44 @@ public class PullAbility : MonoBehaviour
             m_Joint.configuredInWorldSpace = true;
             m_Joint.targetRotation = targetRotation * Quaternion.Inverse(Target.transform.rotation);
         }
+
+
+
+
+        m_Joint.linearLimit = new SoftJointLimit() { limit = LinearLimit, contactDistance = 0.1f };
+        m_Joint.linearLimitSpring = new SoftJointLimitSpring() { spring = StartSpring, damper = StartDamper };
+
+        var drive = m_Joint.slerpDrive;
+        drive.positionSpring = DriverSpring;
+        drive.positionDamper = DriverDamper;
+        m_Joint.slerpDrive = drive;
+
+
+        Target.detectCollisions = true;
+
+        m_GrabTimer = 0;
+
+
+        // TODO ignore hand blocker and hold item
+        //m_Joint.connectedBody.excludeLayers |= LayerMask.NameToLayer("HandBlocker");
+        //Physics.IgnoreCollision()
+
+        m_SmoothPullingForce = m_Joint.currentForce;
+
+        if (m_Attributes)
+        {
+            m_WalkSpeedModifier = new GameplayAttributeModifier() { Type = GameplayAttributeModifierType.Multiplicative, Value = 1 };
+            m_Attributes.AddAttributeModifier(m_WalkSpeedAttribute, m_WalkSpeedModifier);
+
+            m_RotationRateModifier = new GameplayAttributeModifier() { Type = GameplayAttributeModifierType.Multiplicative, Value = 1 };
+            m_Attributes.AddAttributeModifier(m_RotationRateAttribute, m_RotationRateModifier);
+        }
+
+        m_HandBlocker.gameObject.SetActive(true);
+        Target.excludeLayers |= m_HandExcludeLayers;
+
+        m_GrabStarted.Invoke();
+        m_GrabState = GrabState.EstablishGrab;
     }
 
     private void AttachToLocation()
@@ -281,6 +309,7 @@ public class PullAbility : MonoBehaviour
                 m_Joint.connectedAnchor = Vector3.Project(targetHandPos, Vector3.forward);
                 break;
         }
+        m_Joint.connectedAnchor += targetLocalPosition;
     }
 
     private void OnDisable()
@@ -318,32 +347,6 @@ public class PullAbility : MonoBehaviour
         m_GrabEnded.Invoke();
     }
 
-    public void PreEstablishGrab()
-    {
-        if (m_Target_GrabPrefs.UseOrientations)
-        {
-            float bestMatch = float.NegativeInfinity;
-            GrabOrientation bestOrientationMatch = null;
-            for (int i = 0; i < m_Target_GrabPrefs.Orientations.Length; i++)
-            {
-                float match = -Quaternion.Angle(transform.rotation, m_Target_GrabPrefs.Orientations[i].transform.rotation) / MMath.Max(MMath.Epsilon, m_Target_GrabPrefs.Orientations[i].Weight);
-                if (match < bestMatch)
-                {
-                    continue;
-                }
-                bestMatch = match;
-                bestOrientationMatch = m_Target_GrabPrefs.Orientations[i];
-            }
-
-            if (bestOrientationMatch != null)
-            {
-                startRotation = transform.rotation;
-                Quaternion deltaQuat = startRotation * Quaternion.Inverse(bestOrientationMatch.transform.rotation);
-                targetRotation = deltaQuat * Target.rotation;
-            }
-        }
-    }
-
     private void Update()
     {
         if (m_Joint == null ||
@@ -359,6 +362,12 @@ public class PullAbility : MonoBehaviour
     private void FixedUpdate()
     {
         if (m_Joint == null || !Target.gameObject.activeInHierarchy)
+        {
+            enabled = false;
+            return;
+        }
+
+        if (!m_Target_GrabPrefs || !m_Target_GrabPrefs.enabled)
         {
             enabled = false;
             return;
@@ -641,7 +650,7 @@ public class PullAbility : MonoBehaviour
     }
 
 
-    public void Throw()
+    public void Throw(bool smooth)
     {
         Debug.Assert(enabled, "Ability is not active!", gameObject);
     
@@ -668,10 +677,29 @@ public class PullAbility : MonoBehaviour
 
     private void ThrowInternal(Vector3 velocity, float torque)
     {
-        Target.velocity += transform.right * velocity.x + transform.up * velocity.y + transform.forward * velocity.z;
+        Vector3 v = transform.right * velocity.x + transform.up * velocity.y + transform.forward * velocity.z;
+        StartCoroutine(CO_Throw(4, Target, v, torque));
+    }
 
-        float massMult = MMath.RemapClamped(0.2f, 0.6f, 1, 0.25f, Target.mass);
-        Target.AddForceAtPosition(Vector3.up * torque * massMult, Target.worldCenterOfMass - transform.forward, ForceMode.VelocityChange);
-        Target.AddForceAtPosition(Vector3.down * torque * massMult, Target.worldCenterOfMass + transform.forward, ForceMode.VelocityChange);
+    private IEnumerator CO_Throw(int sampleCount, Rigidbody rb, Vector3 velocity, float torque)
+    {
+        for (int i = 0; i < sampleCount; i++)
+        {
+            if (!rb)
+            {
+                break;
+            }
+
+            rb.velocity += velocity / sampleCount;
+
+            float massMult = MMath.RemapClamped(0.2f, 0.6f, 1, 0.25f, rb.mass);
+            Vector3 forward = velocity.normalized;
+            // TODO rotate towards throwing direction
+            Vector3 up = Vector3.Cross(Vector3.Cross(forward != Vector3.up ? Vector3.up : Vector3.forward, forward), forward);
+            rb.AddForceAtPosition(up * torque / sampleCount * massMult, rb.worldCenterOfMass + forward, ForceMode.VelocityChange);
+            rb.AddForceAtPosition(-up * torque / sampleCount * massMult, rb.worldCenterOfMass - forward, ForceMode.VelocityChange);
+
+            yield return new WaitForFixedUpdate();
+        }
     }
 }

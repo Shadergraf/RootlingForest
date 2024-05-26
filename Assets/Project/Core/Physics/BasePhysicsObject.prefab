@@ -115,6 +115,11 @@ MonoBehaviour:
   m_Orientations: []
   m_UpdateGrabLocation: 0
   m_AllowOverlapAfterDrop: 1
+  m_UseCustomThrow: 0
+  m_ThrowRotation: 0
+  m_UseDropThrow: 0
+  m_DropForce: {x: 0, y: 0, z: 0}
+  m_DropTorque: 0
 --- !u!114 &4741099696618946961
 MonoBehaviour:
   m_ObjectHideFlags: 0

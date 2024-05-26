@@ -1,6 +1,8 @@
 using Manatea.GameplaySystem;
 using System;
+using System.Collections;
 using UnityEngine;
+using UnityEngine.Rendering.Universal;
 using UnityEngine.Serialization;
 
 namespace Manatea.AdventureRoots
@@ -54,6 +56,8 @@ namespace Manatea.AdventureRoots
         private bool m_HasJumped;
         private PhysicMaterial m_PhysicsMaterial;
         private Vector3 m_CurrentRotation;
+
+        public Vector3 FeetPos => Collider.ClosestPoint(transform.position + Physics.gravity * 10000);
 
 
         private void Awake()
@@ -141,13 +145,12 @@ namespace Manatea.AdventureRoots
 
             // Ground detection
             bool groundDetected = DetectGround(out RaycastHit groundHitResult, out RaycastHit preciseGroundHitResult);
-            Vector3 feetPos = Collider.ClosestPoint(transform.position + Physics.gravity * 10000);
             m_IsStableGrounded = groundDetected;
             m_IsStableGrounded &= m_ForceAirborneTimer <= 0;
             m_IsSliding = m_IsStableGrounded && MMath.Acos(Vector3.Dot(preciseGroundHitResult.normal, -Physics.gravity.normalized)) * MMath.Rad2Deg > MaxSlopeAngle;
             m_IsStableGrounded &= !m_IsSliding;
             // Step height
-            if (m_IsSliding && Vector3.Dot(preciseGroundHitResult.normal, groundHitResult.normal) < 0.9f && Vector3.Project(preciseGroundHitResult.point - feetPos, transform.up).magnitude < StepHeight)
+            if (m_IsSliding && Vector3.Dot(preciseGroundHitResult.normal, groundHitResult.normal) < 0.9f && Vector3.Project(preciseGroundHitResult.point - FeetPos, transform.up).magnitude < StepHeight)
             {
                 m_IsStableGrounded = true;
                 m_IsSliding = false;
@@ -202,13 +205,13 @@ namespace Manatea.AdventureRoots
                         contactMove = Vector3.ProjectOnPlane(contactMove, preciseGroundHitResult.normal);
                     }
 
-                    m_RigidBody.AddForceAtPosition(contactMove * GroundMoveForce, feetPos, ForceMode.Acceleration);
+                    m_RigidBody.AddForceAtPosition(contactMove * GroundMoveForce, FeetPos, ForceMode.Acceleration);
                 }
                 // Air movement
                 else
                 {
                     float airSpeedMult = MMath.InverseLerpClamped(0.707f, 0f, Vector3.Dot(m_RigidBody.velocity.normalized, contactMove.normalized));
-                    m_RigidBody.AddForceAtPosition(contactMove * AirMoveForce * airSpeedMult, feetPos, ForceMode.Acceleration);
+                    m_RigidBody.AddForceAtPosition(contactMove * AirMoveForce * airSpeedMult, FeetPos, ForceMode.Acceleration);
                 }
 
 
@@ -253,23 +256,13 @@ namespace Manatea.AdventureRoots
             // Jump
             if (m_ScheduledJump && !m_HasJumped && m_AirborneTimer < 0.1f)
             {
+                m_ScheduledJump = false;
+                m_ForceAirborneTimer = 0.05f;
                 Vector3 jumpDir = -Physics.gravity.normalized;
                 // TODO add a sliding jump here that is perpendicular to the slide normal
                 m_RigidBody.velocity = Vector3.ProjectOnPlane(m_RigidBody.velocity, jumpDir);
                 Vector3 jumpForce = jumpDir * JumpForce;
-                m_RigidBody.AddForce(jumpForce, ForceMode.Impulse);
-                m_ScheduledJump = false;
-                m_ForceAirborneTimer = 0.05f;
-
-                for (int i = 0; i < m_GroundColliderCount; i++)
-                {
-                    if (m_GroundColliders[i] && m_GroundColliders[i].attachedRigidbody)
-                    {
-                        // TODO very extreme jumping push to objects. Can be tested by jumping off certain items
-                        m_GroundColliders[i].attachedRigidbody.AddForceAtPosition(-m_RigidBody.velocity, feetPos, ForceMode.VelocityChange);
-                        //m_GroundColliders[i].attachedRigidbody.AddForceAtPosition(-m_RigidBody.GetAccumulatedForce(), feetPos, ForceMode.Force);
-                    }
-                }
+                StartCoroutine(CO_Jump(jumpForce, 3));
 
                 m_HasJumped = true;
             }
@@ -389,6 +382,28 @@ namespace Manatea.AdventureRoots
                 preciseHit = Physics.Raycast(groundHitResult.point - Vector3.up * 0.0001f + groundHitResult.normal * 0.001f, -groundHitResult.normal, out preciseGroundHitResult, 0.1f, layerMask);
 
             return preciseHit;
+        }
+
+        private IEnumerator CO_Jump(Vector3 velocity, int iterations)
+        {
+            for (int i = 0; i < iterations; i++)
+            {
+                m_RigidBody.AddForce(velocity / iterations, ForceMode.Impulse);
+
+                for (int j = 0; j < m_GroundColliderCount; j++)
+                {
+                    if (m_GroundColliders[j] && m_GroundColliders[j].attachedRigidbody)
+                    {
+                        // TODO very extreme jumping push to objects. Can be tested by jumping off certain items
+                        if (m_GroundColliders[j].attachedRigidbody && !m_GroundColliders[j].attachedRigidbody.isKinematic)
+                        {
+                            m_GroundColliders[j].attachedRigidbody.AddForceAtPosition(-velocity / iterations, FeetPos, ForceMode.VelocityChange);
+                        }
+                    }
+                }
+
+                yield return new WaitForFixedUpdate();
+            }
         }
 
         //private void OnGUI()

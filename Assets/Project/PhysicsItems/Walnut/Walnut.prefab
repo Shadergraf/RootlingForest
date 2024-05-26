@@ -744,7 +744,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1998e626f337f6e409931479ee6ff8dc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_ImpulseMagnitude: 10
+  m_ImpulseMagnitude: 12
   m_SpawnObjects:
   - {fileID: 7611809707108263609}
   - {fileID: 1746232784670796581}

@@ -22,17 +22,12 @@ public class ContactBounce : MonoBehaviour
     [SerializeField]
     private List<Collider> m_IncludeColliders;
 
-    private HashSet<Rigidbody> m_BlockerRigids = new HashSet<Rigidbody>();
+    private HashSet<GameObject> m_BlockerRigids = new HashSet<GameObject>();
 
 
     private void OnCollisionEnter(Collision collision)
     {
-        Rigidbody rb = collision.body as Rigidbody;
-        if (!rb)
-        {
-            return;
-        }
-        if (m_BlockerRigids.Contains(collision.body))
+        if (collision.body && m_BlockerRigids.Contains(collision.gameObject))
         {
             return;
         }
@@ -58,8 +53,6 @@ public class ContactBounce : MonoBehaviour
         }
 
 
-        StartCoroutine(TimedBlock(collision.body as Rigidbody, 0.1f));
-
         Vector3 targetVelocity = m_Direction;
         if (!m_UseGlobalSpace)
         {
@@ -72,24 +65,40 @@ public class ContactBounce : MonoBehaviour
         targetVelocity *= m_Force;
         Debug.DrawLine(transform.position, transform.position + targetVelocity.normalized, Color.blue, 0.5f);
 
-        StartCoroutine(CO_ApplyVelocityRepeated(rb, targetVelocity, 4));
-        if (m_OppositeForce != 0 && TryGetComponent(out Rigidbody selfRigid))
+        if (m_OppositeForce != 0 && TryGetComponent(out Rigidbody selfRigid) && !m_BlockerRigids.Contains(gameObject))
         {
             StartCoroutine(CO_ApplyVelocityRepeated(selfRigid, targetVelocity * -1 * m_OppositeForce, 4));
             StartCoroutine(TimedBlock(collision.body as Rigidbody, 0.1f));
         }
 
-        if (rb.TryGetComponent(out PullAbility pullAbility) && pullAbility.Target)
+
+        Rigidbody rb = collision.body as Rigidbody;
+        if (rb)
         {
-            StartCoroutine(CO_ApplyVelocityRepeated(pullAbility.Target, targetVelocity, 1));
+            StartCoroutine(TimedBlock(rb, 0.1f));
+
+            StartCoroutine(CO_ApplyVelocityRepeated(rb, targetVelocity, 4));
+
+            if (rb.TryGetComponent(out PullAbility pullAbility) && pullAbility.Target)
+            {
+                StartCoroutine(CO_ApplyVelocityRepeated(pullAbility.Target, targetVelocity, 1));
+            }
         }
     }
 
     private IEnumerator TimedBlock(Rigidbody rb, float blockTime)
     {
-        m_BlockerRigids.Add(rb);
+        if (rb)
+        {
+            m_BlockerRigids.Add(rb.gameObject);
+        }
+
         yield return new WaitForSeconds(blockTime);
-        m_BlockerRigids.Remove(rb);
+
+        if (rb)
+        {
+            m_BlockerRigids.Remove(rb.gameObject);
+        }
     }
 
     private IEnumerator CO_ApplyVelocityRepeated(Rigidbody rb, Vector3 velocity, int amountOfTimes)

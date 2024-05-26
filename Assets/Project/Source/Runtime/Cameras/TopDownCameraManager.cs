@@ -4,6 +4,7 @@ using UnityEngine;
 
 namespace Manatea.AdventureRoots.Cameras
 {
+    [ExecuteInEditMode]
     public class TopDownCameraManager : MonoBehaviour
     {
         public GameObject Target;
@@ -33,6 +34,11 @@ namespace Manatea.AdventureRoots.Cameras
                 transform.position = MMath.Damp(transform.position, m_LastTarget, Speed, Time.deltaTime);
             }
             else
+            {
+                transform.position = m_LastTarget;
+            }
+
+            if (!Application.isPlaying)
             {
                 transform.position = m_LastTarget;
             }
