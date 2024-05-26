@@ -2,7 +2,6 @@ using Manatea.GameplaySystem;
 using System;
 using System.Collections;
 using UnityEngine;
-using UnityEngine.Rendering.Universal;
 using UnityEngine.Serialization;
 
 namespace Manatea.AdventureRoots
