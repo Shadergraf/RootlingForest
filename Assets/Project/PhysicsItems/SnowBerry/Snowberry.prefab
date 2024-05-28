@@ -1703,7 +1703,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &8142344369956398244
 Transform:
   m_ObjectHideFlags: 0
@@ -2054,7 +2054,7 @@ MeshCollider:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 3454154141446990468}
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 13400000, guid: d5165dafef82ec349a8a66cc2744aad5, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -6164,7 +6164,23 @@ PrefabInstance:
     - target: {fileID: 2820277903825203249, guid: 8262b2170c2f0da4387d50da78b2fc03,
         type: 3}
       propertyPath: m_Name
-      value: Popper
+      value: Snowberry
+      objectReference: {fileID: 0}
+    - target: {fileID: 4741099696618946961, guid: 8262b2170c2f0da4387d50da78b2fc03,
+        type: 3}
+      propertyPath: m_Attributes.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4741099696618946961, guid: 8262b2170c2f0da4387d50da78b2fc03,
+        type: 3}
+      propertyPath: m_Attributes.Array.data[0].m_Attribute
+      value: 
+      objectReference: {fileID: 11400000, guid: bdf1fcbd345381d4ba43a33e3773c7f8,
+        type: 2}
+    - target: {fileID: 4741099696618946961, guid: 8262b2170c2f0da4387d50da78b2fc03,
+        type: 3}
+      propertyPath: m_Attributes.Array.data[0].m_BaseValue
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 5794687575100476513, guid: 8262b2170c2f0da4387d50da78b2fc03,
         type: 3}
@@ -6263,10 +6279,6 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 2820277903825203249, guid: 8262b2170c2f0da4387d50da78b2fc03,
         type: 3}
       insertIndex: -1
-      addedObject: {fileID: 2374341286117822154}
-    - targetCorrespondingSourceObject: {fileID: 2820277903825203249, guid: 8262b2170c2f0da4387d50da78b2fc03,
-        type: 3}
-      insertIndex: -1
       addedObject: {fileID: 6839309884458940931}
     - targetCorrespondingSourceObject: {fileID: 2820277903825203249, guid: 8262b2170c2f0da4387d50da78b2fc03,
         type: 3}
@@ -6285,52 +6297,6 @@ GameObject:
     type: 3}
   m_PrefabInstance: {fileID: 3309432933809844964}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &2374341286117822154
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 778793396282360533}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 186536ed14312d64694a9fc81e4ef188, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_ImpulseMagnitude: 3
-  m_SpawnObjects: []
-  m_DestroyObject: 0
-  m_Force: 0
-  m_RadialForce: 1
-  m_ImpulseForceContribution: 0
-  m_UseMass: 0
-  m_ForceDetected:
-    m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 6839309884458940931}
-        m_TargetAssemblyTypeName: Popper, Assembly-CSharp
-        m_MethodName: Pop
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
-      - m_Target: {fileID: 7601738298221682000}
-        m_TargetAssemblyTypeName: UnityEngine.Behaviour, UnityEngine
-        m_MethodName: set_enabled
-        m_Mode: 6
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
 --- !u!114 &6839309884458940931
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -6418,18 +6384,42 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1998e626f337f6e409931479ee6ff8dc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_ImpulseMagnitude: 5
+  m_ImpulseMagnitude: 230
   m_DisableDetection: 0
   m_SpawnObjects: []
   m_DestroyObject: 0
   m_Force: 0
   m_RadialForce: 1
-  m_ImpulseForceContribution: 0
   m_UseMass: 0
+  m_ForceDetectionMultiplier: {fileID: 0}
+  m_EnableDebugGraphs: 0
   m_ForceDetected:
     m_PersistentCalls:
-      m_Calls: []
-  sample: 0
+      m_Calls:
+      - m_Target: {fileID: 6839309884458940931}
+        m_TargetAssemblyTypeName: Popper, Manatea.RootlingForest.Runtime
+        m_MethodName: Pop
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 7601738298221682000}
+        m_TargetAssemblyTypeName: UnityEngine.Behaviour, UnityEngine
+        m_MethodName: set_enabled
+        m_Mode: 6
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!4 &3778320049982584608 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1838099394805908932, guid: 8262b2170c2f0da4387d50da78b2fc03,

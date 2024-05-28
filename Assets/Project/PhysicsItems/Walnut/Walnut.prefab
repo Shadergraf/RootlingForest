@@ -565,7 +565,7 @@ PrefabInstance:
     - target: {fileID: 4741099696618946961, guid: 8262b2170c2f0da4387d50da78b2fc03,
         type: 3}
       propertyPath: m_Attributes.Array.size
-      value: 1
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 4741099696618946961, guid: 8262b2170c2f0da4387d50da78b2fc03,
         type: 3}
@@ -573,6 +573,17 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 11400000, guid: d62daeae609380a4e93f192aae3830a9,
         type: 2}
+    - target: {fileID: 4741099696618946961, guid: 8262b2170c2f0da4387d50da78b2fc03,
+        type: 3}
+      propertyPath: m_Attributes.Array.data[1].m_Attribute
+      value: 
+      objectReference: {fileID: 11400000, guid: bdf1fcbd345381d4ba43a33e3773c7f8,
+        type: 2}
+    - target: {fileID: 4741099696618946961, guid: 8262b2170c2f0da4387d50da78b2fc03,
+        type: 3}
+      propertyPath: m_Attributes.Array.data[1].m_BaseValue
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 4941498879713128372, guid: 8262b2170c2f0da4387d50da78b2fc03,
         type: 3}
       propertyPath: m_RotationRule
@@ -744,7 +755,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1998e626f337f6e409931479ee6ff8dc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_ImpulseMagnitude: 12
+  m_ImpulseMagnitude: 440
+  m_DisableDetection: 0
   m_SpawnObjects:
   - {fileID: 7611809707108263609}
   - {fileID: 1746232784670796581}
@@ -752,11 +764,13 @@ MonoBehaviour:
   m_DestroyObject: 1
   m_Force: 5
   m_RadialForce: 1
-  m_ImpulseForceContribution: 0.3
   m_UseMass: 1
+  m_ForceDetectionMultiplier: {fileID: 11400000, guid: bdf1fcbd345381d4ba43a33e3773c7f8,
+    type: 2}
   m_ForceDetected:
     m_PersistentCalls:
       m_Calls: []
+  sample: 0
 --- !u!4 &2997098483461836842 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2982696578432685512, guid: 8262b2170c2f0da4387d50da78b2fc03,

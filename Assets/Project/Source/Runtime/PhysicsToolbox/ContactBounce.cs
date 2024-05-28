@@ -20,6 +20,8 @@ public class ContactBounce : MonoBehaviour
     [SerializeField]
     private float m_OppositeForce = 1;
     [SerializeField]
+    private int m_Iterations = 1;
+    [SerializeField]
     private List<Collider> m_IncludeColliders;
 
     private HashSet<GameObject> m_BlockerRigids = new HashSet<GameObject>();
@@ -67,26 +69,26 @@ public class ContactBounce : MonoBehaviour
 
         if (m_OppositeForce != 0 && TryGetComponent(out Rigidbody selfRigid) && !m_BlockerRigids.Contains(gameObject))
         {
-            StartCoroutine(CO_ApplyVelocityRepeated(selfRigid, targetVelocity * -1 * m_OppositeForce, 4));
-            StartCoroutine(TimedBlock(collision.body as Rigidbody, 0.1f));
+            StartCoroutine(CO_ApplyVelocityRepeated(selfRigid, targetVelocity * -1 * m_OppositeForce, m_Iterations));
+            StartCoroutine(CO_TimedBlock(collision.body as Rigidbody, 0.1f));
         }
 
 
         Rigidbody rb = collision.body as Rigidbody;
         if (rb)
         {
-            StartCoroutine(TimedBlock(rb, 0.1f));
-
-            StartCoroutine(CO_ApplyVelocityRepeated(rb, targetVelocity, 4));
+            StartCoroutine(CO_ApplyVelocityRepeated(rb, targetVelocity, m_Iterations));
+            StartCoroutine(CO_TimedBlock(rb, 0.1f));
 
             if (rb.TryGetComponent(out PullAbility pullAbility) && pullAbility.Target)
             {
-                StartCoroutine(CO_ApplyVelocityRepeated(pullAbility.Target, targetVelocity, 1));
+                StartCoroutine(CO_ApplyVelocityRepeated(pullAbility.Target, targetVelocity, m_Iterations));
+                StartCoroutine(CO_TimedBlock(pullAbility.Target, 0.1f));
             }
         }
     }
 
-    private IEnumerator TimedBlock(Rigidbody rb, float blockTime)
+    private IEnumerator CO_TimedBlock(Rigidbody rb, float blockTime)
     {
         if (rb)
         {
@@ -103,15 +105,22 @@ public class ContactBounce : MonoBehaviour
 
     private IEnumerator CO_ApplyVelocityRepeated(Rigidbody rb, Vector3 velocity, int amountOfTimes)
     {
-        while (amountOfTimes > 0 && rb != null)
+        float consecutivePerpendicularComponentMult = MMath.Pow(m_PreservePerpendicularComponent, 1f / amountOfTimes);
+
+        rb.velocity = Vector3.ProjectOnPlane(rb.velocity, velocity.normalized) * m_PreservePerpendicularComponent;
+
+        for (int i = 0; i < amountOfTimes; i++)
         {
+            if (!rb)
+            {
+                yield break;
+            }
+
             if (!rb.isKinematic)
             {
-                Vector3 newVelocity = velocity;
-                newVelocity += Vector3.ProjectOnPlane(rb.velocity, velocity.normalized) * m_PreservePerpendicularComponent;
-                rb.velocity = newVelocity;
+                rb.velocity += velocity / amountOfTimes;
             }
-            amountOfTimes--;
+
             yield return new WaitForFixedUpdate();
         }
     }

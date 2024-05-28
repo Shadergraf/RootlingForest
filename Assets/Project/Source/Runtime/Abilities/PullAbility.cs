@@ -10,6 +10,7 @@ public class PullAbility : MonoBehaviour
 {
     public Rigidbody Self;
     public bool m_UseTargetPosition;
+    public bool m_UseDrivers;
     public float StartSpring = 10;
     public float EndSpring = 500;
     public float StartDamper = 50;
@@ -52,6 +53,8 @@ public class PullAbility : MonoBehaviour
 
     public GameplayAttribute m_WalkSpeedAttribute;
     public GameplayAttribute m_RotationRateAttribute;
+    public GameplayAttribute m_ForceDetectionMultiplierAttribute;
+    public float m_ForceDetectionMultiplier = 0.3f;
 
     public UnityEvent m_GrabStarted;
     public UnityEvent m_GrabEnded;
@@ -93,6 +96,7 @@ public class PullAbility : MonoBehaviour
 
     private GameplayAttributeModifier m_WalkSpeedModifier;
     private GameplayAttributeModifier m_RotationRateModifier;
+    private GameplayAttributeModifier m_ForceDetectionMultiplierModifier;
 
     private Vector3 m_SmoothPullingForce;
 
@@ -249,9 +253,25 @@ public class PullAbility : MonoBehaviour
 
 
 
+        if (!m_UseDrivers)
+        {
+            m_Joint.linearLimit = new SoftJointLimit() { limit = LinearLimit, contactDistance = 0.1f };
+            m_Joint.linearLimitSpring = new SoftJointLimitSpring() { spring = StartSpring, damper = StartDamper };
+        }
+        else
+        {
+            m_Joint.linearLimit = new SoftJointLimit() { limit = 2.0f, contactDistance = 0.01f };
 
-        //m_Joint.linearLimit = new SoftJointLimit() { limit = LinearLimit, contactDistance = 0.1f };
-        //m_Joint.linearLimitSpring = new SoftJointLimitSpring() { spring = StartSpring, damper = StartDamper };
+            m_Joint.xDrive = new JointDrive()
+            {
+                positionSpring = StartSpring,
+                positionDamper = StartDamper,
+                useAcceleration = true,
+                maximumForce = float.MaxValue,
+            };
+            m_Joint.yDrive = m_Joint.xDrive;
+            m_Joint.zDrive = m_Joint.xDrive;
+        }
 
         var drive = m_Joint.slerpDrive;
         drive.positionSpring = DriverSpring;
@@ -277,6 +297,12 @@ public class PullAbility : MonoBehaviour
 
             m_RotationRateModifier = new GameplayAttributeModifier() { Type = GameplayAttributeModifierType.Multiplicative, Value = 1 };
             m_Attributes.AddAttributeModifier(m_RotationRateAttribute, m_RotationRateModifier);
+        }
+
+        if (Target.TryGetComponent(out GameplayAttributeOwner targetAttOwner))
+        {
+            m_ForceDetectionMultiplierModifier = new GameplayAttributeModifier() { Type = GameplayAttributeModifierType.Multiplicative, Value = m_ForceDetectionMultiplier };
+            targetAttOwner.AddAttributeModifier(m_ForceDetectionMultiplierAttribute, m_ForceDetectionMultiplierModifier);
         }
 
         m_HandBlocker.gameObject.SetActive(true);
@@ -333,6 +359,11 @@ public class PullAbility : MonoBehaviour
             }
 
             Target.excludeLayers = new LayerMask();
+
+            if (Target.TryGetComponent(out GameplayAttributeOwner targetAttOwner))
+            {
+                targetAttOwner.RemoveAttributeModifier(m_ForceDetectionMultiplierAttribute, m_ForceDetectionMultiplierModifier);
+            }
         }
 
         m_Target = null;
@@ -343,6 +374,7 @@ public class PullAbility : MonoBehaviour
         if (m_Attributes)
         {
             m_Attributes.RemoveAttributeModifier(m_WalkSpeedAttribute, m_WalkSpeedModifier);
+            m_Attributes.RemoveAttributeModifier(m_RotationRateAttribute, m_RotationRateModifier);
             m_Attributes.RemoveAttributeModifier(m_RotationRateAttribute, m_RotationRateModifier);
         }
         m_Attributes = null;
@@ -411,16 +443,28 @@ public class PullAbility : MonoBehaviour
 
     private void UpdateEstablishGrab()
     {
-        //SoftJointLimitSpring linearLimitSpring = m_Joint.linearLimitSpring;
-        //linearLimitSpring.spring = MMath.LerpClamped(StartSpring, EndSpring, MMath.Pow(m_GrabTimer / GrabTime, 2));
-        //linearLimitSpring.damper = MMath.LerpClamped(StartDamper, EndDamper, MMath.Pow(m_GrabTimer / GrabTime, 2));
-        //m_Joint.linearLimitSpring = linearLimitSpring;
+        if (!m_UseDrivers)
+        {
+            SoftJointLimitSpring linearLimitSpring = m_Joint.linearLimitSpring;
+            linearLimitSpring.spring = MMath.LerpClamped(StartSpring, EndSpring, MMath.Pow(m_GrabTimer / GrabTime, 2));
+            linearLimitSpring.damper = MMath.LerpClamped(StartDamper, EndDamper, MMath.Pow(m_GrabTimer / GrabTime, 2));
+            m_Joint.linearLimitSpring = linearLimitSpring;
+        }
+        else
+        {
+            m_Joint.linearLimit = new SoftJointLimit() { limit = 10.002f, contactDistance = 0.01f };
 
-        m_Joint.linearLimit = new SoftJointLimit() { limit = 10.002f, contactDistance = 0.01f };
+            m_Joint.xDrive = new JointDrive()
+            {
+                positionSpring = MMath.LerpClamped(StartSpring, EndSpring, MMath.Pow(m_GrabTimer / GrabTime, 2)),
+                positionDamper = MMath.LerpClamped(StartDamper, EndDamper, MMath.Pow(m_GrabTimer / GrabTime, 2)),
+                useAcceleration = true,
+                maximumForce = float.MaxValue,
+            };
+            m_Joint.yDrive = m_Joint.xDrive;
+            m_Joint.zDrive = m_Joint.xDrive;
+        }
 
-        m_Joint.xDrive = new JointDrive() { positionSpring = MMath.LerpClamped(StartSpring, EndSpring, MMath.Pow(m_GrabTimer / GrabTime, 2)) };
-        m_Joint.yDrive = m_Joint.xDrive;
-        m_Joint.zDrive = m_Joint.xDrive;
 
         // stop grab attempt if too much time passed
         if (m_GrabTimer > GrabTime + GrabTimeLeeway)
@@ -657,7 +701,7 @@ public class PullAbility : MonoBehaviour
     }
 
 
-    public void Throw(bool smooth)
+    public void Throw()
     {
         Debug.Assert(enabled, "Ability is not active!", gameObject);
     
@@ -667,6 +711,12 @@ public class PullAbility : MonoBehaviour
         {
             throwRotation = m_Target_GrabPrefs.ThrowRotation;
         }
+        // Limit throw if we are still not fully grabbing on to the target
+        if (m_GrabState != GrabState.GrabEstablished)
+        {
+            throwForce *= 0.2f;
+        }
+
         ThrowInternal(ThrowDir * throwForce, throwRotation);
     
         enabled = false;

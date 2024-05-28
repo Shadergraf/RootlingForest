@@ -1842,6 +1842,7 @@ MonoBehaviour:
   m_Force: 15
   m_PreservePerpendicularComponent: 0.5
   m_OppositeForce: 1
+  m_Iterations: 1
   m_IncludeColliders: []
 --- !u!65 &193900511
 BoxCollider:
@@ -2521,6 +2522,7 @@ MonoBehaviour:
   m_Force: 15
   m_PreservePerpendicularComponent: 0.5
   m_OppositeForce: 1
+  m_Iterations: 1
   m_IncludeColliders: []
 --- !u!65 &308718922
 BoxCollider:
@@ -5355,6 +5357,7 @@ MonoBehaviour:
   m_Force: 15
   m_PreservePerpendicularComponent: 0.5
   m_OppositeForce: 1
+  m_Iterations: 1
   m_IncludeColliders: []
 --- !u!65 &785068620
 BoxCollider:
@@ -8217,7 +8220,7 @@ PrefabInstance:
     - target: {fileID: 6868106048537390128, guid: d62bf33f356aaad44b6590ec697f4088,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: -6.03
+      value: -6.68
       objectReference: {fileID: 0}
     - target: {fileID: 6868106048537390128, guid: d62bf33f356aaad44b6590ec697f4088,
         type: 3}
@@ -8227,7 +8230,7 @@ PrefabInstance:
     - target: {fileID: 6868106048537390128, guid: d62bf33f356aaad44b6590ec697f4088,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 9.26
+      value: 23.93
       objectReference: {fileID: 0}
     - target: {fileID: 6868106048537390128, guid: d62bf33f356aaad44b6590ec697f4088,
         type: 3}
@@ -12593,6 +12596,7 @@ MonoBehaviour:
   m_Force: 15
   m_PreservePerpendicularComponent: 0.5
   m_OppositeForce: 1
+  m_Iterations: 1
   m_IncludeColliders: []
 --- !u!65 &1856255012
 BoxCollider:
@@ -13891,6 +13895,7 @@ MonoBehaviour:
   m_Force: 1
   m_PreservePerpendicularComponent: 1
   m_OppositeForce: 1
+  m_Iterations: 1
   m_IncludeColliders: []
 --- !u!1 &2070534422
 GameObject:
@@ -15367,7 +15372,7 @@ PrefabInstance:
     - target: {fileID: 5086757860433763271, guid: 6f079da4623a1ed428e5738f8cc4fc13,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: -6.03
+      value: -6.68
       objectReference: {fileID: 0}
     - target: {fileID: 5086757860433763271, guid: 6f079da4623a1ed428e5738f8cc4fc13,
         type: 3}
@@ -15377,7 +15382,7 @@ PrefabInstance:
     - target: {fileID: 5086757860433763271, guid: 6f079da4623a1ed428e5738f8cc4fc13,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 9.26
+      value: 23.93
       objectReference: {fileID: 0}
     - target: {fileID: 5086757860433763271, guid: 6f079da4623a1ed428e5738f8cc4fc13,
         type: 3}

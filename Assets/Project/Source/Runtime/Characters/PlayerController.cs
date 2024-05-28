@@ -153,18 +153,13 @@ namespace Manatea
                 {
                     if (m_MovementAction.ReadValue<Vector2>().magnitude > 0.3f)
                     {
-                        PullAbility.Throw(false);
+                        PullAbility.Throw();
                     }
                     else
                     {
                         PullAbility.Drop();
                     }
                 }
-            }
-
-            if (Input.GetMouseButtonDown(1))
-            {
-                PullAbility.Throw(true);
             }
             // TODO test if single button grab/throw input feels good
             //if (m_ThrowAction.WasPressedThisFrame())
