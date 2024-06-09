@@ -14,6 +14,12 @@ public class ForceDetector : MonoBehaviour
     [SerializeField]
     private bool m_DisableDetection = false;
     [SerializeField]
+    [Range(0f, 1f)]
+    private float m_JerkInfluence = 1;
+    [SerializeField]
+    [Range(0f, 1f)]
+    private float m_ContactInfluence = 1;
+    [SerializeField]
     private GameObject[] m_SpawnObjects;
     [SerializeField]
     private bool m_DestroyObject;
@@ -26,10 +32,23 @@ public class ForceDetector : MonoBehaviour
     [SerializeField]
     private GameplayAttribute m_ForceDetectionMultiplier;
     [SerializeField]
+    private GameplayAttribute m_ForceBoostMultiplier;
+    [SerializeField]
+    private GameplayAttribute m_HealthAttribute;
+    [SerializeField]
     private bool m_EnableDebugGraphs;
 
     [SerializeField]
     private UnityEvent m_ForceDetected;
+
+    public float ImpulseMagnitude => m_ImpulseMagnitude;
+    public bool DisableDetection => m_DisableDetection;
+    public Vector3 Velocity => m_Rigidbody.velocity;
+    public Vector3 Acceleration => m_Acceleration;
+    public Vector3 Jerk => m_Jerk;
+    public Vector3 FinalForce => m_FinalForce;
+    public Vector3 ContactImpulse => m_ContactImpulse;
+    public Vector3 ContactVelocity => m_ContactVelocity;
 
     private Rigidbody m_Rigidbody;
     private GameplayAttributeOwner m_AttributeOwner;
@@ -38,22 +57,13 @@ public class ForceDetector : MonoBehaviour
     private Vector3 m_Acceleration;
     private Vector3 m_LastAcceleration;
     private Vector3 m_Jerk;
+    private Vector3 m_ContactImpulse;
+    private Vector3 m_ContactVelocity;
+    private Vector3 m_FinalForce;
 
-    private float m_AccumulatedForces;
+    private Vector3 m_AccumulatedForces;
 
-
-    // TODO make this debugging stuff editor only
-    private const int c_CaptureSamples = 800;
-    private int m_CurrentSample = 0;
-    private List<float> m_VelocityGraph = new List<float>();
-    private List<float> m_AccelerationGraph = new List<float>();
-    private List<float> m_JerkGraph = new List<float>();
-    private List<float> m_AccumulatedForcesGraph = new List<float>();
-    private float m_VelocityGraphZoom = 0.15f;
-    private float m_AccelerationGraphZoom = 0.6f;
-    private float m_JerkGraphZoom = 0.75f;
-    private float m_AccumulatedForcesGraphZoom = 0.001f;
-    private bool m_GraphsInitialized;
+    private bool m_DamageTimeout;
 
 
     private void Awake()
@@ -69,68 +79,79 @@ public class ForceDetector : MonoBehaviour
 
     private void FixedUpdate()
     {
-        m_Acceleration = m_Rigidbody.velocity - m_LastVelocity;
-        m_Jerk = m_Acceleration - m_LastAcceleration;
+        m_Acceleration = (m_Rigidbody.velocity - m_LastVelocity) / Time.fixedDeltaTime;
+        m_Jerk = (m_Acceleration - m_LastAcceleration) / Time.fixedDeltaTime;
 
         m_LastVelocity = m_Rigidbody.velocity;
         m_LastAcceleration = m_Acceleration;
 
-        m_AccumulatedForces = MMath.Damp(m_AccumulatedForces, 0, 16, Time.fixedDeltaTime);
-        m_AccumulatedForces += MMath.Pow(m_Jerk.magnitude, 2);
+        m_AccumulatedForces = MMath.Damp(m_AccumulatedForces, Vector3.zero, 16, Time.fixedDeltaTime);
+        m_AccumulatedForces += m_Jerk * m_JerkInfluence;
+        m_AccumulatedForces += m_ContactImpulse * m_ContactInfluence;
+        m_AccumulatedForces += m_ContactVelocity * m_ContactInfluence;
 
-        float finalForce = m_AccumulatedForces;
+        m_ContactImpulse = Vector3.zero;
+        m_ContactVelocity = Vector3.zero;
+
+        m_FinalForce = m_AccumulatedForces;
         if (m_AttributeOwner)
         {
             if (m_AttributeOwner.TryGetAttributeEvaluatedValue(m_ForceDetectionMultiplier, out float val))
             {
-                finalForce *= val;
+                m_FinalForce *= val;
             }
         }
 
-        if (!m_DisableDetection && finalForce > m_ImpulseMagnitude)
+        if (!m_DisableDetection && m_FinalForce.magnitude > m_ImpulseMagnitude)
         {
             ForceDetected();
         }
+    }
 
-        if (m_EnableDebugGraphs)
+    private void OnCollisionEnter(Collision collision)
+    {
+        ContactResponse(collision);
+    }
+    private void OnCollisionStay(Collision collision)
+    {
+        ContactResponse(collision);
+    }
+
+    private void ContactResponse(Collision collision)
+    {
+        if (m_ContactInfluence != 0)
         {
-            if (!m_GraphsInitialized)
+            float mult = 1;
+            GameplayAttributeOwner attributeOwner = collision.gameObject.GetComponentInParent<GameplayAttributeOwner>();
+            if (attributeOwner && attributeOwner.TryGetAttributeEvaluatedValue(m_ForceDetectionMultiplier, out float val))
             {
-                m_VelocityGraph.Clear();
-                m_AccelerationGraph.Clear();
-                m_JerkGraph.Clear();
-                m_AccumulatedForcesGraph.Clear();
-                for (int i = 0; i < c_CaptureSamples; i++)
-                {
-                    m_VelocityGraph.Add(0);
-                    m_AccelerationGraph.Add(0);
-                    m_JerkGraph.Add(0);
-                    m_AccumulatedForcesGraph.Add(0);
-                }
-                m_GraphsInitialized = true;
+                mult = val;
             }
 
-            m_CurrentSample++;
-            m_CurrentSample %= c_CaptureSamples;
-            m_VelocityGraph[m_CurrentSample] = m_Rigidbody.velocity.magnitude * Time.fixedDeltaTime;
-            m_AccelerationGraph[m_CurrentSample] = m_Acceleration.magnitude * Time.fixedDeltaTime;
-            m_JerkGraph[m_CurrentSample] = m_Jerk.magnitude * Time.fixedDeltaTime;
-
-            m_AccumulatedForcesGraph[m_CurrentSample] = finalForce;
+            m_ContactImpulse = collision.impulse * mult * 1900;
+            m_ContactVelocity = collision.relativeVelocity * mult * 100;
         }
     }
 
-    //private void OnCollisionStay(Collision collision)
-    //{
-    //    if (!collision.rigidbody || collision.rigidbody.isKinematic)
-    //    {
-    //        m_AccumulatedForces += MMath.Pow(collision.relativeVelocity.magnitude, 2);
-    //    }
-    //}
-
     private void ForceDetected()
     {
+        if (m_DamageTimeout)
+        {
+            return;
+        }
+
         m_ForceDetected.Invoke();
+
+        if (m_HealthAttribute && m_AttributeOwner)
+        {
+            m_AttributeOwner.ChangeAttributeBaseValue(m_HealthAttribute, v => v - 1);
+
+            if (m_AttributeOwner.TryGetAttributeEvaluatedValue(m_HealthAttribute, out float health) && health > 0)
+            {
+                StartCoroutine(CO_Timeout());
+                return;
+            }
+        }
 
         Rigidbody sourceRigid = GetComponent<Rigidbody>();
         for (int i = 0; i < m_SpawnObjects.Length; ++i)
@@ -158,129 +179,10 @@ public class ForceDetector : MonoBehaviour
         }
     }
 
-    public void OnGUI()
+    private IEnumerator CO_Timeout()
     {
-        if (!Application.isPlaying)
-        {
-            return;
-        }
-        if (!m_EnableDebugGraphs)
-        {
-            return;
-        }
-        if (!m_GraphsInitialized)
-        {
-            return;
-        }
-
-        GUILayout.BeginArea(new Rect(Screen.width - 200, 0, 200, 400));
-
-        m_VelocityGraphZoom = GUILayout.HorizontalSlider(m_VelocityGraphZoom, 0, 1);
-        m_AccelerationGraphZoom = GUILayout.HorizontalSlider(m_AccelerationGraphZoom, 0, 1);
-        m_JerkGraphZoom = GUILayout.HorizontalSlider(m_JerkGraphZoom, 0, 1);
-        m_AccumulatedForcesGraphZoom = GUILayout.HorizontalSlider(m_AccumulatedForcesGraphZoom, 0, 0.1f);
-
-        GUILayout.EndArea();
-    }
-    public void OnDrawGizmosSelected()
-    {
-        if (!Application.isPlaying)
-        {
-            return;
-        }
-        if (!m_EnableDebugGraphs)
-        {
-            return;
-        }
-        if (!m_GraphsInitialized)
-        {
-            return;
-        }
-
-        Camera cam = Camera.main;
-
-        float xPos = 0.1f;
-        float yPos = 0.5f;
-        float zPos = 0.1f;
-
-        float time = 0.2f * 0.005f;
-
-        // Draw graph
-        Debug.DrawLine(
-            cam.ViewportToWorldPoint(new Vector3(xPos, 0.15f, zPos)), 
-            cam.ViewportToWorldPoint(new Vector3(0.1f, 0.85f, zPos)));
-        Debug.DrawLine(
-            cam.ViewportToWorldPoint(new Vector3(xPos, 0.5f, zPos)), 
-            cam.ViewportToWorldPoint(new Vector3(0.9f, 0.5f, zPos)));
-
-        // Draw current time
-        Debug.DrawLine(
-            cam.ViewportToWorldPoint(new Vector3(xPos + m_CurrentSample * time, 0.15f, zPos)), 
-            cam.ViewportToWorldPoint(new Vector3(xPos + m_CurrentSample * time, 0.85f, zPos)), 
-            new Color(0, 0, 0, 0.5f));
-
-        float maxD = float.NegativeInfinity;
-        float maxE = float.NegativeInfinity;
-        for (int i = 0; i < c_CaptureSamples - 1; i++)
-        {
-            // Break continous graph on current time sample
-            if (i == m_CurrentSample)
-            {
-                continue;
-            }
-
-            // Graph velocity
-            Debug.DrawLine(
-                cam.ViewportToWorldPoint(new Vector3(xPos + i * time, yPos + m_VelocityGraph[i] * m_VelocityGraphZoom, zPos)), 
-                cam.ViewportToWorldPoint(new Vector3(xPos + (i + 1) * time, yPos + m_VelocityGraph[i + 1] * m_VelocityGraphZoom, zPos)), 
-                Color.red);
-            // Graph acceleration
-            Debug.DrawLine(
-                cam.ViewportToWorldPoint(new Vector3(xPos + i * time, yPos + m_AccelerationGraph[i] * m_AccelerationGraphZoom, zPos)), 
-                cam.ViewportToWorldPoint(new Vector3(xPos + (i + 1) * time, yPos + m_AccelerationGraph[i + 1] * m_AccelerationGraphZoom, zPos)), 
-                Color.green);
-
-            // Graph jerk
-            maxD = MMath.Max(maxD, MMath.Abs(m_JerkGraph[i]));
-            Debug.DrawLine(
-                cam.ViewportToWorldPoint(new Vector3(xPos + i * time, yPos + m_JerkGraph[i] * m_JerkGraphZoom, zPos)), 
-                cam.ViewportToWorldPoint(new Vector3(xPos + (i + 1) * time, yPos + m_JerkGraph[i + 1] * m_JerkGraphZoom, zPos)), 
-                Color.blue);
-
-            // Graph accumulated forces
-            maxE = MMath.Max(maxE, MMath.Abs(m_AccumulatedForcesGraph[i]));
-            Debug.DrawLine(
-                cam.ViewportToWorldPoint(new Vector3(xPos + i * time, yPos + m_AccumulatedForcesGraph[i] * m_AccumulatedForcesGraphZoom, zPos)), 
-                cam.ViewportToWorldPoint(new Vector3(xPos + (i + 1) * time, yPos + m_AccumulatedForcesGraph[i + 1] * m_AccumulatedForcesGraphZoom, zPos)), 
-                Color.yellow);
-        }
-
-        // Max jerk line
-        if (!float.IsInfinity(maxD))
-        {
-            Debug.DrawLine(
-                cam.ViewportToWorldPoint(new Vector3(0.1f, yPos + maxD * m_JerkGraphZoom, zPos)), 
-                cam.ViewportToWorldPoint(new Vector3(0.9f, yPos + maxD * m_JerkGraphZoom, zPos)), 
-                new Color(1, 1, 1, 0.5f));
-            Debug.DrawLine(
-                cam.ViewportToWorldPoint(new Vector3(0.1f, yPos - maxD * m_JerkGraphZoom, zPos)), 
-                cam.ViewportToWorldPoint(new Vector3(0.9f, yPos - maxD * m_JerkGraphZoom, zPos)), 
-                new Color(1, 1, 1, 0.5f));
-        }
-        // Max accumulated forces line
-        if (!float.IsInfinity(maxE))
-        {
-            Debug.DrawLine(
-                cam.ViewportToWorldPoint(new Vector3(0.1f, yPos + maxE * m_AccumulatedForcesGraphZoom, zPos)), 
-                cam.ViewportToWorldPoint(new Vector3(0.9f, yPos + maxE * m_AccumulatedForcesGraphZoom, zPos)), 
-                new Color(1, 1, 1, 0.2f));
-        }
-
-        // Cross this line with accumulated forces to trigger the break response
-        Debug.DrawLine(
-            cam.ViewportToWorldPoint(new Vector3(xPos, yPos + m_ImpulseMagnitude * m_AccumulatedForcesGraphZoom, zPos)), 
-            cam.ViewportToWorldPoint(new Vector3(0.9f, yPos + m_ImpulseMagnitude * m_AccumulatedForcesGraphZoom, zPos)), 
-            m_DisableDetection ? Color.red : Color.green);
-
+        m_DamageTimeout = true;
+        yield return new WaitForSeconds(0.2f);
+        m_DamageTimeout = false;
     }
 }

@@ -29,6 +29,7 @@ namespace Manatea.AdventureRoots
         [Header("Attributes & Tags")]
         public GameplayAttribute m_MoveSpeedAttribute;
         public GameplayAttribute m_RotationRateAttribute;
+        public GameplayTag m_NoStableGroundTag;
 
         [Header("Debug")]
         public bool DebugCharacter = false;
@@ -164,6 +165,14 @@ namespace Manatea.AdventureRoots
             {
                 m_HasJumped = false;
                 m_JumpTimer = 0;
+            }
+            if (m_IsStableGrounded && m_NoStableGroundTag)
+            {
+                var tagOwner = groundHitResult.collider.GetComponentInParent<GameplayTagOwner>();
+                if (tagOwner && tagOwner.Tags.Contains(m_NoStableGroundTag))
+                {
+                    m_IsStableGrounded = false;
+                }
             }
 
 

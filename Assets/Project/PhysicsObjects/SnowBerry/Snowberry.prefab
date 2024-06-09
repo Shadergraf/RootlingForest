@@ -2912,8 +2912,9 @@ AudioSource:
   m_Enabled: 1
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 8300000, guid: 81c6f343009283540a9c93725edccdb3, type: 3}
-  m_Resource: {fileID: 8300000, guid: 81c6f343009283540a9c93725edccdb3, type: 3}
+  m_audioClip: {fileID: 0}
+  m_Resource: {fileID: 6418180475301049370, guid: 844077176d21e654e864e0dcf8ea5333,
+    type: 2}
   m_PlayOnAwake: 0
   m_Volume: 1
   m_Pitch: 1
@@ -6189,6 +6190,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5794687575100476513, guid: 8262b2170c2f0da4387d50da78b2fc03,
         type: 3}
+      propertyPath: m_Mass
+      value: 0.3
+      objectReference: {fileID: 0}
+    - target: {fileID: 5794687575100476513, guid: 8262b2170c2f0da4387d50da78b2fc03,
+        type: 3}
       propertyPath: m_AngularDrag
       value: 5
       objectReference: {fileID: 0}
@@ -6385,13 +6391,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_ImpulseMagnitude: 230
-  m_DisableDetection: 0
+  m_DisableDetection: 1
+  m_JerkInfluence: 1
+  m_ContactInfluence: 1
   m_SpawnObjects: []
   m_DestroyObject: 0
   m_Force: 0
   m_RadialForce: 1
   m_UseMass: 0
-  m_ForceDetectionMultiplier: {fileID: 0}
+  m_ForceDetectionMultiplier: {fileID: 11400000, guid: bdf1fcbd345381d4ba43a33e3773c7f8,
+    type: 2}
   m_EnableDebugGraphs: 0
   m_ForceDetected:
     m_PersistentCalls:

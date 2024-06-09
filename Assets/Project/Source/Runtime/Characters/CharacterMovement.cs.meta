@@ -1,2 +1,18 @@
 fileFormatVersion: 2
 guid: 5266fe543a7f7d64388b4cde3b2c86bf
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - Collider: {instanceID: 0}
+  - m_MoveSpeedAttribute: {fileID: 11400000, guid: b08ce0e4b3536694bbf575ddf6619fa5,
+      type: 2}
+  - m_RotationRateAttribute: {fileID: 11400000, guid: 13efa8a8c038c3a47ae5293010294aa4,
+      type: 2}
+  - m_NoStableGroundTag: {fileID: 11400000, guid: 942d62db9bc34ae499e56a855290abc6,
+      type: 2}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

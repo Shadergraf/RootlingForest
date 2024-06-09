@@ -111,6 +111,18 @@ namespace Manatea.GameplaySystem
             }
             return false;
         }
+        public bool ChangeAttributeBaseValue(GameplayAttribute attribute, Func<float, float> function)
+        {
+            for (int i = 0; i < m_Attributes.Count; i++)
+            {
+                if (m_Attributes[i].Attribute == attribute)
+                {
+                    m_Attributes[i].BaseValue = function(m_Attributes[i].BaseValue);
+                    return true;
+                }
+            }
+            return false;
+        }
         public bool AddAttributeModifier(GameplayAttribute attribute, GameplayAttributeModifier modifier)
         {
             for (int i = 0; i < m_Attributes.Count; i++)

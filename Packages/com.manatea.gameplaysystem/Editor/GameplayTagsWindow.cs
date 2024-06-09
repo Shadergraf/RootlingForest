@@ -180,7 +180,13 @@ namespace Manatea.GameplaySystem
         }
         public void CreateTag()
         {
-            string path = EditorUtility.SaveFilePanelInProject("Create Tag", "", "asset", "");
+            string assetPath = "";
+            if (GetSelection().Count == 1)
+            {
+                assetPath = AssetDatabase.GetAssetPath((FindItem(GetSelection()[0], rootItem) as GameplayTagItem).gameplayTag);
+                assetPath = assetPath.Remove(assetPath.LastIndexOf('/'));
+            }
+            string path = EditorUtility.SaveFilePanelInProject("Create Tag", "", "asset", "", assetPath);
             if (!string.IsNullOrEmpty(path))
             {
                 GameplayTag newTag = ScriptableObject.CreateInstance<GameplayTag>();

@@ -25,29 +25,47 @@ public class PhysicsDebugger : MonoBehaviour
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             if (Physics.Raycast(ray, out RaycastHit hit))
             {
-                m_GrabObject = hit.collider.GetComponentInParent<Rigidbody>();
-
-
-                if (m_GrabObject != null)
+                GameObject currentTestObj = hit.collider.gameObject;
+                while (currentTestObj != null)
                 {
-                    m_GrabPosLocal = m_GrabObject.transform.InverseTransformPoint(hit.point);
-                    m_InitialGrabPosGlobal = hit.point;
-                    m_CurrentGrabPosGlobal = m_InitialGrabPosGlobal;
+                    m_GrabObject = currentTestObj.GetComponentInParent<Rigidbody>();
+                    if (m_GrabObject != null && !m_GrabObject.isKinematic)
+                    {
+                        Debug.Log("Grabbing: " + m_GrabObject.name, m_GrabObject);
+                        m_GrabPosLocal = m_GrabObject.transform.InverseTransformPoint(hit.point);
+                        m_InitialGrabPosGlobal = hit.point;
+                        m_CurrentGrabPosGlobal = m_InitialGrabPosGlobal;
 
-                    GameObject springGO = new GameObject("DebugPhysicsSpring");
-                    springGO.hideFlags = HideFlags.HideAndDontSave;
+                        GameObject springGO = new GameObject("DebugPhysicsSpring");
+                        springGO.hideFlags = HideFlags.HideAndDontSave;
 
-                    springGO.transform.position = hit.point;
-                    m_Spring = springGO.AddComponent<SpringJoint>();
-                    m_Spring.connectedBody = m_GrabObject;
-                    m_Spring.autoConfigureConnectedAnchor = false;
-                    m_Spring.anchor = Vector3.zero;
-                    m_Spring.connectedAnchor = m_GrabPosLocal;
+                        springGO.transform.position = hit.point;
+                        m_Spring = springGO.AddComponent<SpringJoint>();
+                        m_Spring.connectedBody = m_GrabObject;
+                        m_Spring.autoConfigureConnectedAnchor = false;
+                        m_Spring.anchor = Vector3.zero;
+                        m_Spring.connectedAnchor = m_GrabPosLocal;
 
-                    m_Spring.spring = 100;
-                    m_Spring.damper = 40;
+                        m_Spring.spring = 100;
+                        m_Spring.damper = 40;
 
-                    m_Spring.GetComponent<Rigidbody>().isKinematic = true;
+                        m_Spring.GetComponent<Rigidbody>().isKinematic = true;
+                        break;
+                    }
+
+                    if (currentTestObj.transform.parent)
+                    {
+                        currentTestObj = currentTestObj.transform.parent.gameObject;
+                    }
+                    else
+                    {
+                        currentTestObj = null;
+                    }
+                    if (currentTestObj == null)
+                    {
+                        m_GrabObject = null;
+                        break;
+                    }
                 }
             }
         }

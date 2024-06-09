@@ -93,6 +93,8 @@ MonoBehaviour:
     type: 2}
   m_RotationRateAttribute: {fileID: 11400000, guid: 13efa8a8c038c3a47ae5293010294aa4,
     type: 2}
+  m_NoStableGroundTag: {fileID: 11400000, guid: 942d62db9bc34ae499e56a855290abc6,
+    type: 2}
   DebugCharacter: 0
 --- !u!114 &5171198309114388193
 MonoBehaviour:
@@ -144,6 +146,9 @@ MonoBehaviour:
   m_AllowOverlapAfterDrop: 1
   m_UseCustomThrow: 0
   m_ThrowRotation: 0
+  m_UseDropThrow: 0
+  m_DropForce: {x: 0, y: 0, z: 0}
+  m_DropTorque: 0
 --- !u!1 &4824895105632388978
 GameObject:
   m_ObjectHideFlags: 0

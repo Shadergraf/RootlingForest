@@ -431,6 +431,16 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 30843199278676019, guid: bf0177a3809de3d49ac5dcdb1afa9084,
+        type: 3}
+      propertyPath: m_RotationRule
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 30843199278676019, guid: bf0177a3809de3d49ac5dcdb1afa9084,
+        type: 3}
+      propertyPath: m_CollisionEnabled
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 2459274439249617929, guid: bf0177a3809de3d49ac5dcdb1afa9084,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -491,6 +501,22 @@ PrefabInstance:
       propertyPath: Collider
       value: 
       objectReference: {fileID: -2380540039210584354}
+    - target: {fileID: 5171198309114388193, guid: bf0177a3809de3d49ac5dcdb1afa9084,
+        type: 3}
+      propertyPath: m_Attributes.Array.size
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 5171198309114388193, guid: bf0177a3809de3d49ac5dcdb1afa9084,
+        type: 3}
+      propertyPath: m_Attributes.Array.data[5].m_Attribute
+      value: 
+      objectReference: {fileID: 11400000, guid: bdf1fcbd345381d4ba43a33e3773c7f8,
+        type: 2}
+    - target: {fileID: 5171198309114388193, guid: bf0177a3809de3d49ac5dcdb1afa9084,
+        type: 3}
+      propertyPath: m_Attributes.Array.data[5].m_BaseValue
+      value: 0.3
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
