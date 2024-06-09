@@ -87,12 +87,16 @@ namespace Manatea
             m_GrabAction.Enable();
             m_ThrowAction.Enable();
         }
+
         private void OnEnable()
         {
             m_Keyboard = InputSystem.GetDevice<Keyboard>();
             m_Mouse = InputSystem.GetDevice<Mouse>();
             m_Gamepad = InputSystem.GetDevice<Gamepad>();
 
+
+            m_JumpAction.started += JumpAction;
+            m_GrabAction.started += GrabAction;
         }
         private void OnDisable()
         {
@@ -105,6 +109,9 @@ namespace Manatea
             m_JumpAction.Disable();
             m_GrabAction.Disable();
             m_ThrowAction.Disable();
+
+            m_JumpAction.started -= JumpAction;
+            m_GrabAction.started -= GrabAction;
         }
 
 
@@ -118,49 +125,10 @@ namespace Manatea
             CharacterMovement.Move(inputVector);
 
 
-            if (m_JumpAction.IsPressed())
-            {
-                CharacterMovement.Jump();
-            }
-            else
-            {
-                CharacterMovement.ReleaseJump();
-            }
-
 
             TriggerCollider.GetGlobalParams(out Vector3 p1, out Vector3 p2, out float radius);
             OverlapCount = Physics.OverlapCapsuleNonAlloc(p1, p2, radius, Colliders, m_GrabLayerMask);
-            // TODO capsule cast to find nearest collider
-            if (m_GrabAction.WasPressedThisFrame())
-            {
-                if (!PullAbility.enabled)
-                {
-                    for (int i = 0; i < OverlapCount; i++)
-                    {
-                        if (Colliders[i].gameObject == CharacterMovement.gameObject)
-                            continue;
-                        Rigidbody rigid = Colliders[i].attachedRigidbody;
-                        if (rigid == null)
-                            continue;
-                        if (!rigid.GetComponent<GrabPreferences>())
-                            continue;
-                        PullAbility.Target = rigid;
-                        PullAbility.enabled = true;
-                        break;
-                    }
-                }
-                else
-                {
-                    if (m_MovementAction.ReadValue<Vector2>().magnitude > 0.3f)
-                    {
-                        PullAbility.Throw();
-                    }
-                    else
-                    {
-                        PullAbility.Drop();
-                    }
-                }
-            }
+
             // TODO test if single button grab/throw input feels good
             //if (m_ThrowAction.WasPressedThisFrame())
             //{
@@ -171,6 +139,54 @@ namespace Manatea
             //}
         }
 
+
+        private void JumpAction(InputAction.CallbackContext ctx)
+        {
+            if (ctx.started)
+            {
+                CharacterMovement.Jump();
+            }
+            if (ctx.canceled)
+            {
+                CharacterMovement.ReleaseJump();
+            }
+        }
+        private void GrabAction(InputAction.CallbackContext ctx)
+        {
+            if (!ctx.started)
+            {
+                return;
+            }
+
+            // TODO capsule cast to find nearest collider
+            if (!PullAbility.enabled)
+            {
+                for (int i = 0; i < OverlapCount; i++)
+                {
+                    if (Colliders[i].gameObject == CharacterMovement.gameObject)
+                        continue;
+                    Rigidbody rigid = Colliders[i].attachedRigidbody;
+                    if (rigid == null)
+                        continue;
+                    if (!rigid.GetComponent<GrabPreferences>())
+                        continue;
+                    PullAbility.Target = rigid;
+                    PullAbility.enabled = true;
+                    break;
+                }
+            }
+            else
+            {
+                if (m_MovementAction.ReadValue<Vector2>().magnitude > 0.3f)
+                {
+                    PullAbility.Throw();
+                }
+                else
+                {
+                    PullAbility.Drop();
+                }
+            }
+        }
 
         private float Smoothing01(float x, float n)
         {

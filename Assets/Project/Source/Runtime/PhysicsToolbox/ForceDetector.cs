@@ -9,6 +9,8 @@ using Manatea.GameplaySystem;
 
 public class ForceDetector : MonoBehaviour
 {
+    #region Serialized Vars
+
     [SerializeField]
     private float m_ImpulseMagnitude = 5;
     [SerializeField]
@@ -37,9 +39,13 @@ public class ForceDetector : MonoBehaviour
     private GameplayAttribute m_HealthAttribute;
     [SerializeField]
     private bool m_EnableDebugGraphs;
-
+    // Events
     [SerializeField]
     private UnityEvent m_ForceDetected;
+
+    #endregion
+
+    #region Public Vars
 
     public float ImpulseMagnitude => m_ImpulseMagnitude;
     public bool DisableDetection => m_DisableDetection;
@@ -49,6 +55,10 @@ public class ForceDetector : MonoBehaviour
     public Vector3 FinalForce => m_FinalForce;
     public Vector3 ContactImpulse => m_ContactImpulse;
     public Vector3 ContactVelocity => m_ContactVelocity;
+
+    #endregion
+
+    #region Private Vars
 
     private Rigidbody m_Rigidbody;
     private GameplayAttributeOwner m_AttributeOwner;
@@ -64,7 +74,12 @@ public class ForceDetector : MonoBehaviour
     private Vector3 m_AccumulatedForces;
 
     private bool m_DamageTimeout;
+    private bool m_ImpactRecordedThisFrame;
 
+    #endregion
+
+
+    #region Unity Events
 
     private void Awake()
     {
@@ -75,6 +90,16 @@ public class ForceDetector : MonoBehaviour
     {
         m_LastVelocity = m_Rigidbody.velocity;
         m_Acceleration = Vector3.zero;
+    }
+
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        ContactResponse(collision);
+    }
+    private void OnCollisionStay(Collision collision)
+    {
+        ContactResponse(collision);
     }
 
     private void FixedUpdate()
@@ -90,8 +115,16 @@ public class ForceDetector : MonoBehaviour
         m_AccumulatedForces += m_ContactImpulse * m_ContactInfluence;
         m_AccumulatedForces += m_ContactVelocity * m_ContactInfluence;
 
-        m_ContactImpulse = Vector3.zero;
-        m_ContactVelocity = Vector3.zero;
+        // Persist the contact variables for one fixedUpdate step
+        if (m_ImpactRecordedThisFrame)
+        {
+            m_ImpactRecordedThisFrame = false;
+        }
+        else
+        {
+            m_ContactImpulse = Vector3.zero;
+            m_ContactVelocity = Vector3.zero;
+        }
 
         m_FinalForce = m_AccumulatedForces;
         if (m_AttributeOwner)
@@ -108,28 +141,31 @@ public class ForceDetector : MonoBehaviour
         }
     }
 
-    private void OnCollisionEnter(Collision collision)
-    {
-        ContactResponse(collision);
-    }
-    private void OnCollisionStay(Collision collision)
-    {
-        ContactResponse(collision);
-    }
+    #endregion
 
     private void ContactResponse(Collision collision)
     {
         if (m_ContactInfluence != 0)
         {
             float mult = 1;
+
+            // Other collider attributes
             GameplayAttributeOwner attributeOwner = collision.gameObject.GetComponentInParent<GameplayAttributeOwner>();
             if (attributeOwner && attributeOwner.TryGetAttributeEvaluatedValue(m_ForceDetectionMultiplier, out float val))
             {
                 mult = val;
             }
 
+            // This collider attributes
+            attributeOwner = m_AttributeOwner;
+            if (attributeOwner && attributeOwner.TryGetAttributeEvaluatedValue(m_ForceDetectionMultiplier, out val))
+            {
+                mult = val;
+            }
+
             m_ContactImpulse = collision.impulse * mult * 1900;
             m_ContactVelocity = collision.relativeVelocity * mult * 100;
+            m_ImpactRecordedThisFrame = true;
         }
     }
 

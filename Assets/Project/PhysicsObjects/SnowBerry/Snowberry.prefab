@@ -6401,6 +6401,9 @@ MonoBehaviour:
   m_UseMass: 0
   m_ForceDetectionMultiplier: {fileID: 11400000, guid: bdf1fcbd345381d4ba43a33e3773c7f8,
     type: 2}
+  m_ForceBoostMultiplier: {fileID: 11400000, guid: 0861c7696e0fc7d40b6681572d235d9f,
+    type: 2}
+  m_HealthAttribute: {fileID: 0}
   m_EnableDebugGraphs: 0
   m_ForceDetected:
     m_PersistentCalls:

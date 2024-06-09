@@ -7,6 +7,7 @@ using UnityEditor.PackageManager.UI;
 using UnityEngine.Profiling;
 using Manatea.GameplaySystem;
 
+[DefaultExecutionOrder(10000)]
 public class ForceDetectorDebugger : MonoBehaviour
 {
     public bool m_ShowDebugWindow = true;
@@ -88,7 +89,7 @@ public class ForceDetectorDebugger : MonoBehaviour
         m_JerkGraphZoom = GUILayout.HorizontalSlider(m_JerkGraphZoom, 0, 0.001f);
         GUILayout.Space(10);
         m_ContactImpulseGraphZoom = GUILayout.HorizontalSlider(m_ContactImpulseGraphZoom, 0, 0.0001f);
-        m_ContactVelocityGraphZoom = GUILayout.HorizontalSlider(m_ContactVelocityGraphZoom, 0, 0.0001f);
+        m_ContactVelocityGraphZoom = GUILayout.HorizontalSlider(m_ContactVelocityGraphZoom, 0, 0.001f);
         GUILayout.Space(10);
         m_AccumulatedForcesGraphZoom = GUILayout.HorizontalSlider(m_AccumulatedForcesGraphZoom, 0, 0.0001f);
 
