@@ -647,7 +647,7 @@ PrefabInstance:
     - target: {fileID: 5794687575100476513, guid: 8262b2170c2f0da4387d50da78b2fc03,
         type: 3}
       propertyPath: m_Drag
-      value: 0.3
+      value: 0.4
       objectReference: {fileID: 0}
     - target: {fileID: 5794687575100476513, guid: 8262b2170c2f0da4387d50da78b2fc03,
         type: 3}
@@ -759,10 +759,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1998e626f337f6e409931479ee6ff8dc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_ImpulseMagnitude: 440
+  m_ImpulseMagnitude: 900
   m_DisableDetection: 0
-  m_JerkInfluence: 1
-  m_ContactInfluence: 1
+  m_JerkInfluence: 0
+  m_ContactImpulseInfluence: 0
+  m_ContactVelocityInfluence: 1
+  m_ImpulseTimeFalloff: 1000
   m_SpawnObjects:
   - {fileID: 7611809707108263609}
   - {fileID: 1746232784670796581}
@@ -776,6 +778,8 @@ MonoBehaviour:
   m_ForceBoostMultiplier: {fileID: 11400000, guid: 0861c7696e0fc7d40b6681572d235d9f,
     type: 2}
   m_HealthAttribute: {fileID: 0}
+  m_ToughTag: {fileID: 11400000, guid: 866f3415c1a5a2441b06eb36e9a4b182, type: 2}
+  m_SoftTag: {fileID: 11400000, guid: 1c18da10d3323594b984a916c6f91687, type: 2}
   m_EnableDebugGraphs: 0
   m_ForceDetected:
     m_PersistentCalls:
@@ -794,6 +798,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Tags:
   - {fileID: 11400000, guid: 942d62db9bc34ae499e56a855290abc6, type: 2}
+  - {fileID: 11400000, guid: 866f3415c1a5a2441b06eb36e9a4b182, type: 2}
 --- !u!4 &2997098483461836842 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 2982696578432685512, guid: 8262b2170c2f0da4387d50da78b2fc03,

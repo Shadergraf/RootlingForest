@@ -125,10 +125,6 @@ namespace Manatea
             CharacterMovement.Move(inputVector);
 
 
-
-            TriggerCollider.GetGlobalParams(out Vector3 p1, out Vector3 p2, out float radius);
-            OverlapCount = Physics.OverlapCapsuleNonAlloc(p1, p2, radius, Colliders, m_GrabLayerMask);
-
             // TODO test if single button grab/throw input feels good
             //if (m_ThrowAction.WasPressedThisFrame())
             //{
@@ -161,6 +157,9 @@ namespace Manatea
             // TODO capsule cast to find nearest collider
             if (!PullAbility.enabled)
             {
+                TriggerCollider.GetGlobalParams(out Vector3 p1, out Vector3 p2, out float radius);
+                OverlapCount = Physics.OverlapCapsuleNonAlloc(p1, p2, radius, Colliders, m_GrabLayerMask);
+
                 for (int i = 0; i < OverlapCount; i++)
                 {
                     if (Colliders[i].gameObject == CharacterMovement.gameObject)

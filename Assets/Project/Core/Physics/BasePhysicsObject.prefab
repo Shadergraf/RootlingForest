@@ -43,6 +43,7 @@ GameObject:
   - component: {fileID: 5794687575100476513}
   - component: {fileID: 4941498879713128372}
   - component: {fileID: 4741099696618946961}
+  - component: {fileID: 4438036652801548514}
   m_Layer: 3
   m_Name: BasePhysicsObject
   m_TagString: Untagged
@@ -132,7 +133,24 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e2ee4c4e098bbcd459201c714bd9c614, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Attributes: []
+  m_Attributes:
+  - m_Attribute: {fileID: 11400000, guid: bdf1fcbd345381d4ba43a33e3773c7f8, type: 2}
+    m_BaseValue: 1
+    m_Modifiers: []
+--- !u!114 &4438036652801548514
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2820277903825203249}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 87a03fefa4dbd7348b64c2e534204576, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Tags:
+  - {fileID: 11400000, guid: 866f3415c1a5a2441b06eb36e9a4b182, type: 2}
 --- !u!1 &6307152933887706289
 GameObject:
   m_ObjectHideFlags: 0

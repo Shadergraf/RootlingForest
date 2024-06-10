@@ -6167,6 +6167,17 @@ PrefabInstance:
       propertyPath: m_Name
       value: Snowberry
       objectReference: {fileID: 0}
+    - target: {fileID: 4438036652801548514, guid: 8262b2170c2f0da4387d50da78b2fc03,
+        type: 3}
+      propertyPath: m_Tags.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4438036652801548514, guid: 8262b2170c2f0da4387d50da78b2fc03,
+        type: 3}
+      propertyPath: 'm_Tags.Array.data[0]'
+      value: 
+      objectReference: {fileID: 11400000, guid: 1c18da10d3323594b984a916c6f91687,
+        type: 2}
     - target: {fileID: 4741099696618946961, guid: 8262b2170c2f0da4387d50da78b2fc03,
         type: 3}
       propertyPath: m_Attributes.Array.size
@@ -6317,8 +6328,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_PopCount: 16
   m_PopDelay: 0.25
-  m_PopForce: 2.5
-  m_PopRotation: 0.5
+  m_PopForce: 1.5
+  m_PopRotation: 0.3
   m_PopResponse:
     m_PersistentCalls:
       m_Calls:
@@ -6390,10 +6401,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1998e626f337f6e409931479ee6ff8dc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_ImpulseMagnitude: 230
-  m_DisableDetection: 1
-  m_JerkInfluence: 1
-  m_ContactInfluence: 1
+  m_ImpulseMagnitude: 900
+  m_DisableDetection: 0
+  m_JerkInfluence: 0
+  m_ContactImpulseInfluence: 0
+  m_ContactVelocityInfluence: 1
+  m_ImpulseTimeFalloff: 10000
   m_SpawnObjects: []
   m_DestroyObject: 0
   m_Force: 0
@@ -6404,6 +6417,8 @@ MonoBehaviour:
   m_ForceBoostMultiplier: {fileID: 11400000, guid: 0861c7696e0fc7d40b6681572d235d9f,
     type: 2}
   m_HealthAttribute: {fileID: 0}
+  m_ToughTag: {fileID: 11400000, guid: 866f3415c1a5a2441b06eb36e9a4b182, type: 2}
+  m_SoftTag: {fileID: 11400000, guid: 1c18da10d3323594b984a916c6f91687, type: 2}
   m_EnableDebugGraphs: 0
   m_ForceDetected:
     m_PersistentCalls:

@@ -3,6 +3,7 @@ using Manatea;
 using Manatea.GameplaySystem;
 using UnityEngine.Events;
 using System.Collections;
+using System;
 
 // TODO cleanup this file
 
@@ -360,10 +361,7 @@ public class PullAbility : MonoBehaviour
 
             Target.excludeLayers = new LayerMask();
 
-            if (Target.TryGetComponent(out GameplayAttributeOwner targetAttOwner))
-            {
-                targetAttOwner.RemoveAttributeModifier(m_ForceDetectionMultiplierAttribute, m_ForceDetectionMultiplierModifier);
-            }
+            StartCoroutine(CO_RemoveAttributesDelayed(m_Target));
         }
 
         m_Target = null;
@@ -747,16 +745,27 @@ public class PullAbility : MonoBehaviour
                 break;
             }
 
-            rb.velocity += velocity / sampleCount;
+            float massLocationMult = MMath.RemapClamped(0.5f, 1.0f, 1, 0.6f, rb.mass);
+            rb.velocity += velocity / sampleCount * massLocationMult;
 
-            float massMult = MMath.RemapClamped(0.2f, 0.6f, 1, 0.25f, rb.mass);
+            float massRotationMult = MMath.RemapClamped(0.5f, 1.0f, 1, 0.25f, rb.mass);
             Vector3 forward = velocity.normalized;
             // TODO rotate towards throwing direction
             Vector3 up = Vector3.Cross(Vector3.Cross(forward != Vector3.up ? Vector3.up : Vector3.forward, forward), forward);
-            rb.AddForceAtPosition(up * torque / sampleCount * massMult, rb.worldCenterOfMass + forward, ForceMode.VelocityChange);
-            rb.AddForceAtPosition(-up * torque / sampleCount * massMult, rb.worldCenterOfMass - forward, ForceMode.VelocityChange);
+            rb.AddForceAtPosition(up * torque / sampleCount * massRotationMult, rb.worldCenterOfMass + forward, ForceMode.VelocityChange);
+            rb.AddForceAtPosition(-up * torque / sampleCount * massRotationMult, rb.worldCenterOfMass - forward, ForceMode.VelocityChange);
 
             yield return new WaitForFixedUpdate();
+        }
+    }
+
+    private IEnumerator CO_RemoveAttributesDelayed(Rigidbody target)
+    {
+        yield return new WaitForSeconds(0.1f);
+
+        if (target && target.TryGetComponent(out GameplayAttributeOwner targetAttOwner))
+        {
+            targetAttOwner.RemoveAttributeModifier(m_ForceDetectionMultiplierAttribute, m_ForceDetectionMultiplierModifier);
         }
     }
 }

@@ -882,10 +882,15 @@ PrefabInstance:
       propertyPath: m_Name
       value: WalnutShield
       objectReference: {fileID: 0}
+    - target: {fileID: 4438036652801548514, guid: 8262b2170c2f0da4387d50da78b2fc03,
+        type: 3}
+      propertyPath: m_Tags.Array.size
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4741099696618946961, guid: 8262b2170c2f0da4387d50da78b2fc03,
         type: 3}
       propertyPath: m_Attributes.Array.size
-      value: 1
+      value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 4741099696618946961, guid: 8262b2170c2f0da4387d50da78b2fc03,
         type: 3}
@@ -893,6 +898,28 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 11400000, guid: d62daeae609380a4e93f192aae3830a9,
         type: 2}
+    - target: {fileID: 4741099696618946961, guid: 8262b2170c2f0da4387d50da78b2fc03,
+        type: 3}
+      propertyPath: m_Attributes.Array.data[1].m_Attribute
+      value: 
+      objectReference: {fileID: 11400000, guid: 544fa5972763a11478e613bc7b419079,
+        type: 2}
+    - target: {fileID: 4741099696618946961, guid: 8262b2170c2f0da4387d50da78b2fc03,
+        type: 3}
+      propertyPath: m_Attributes.Array.data[1].m_BaseValue
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 4741099696618946961, guid: 8262b2170c2f0da4387d50da78b2fc03,
+        type: 3}
+      propertyPath: m_Attributes.Array.data[2].m_Attribute
+      value: 
+      objectReference: {fileID: 11400000, guid: bdf1fcbd345381d4ba43a33e3773c7f8,
+        type: 2}
+    - target: {fileID: 4741099696618946961, guid: 8262b2170c2f0da4387d50da78b2fc03,
+        type: 3}
+      propertyPath: m_Attributes.Array.data[2].m_BaseValue
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 4941498879713128372, guid: 8262b2170c2f0da4387d50da78b2fc03,
         type: 3}
       propertyPath: m_RotationRule
@@ -1016,6 +1043,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: -4843920924282928374}
+    - targetCorrespondingSourceObject: {fileID: 2820277903825203249, guid: 8262b2170c2f0da4387d50da78b2fc03,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4999040997176856583}
   m_SourcePrefab: {fileID: 100100000, guid: 8262b2170c2f0da4387d50da78b2fc03, type: 3}
 --- !u!4 &5028532209151369023 stripped
 Transform:
@@ -1043,6 +1074,41 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Tags:
   - {fileID: 11400000, guid: 942d62db9bc34ae499e56a855290abc6, type: 2}
+--- !u!114 &4999040997176856583
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5444823454181325510}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1998e626f337f6e409931479ee6ff8dc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_ImpulseMagnitude: 900
+  m_DisableDetection: 0
+  m_JerkInfluence: 0
+  m_ContactImpulseInfluence: 0
+  m_ContactVelocityInfluence: 1
+  m_ImpulseTimeFalloff: 1000
+  m_SpawnObjects: []
+  m_DestroyObject: 1
+  m_Force: 0
+  m_RadialForce: 1
+  m_UseMass: 0
+  m_ForceDetectionMultiplier: {fileID: 11400000, guid: bdf1fcbd345381d4ba43a33e3773c7f8,
+    type: 2}
+  m_ForceBoostMultiplier: {fileID: 11400000, guid: 0861c7696e0fc7d40b6681572d235d9f,
+    type: 2}
+  m_HealthAttribute: {fileID: 11400000, guid: 544fa5972763a11478e613bc7b419079, type: 2}
+  m_ToughTag: {fileID: 11400000, guid: 866f3415c1a5a2441b06eb36e9a4b182, type: 2}
+  m_SoftTag: {fileID: 11400000, guid: 1c18da10d3323594b984a916c6f91687, type: 2}
+  m_EnableDebugGraphs: 0
+  m_OnlyBreakWhenBeingHit: 1
+  m_ForceDetected:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!4 &6682177163174451767 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 3465407089360146624, guid: 8262b2170c2f0da4387d50da78b2fc03,

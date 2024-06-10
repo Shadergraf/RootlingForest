@@ -6,6 +6,7 @@ using UnityEngine.Events;
 using UnityEditor.PackageManager.UI;
 using UnityEngine.Profiling;
 using Manatea.GameplaySystem;
+using UnityEngine.Serialization;
 
 public class ForceDetector : MonoBehaviour
 {
@@ -20,7 +21,13 @@ public class ForceDetector : MonoBehaviour
     private float m_JerkInfluence = 1;
     [SerializeField]
     [Range(0f, 1f)]
-    private float m_ContactInfluence = 1;
+    [FormerlySerializedAs("m_ContactInfluence")]
+    private float m_ContactImpulseInfluence = 1;
+    [SerializeField]
+    [Range(0f, 1f)]
+    private float m_ContactVelocityInfluence = 1;
+    [SerializeField]
+    private float m_ImpulseTimeFalloff = 16;
     [SerializeField]
     private GameObject[] m_SpawnObjects;
     [SerializeField]
@@ -38,7 +45,13 @@ public class ForceDetector : MonoBehaviour
     [SerializeField]
     private GameplayAttribute m_HealthAttribute;
     [SerializeField]
+    private GameplayTag m_ToughTag;
+    [SerializeField]
+    private GameplayTag m_SoftTag;
+    [SerializeField]
     private bool m_EnableDebugGraphs;
+    [SerializeField]
+    private bool m_OnlyBreakWhenBeingHit;
     // Events
     [SerializeField]
     private UnityEvent m_ForceDetected;
@@ -62,6 +75,7 @@ public class ForceDetector : MonoBehaviour
 
     private Rigidbody m_Rigidbody;
     private GameplayAttributeOwner m_AttributeOwner;
+    private GameplayTagOwner m_TagOwner;
 
     private Vector3 m_LastVelocity;
     private Vector3 m_Acceleration;
@@ -85,6 +99,7 @@ public class ForceDetector : MonoBehaviour
     {
         m_Rigidbody = GetComponent<Rigidbody>();
         m_AttributeOwner = GetComponent<GameplayAttributeOwner>();
+        m_TagOwner = GetComponent<GameplayTagOwner>();
     }
     private void OnEnable()
     {
@@ -97,10 +112,10 @@ public class ForceDetector : MonoBehaviour
     {
         ContactResponse(collision);
     }
-    private void OnCollisionStay(Collision collision)
-    {
-        ContactResponse(collision);
-    }
+    //private void OnCollisionStay(Collision collision)
+    //{
+    //    ContactResponse(collision);
+    //}
 
     private void FixedUpdate()
     {
@@ -110,10 +125,10 @@ public class ForceDetector : MonoBehaviour
         m_LastVelocity = m_Rigidbody.velocity;
         m_LastAcceleration = m_Acceleration;
 
-        m_AccumulatedForces = MMath.Damp(m_AccumulatedForces, Vector3.zero, 16, Time.fixedDeltaTime);
+        m_AccumulatedForces = MMath.Damp(m_AccumulatedForces, Vector3.zero, m_ImpulseTimeFalloff, Time.fixedDeltaTime);
         m_AccumulatedForces += m_Jerk * m_JerkInfluence;
-        m_AccumulatedForces += m_ContactImpulse * m_ContactInfluence;
-        m_AccumulatedForces += m_ContactVelocity * m_ContactInfluence;
+        m_AccumulatedForces += m_ContactImpulse;
+        m_AccumulatedForces += m_ContactVelocity;
 
         // Persist the contact variables for one fixedUpdate step
         if (m_ImpactRecordedThisFrame)
@@ -145,26 +160,48 @@ public class ForceDetector : MonoBehaviour
 
     private void ContactResponse(Collision collision)
     {
-        if (m_ContactInfluence != 0)
+        if (m_ContactImpulseInfluence != 0 || m_ContactVelocityInfluence != 0)
         {
+            Vector3 relativeVelocity = collision.relativeVelocity;
+            if (m_OnlyBreakWhenBeingHit)
+            {
+                relativeVelocity += m_LastVelocity;
+            }
+
             float mult = 1;
+
+            GameplayTagOwner tagOwner = collision.gameObject.GetComponentInParent<GameplayTagOwner>();
+            bool validBasedOnTags = !tagOwner || ((!tagOwner.Tags.Contains(m_SoftTag) && tagOwner.Tags.Contains(m_ToughTag)) || m_TagOwner.Tags.Contains(m_SoftTag));
+            bool validBasedOnRigidbody = !collision.collider.attachedRigidbody || (collision.collider.attachedRigidbody.isKinematic && collision.collider.attachedRigidbody.mass >= 0.5f);
+            if (!validBasedOnTags && !validBasedOnRigidbody)
+            {
+                return;
+            }
 
             // Other collider attributes
             GameplayAttributeOwner attributeOwner = collision.gameObject.GetComponentInParent<GameplayAttributeOwner>();
             if (attributeOwner && attributeOwner.TryGetAttributeEvaluatedValue(m_ForceDetectionMultiplier, out float val))
             {
-                mult = val;
+                mult *= val;
             }
 
             // This collider attributes
             attributeOwner = m_AttributeOwner;
             if (attributeOwner && attributeOwner.TryGetAttributeEvaluatedValue(m_ForceDetectionMultiplier, out val))
             {
-                mult = val;
+                mult *= val;
             }
 
-            m_ContactImpulse = collision.impulse * mult * 1900;
-            m_ContactVelocity = collision.relativeVelocity * mult * 100;
+            Vector3 newImpulseVelocity = collision.impulse * mult * m_ContactImpulseInfluence * 1900;
+            if (newImpulseVelocity.magnitude > m_ContactImpulse.magnitude)
+            {
+                m_ContactImpulse = newImpulseVelocity;
+            }
+            Vector3 newContactVelocity = relativeVelocity * mult * m_ContactVelocityInfluence * 100;
+            if (newContactVelocity.magnitude > m_ContactVelocity.magnitude)
+            {
+                m_ContactVelocity = newContactVelocity;
+            }
             m_ImpactRecordedThisFrame = true;
         }
     }
@@ -218,7 +255,7 @@ public class ForceDetector : MonoBehaviour
     private IEnumerator CO_Timeout()
     {
         m_DamageTimeout = true;
-        yield return new WaitForSeconds(0.2f);
+        yield return new WaitForSeconds(0.4f);
         m_DamageTimeout = false;
     }
 }
