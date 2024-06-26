@@ -759,12 +759,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1998e626f337f6e409931479ee6ff8dc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_ImpulseMagnitude: 900
+  m_Config: {fileID: 11400000, guid: e69def2551f5f4247af59dba60b80891, type: 2}
   m_DisableDetection: 0
-  m_JerkInfluence: 0
-  m_ContactImpulseInfluence: 0
-  m_ContactVelocityInfluence: 1
-  m_ImpulseTimeFalloff: 1000
   m_SpawnObjects:
   - {fileID: 7611809707108263609}
   - {fileID: 1746232784670796581}
@@ -772,15 +768,8 @@ MonoBehaviour:
   m_DestroyObject: 1
   m_Force: 5
   m_RadialForce: 1
-  m_UseMass: 1
-  m_ForceDetectionMultiplier: {fileID: 11400000, guid: bdf1fcbd345381d4ba43a33e3773c7f8,
-    type: 2}
-  m_ForceBoostMultiplier: {fileID: 11400000, guid: 0861c7696e0fc7d40b6681572d235d9f,
-    type: 2}
-  m_HealthAttribute: {fileID: 0}
-  m_ToughTag: {fileID: 11400000, guid: 866f3415c1a5a2441b06eb36e9a4b182, type: 2}
-  m_SoftTag: {fileID: 11400000, guid: 1c18da10d3323594b984a916c6f91687, type: 2}
   m_EnableDebugGraphs: 0
+  m_OnlyBreakWhenBeingHit: 0
   m_ForceDetected:
     m_PersistentCalls:
       m_Calls: []

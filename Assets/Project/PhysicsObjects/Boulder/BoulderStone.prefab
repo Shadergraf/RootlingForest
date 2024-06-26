@@ -202,6 +202,17 @@ PrefabInstance:
       propertyPath: m_Name
       value: BoulderStone
       objectReference: {fileID: 0}
+    - target: {fileID: 4438036652801548514, guid: 8262b2170c2f0da4387d50da78b2fc03,
+        type: 3}
+      propertyPath: m_Tags.Array.size
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4438036652801548514, guid: 8262b2170c2f0da4387d50da78b2fc03,
+        type: 3}
+      propertyPath: 'm_Tags.Array.data[1]'
+      value: 
+      objectReference: {fileID: 11400000, guid: 942d62db9bc34ae499e56a855290abc6,
+        type: 2}
     - target: {fileID: 4741099696618946961, guid: 8262b2170c2f0da4387d50da78b2fc03,
         type: 3}
       propertyPath: m_Attributes.Array.size
@@ -239,11 +250,7 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 2824398884617996519}
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 2820277903825203249, guid: 8262b2170c2f0da4387d50da78b2fc03,
-        type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 5098205215100837623}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 8262b2170c2f0da4387d50da78b2fc03, type: 3}
 --- !u!4 &4705953069704604753 stripped
 Transform:
@@ -257,24 +264,3 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 6398729736136337813}
   m_PrefabAsset: {fileID: 0}
---- !u!1 &9218720023177124260 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 2820277903825203249, guid: 8262b2170c2f0da4387d50da78b2fc03,
-    type: 3}
-  m_PrefabInstance: {fileID: 6398729736136337813}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &5098205215100837623
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9218720023177124260}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 87a03fefa4dbd7348b64c2e534204576, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Tags:
-  - {fileID: 11400000, guid: 942d62db9bc34ae499e56a855290abc6, type: 2}
-  - {fileID: 11400000, guid: 866f3415c1a5a2441b06eb36e9a4b182, type: 2}

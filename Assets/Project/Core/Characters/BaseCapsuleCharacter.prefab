@@ -501,6 +501,16 @@ PrefabInstance:
       propertyPath: Collider
       value: 
       objectReference: {fileID: -2380540039210584354}
+    - target: {fileID: 5137507898606658623, guid: bf0177a3809de3d49ac5dcdb1afa9084,
+        type: 3}
+      propertyPath: LedgeDetectionDepth
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 5137507898606658623, guid: bf0177a3809de3d49ac5dcdb1afa9084,
+        type: 3}
+      propertyPath: LedgeDetectionRadius
+      value: 0.6
+      objectReference: {fileID: 0}
     - target: {fileID: 5171198309114388193, guid: bf0177a3809de3d49ac5dcdb1afa9084,
         type: 3}
       propertyPath: m_Attributes.Array.size

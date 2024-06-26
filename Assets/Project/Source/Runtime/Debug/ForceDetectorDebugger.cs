@@ -198,8 +198,8 @@ public class ForceDetectorDebugger : MonoBehaviour
 
         // Cross this line with accumulated forces to trigger the break response
         Debug.DrawLine(
-            cam.ViewportToWorldPoint(new Vector3(xPos, yPos + m_DebugForceDetector.ImpulseMagnitude * m_AccumulatedForcesGraphZoom, zPos)), 
-            cam.ViewportToWorldPoint(new Vector3(0.9f, yPos + m_DebugForceDetector.ImpulseMagnitude * m_AccumulatedForcesGraphZoom, zPos)),
+            cam.ViewportToWorldPoint(new Vector3(xPos, yPos + m_DebugForceDetector.Config.ImpulseMagnitude * m_AccumulatedForcesGraphZoom, zPos)), 
+            cam.ViewportToWorldPoint(new Vector3(0.9f, yPos + m_DebugForceDetector.Config.ImpulseMagnitude * m_AccumulatedForcesGraphZoom, zPos)),
             m_DebugForceDetector.DisableDetection ? Color.red : Color.green);
 
     }

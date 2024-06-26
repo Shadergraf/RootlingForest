@@ -7,27 +7,16 @@ using UnityEditor.PackageManager.UI;
 using UnityEngine.Profiling;
 using Manatea.GameplaySystem;
 using UnityEngine.Serialization;
+using JetBrains.Annotations;
 
 public class ForceDetector : MonoBehaviour
 {
     #region Serialized Vars
 
     [SerializeField]
-    private float m_ImpulseMagnitude = 5;
+    private ForceDetectorConfig m_Config;
     [SerializeField]
     private bool m_DisableDetection = false;
-    [SerializeField]
-    [Range(0f, 1f)]
-    private float m_JerkInfluence = 1;
-    [SerializeField]
-    [Range(0f, 1f)]
-    [FormerlySerializedAs("m_ContactInfluence")]
-    private float m_ContactImpulseInfluence = 1;
-    [SerializeField]
-    [Range(0f, 1f)]
-    private float m_ContactVelocityInfluence = 1;
-    [SerializeField]
-    private float m_ImpulseTimeFalloff = 16;
     [SerializeField]
     private GameObject[] m_SpawnObjects;
     [SerializeField]
@@ -36,18 +25,6 @@ public class ForceDetector : MonoBehaviour
     private float m_Force;
     [SerializeField, Range(0, 1)]
     private float m_RadialForce = 1;
-    [SerializeField]
-    private bool m_UseMass;
-    [SerializeField]
-    private GameplayAttribute m_ForceDetectionMultiplier;
-    [SerializeField]
-    private GameplayAttribute m_ForceBoostMultiplier;
-    [SerializeField]
-    private GameplayAttribute m_HealthAttribute;
-    [SerializeField]
-    private GameplayTag m_ToughTag;
-    [SerializeField]
-    private GameplayTag m_SoftTag;
     [SerializeField]
     private bool m_EnableDebugGraphs;
     [SerializeField]
@@ -60,7 +37,7 @@ public class ForceDetector : MonoBehaviour
 
     #region Public Vars
 
-    public float ImpulseMagnitude => m_ImpulseMagnitude;
+    public ForceDetectorConfig Config => m_Config;
     public bool DisableDetection => m_DisableDetection;
     public Vector3 Velocity => m_Rigidbody.velocity;
     public Vector3 Acceleration => m_Acceleration;
@@ -125,8 +102,8 @@ public class ForceDetector : MonoBehaviour
         m_LastVelocity = m_Rigidbody.velocity;
         m_LastAcceleration = m_Acceleration;
 
-        m_AccumulatedForces = MMath.Damp(m_AccumulatedForces, Vector3.zero, m_ImpulseTimeFalloff, Time.fixedDeltaTime);
-        m_AccumulatedForces += m_Jerk * m_JerkInfluence;
+        m_AccumulatedForces = MMath.Damp(m_AccumulatedForces, Vector3.zero, m_Config.ImpulseTimeFalloff, Time.fixedDeltaTime);
+        m_AccumulatedForces += m_Jerk * m_Config.JerkInfluence;
         m_AccumulatedForces += m_ContactImpulse;
         m_AccumulatedForces += m_ContactVelocity;
 
@@ -144,13 +121,13 @@ public class ForceDetector : MonoBehaviour
         m_FinalForce = m_AccumulatedForces;
         if (m_AttributeOwner)
         {
-            if (m_AttributeOwner.TryGetAttributeEvaluatedValue(m_ForceDetectionMultiplier, out float val))
+            if (m_AttributeOwner.TryGetAttributeEvaluatedValue(m_Config.ForceDetectionMultiplier, out float val))
             {
                 m_FinalForce *= val;
             }
         }
 
-        if (!m_DisableDetection && m_FinalForce.magnitude > m_ImpulseMagnitude)
+        if (!m_DisableDetection && m_FinalForce.magnitude > m_Config.ImpulseMagnitude)
         {
             ForceDetected();
         }
@@ -160,7 +137,7 @@ public class ForceDetector : MonoBehaviour
 
     private void ContactResponse(Collision collision)
     {
-        if (m_ContactImpulseInfluence != 0 || m_ContactVelocityInfluence != 0)
+        if (m_Config.ContactImpulseInfluence != 0 || m_Config.ContactVelocityInfluence != 0)
         {
             Vector3 relativeVelocity = collision.relativeVelocity;
             if (m_OnlyBreakWhenBeingHit)
@@ -171,7 +148,7 @@ public class ForceDetector : MonoBehaviour
             float mult = 1;
 
             GameplayTagOwner tagOwner = collision.gameObject.GetComponentInParent<GameplayTagOwner>();
-            bool validBasedOnTags = !tagOwner || ((!tagOwner.Tags.Contains(m_SoftTag) && tagOwner.Tags.Contains(m_ToughTag)) || m_TagOwner.Tags.Contains(m_SoftTag));
+            bool validBasedOnTags = !tagOwner || ((!tagOwner.Tags.Contains(m_Config.SoftTag) && tagOwner.Tags.Contains(m_Config.ToughTag)) || m_TagOwner.Tags.Contains(m_Config.SoftTag));
             bool validBasedOnRigidbody = !collision.collider.attachedRigidbody || (collision.collider.attachedRigidbody.isKinematic && collision.collider.attachedRigidbody.mass >= 0.5f);
             if (!validBasedOnTags && !validBasedOnRigidbody)
             {
@@ -180,24 +157,24 @@ public class ForceDetector : MonoBehaviour
 
             // Other collider attributes
             GameplayAttributeOwner attributeOwner = collision.gameObject.GetComponentInParent<GameplayAttributeOwner>();
-            if (attributeOwner && attributeOwner.TryGetAttributeEvaluatedValue(m_ForceDetectionMultiplier, out float val))
+            if (attributeOwner && attributeOwner.TryGetAttributeEvaluatedValue(m_Config.ForceDetectionMultiplier, out float val))
             {
                 mult *= val;
             }
 
             // This collider attributes
             attributeOwner = m_AttributeOwner;
-            if (attributeOwner && attributeOwner.TryGetAttributeEvaluatedValue(m_ForceDetectionMultiplier, out val))
+            if (attributeOwner && attributeOwner.TryGetAttributeEvaluatedValue(m_Config.ForceDetectionMultiplier, out val))
             {
                 mult *= val;
             }
 
-            Vector3 newImpulseVelocity = collision.impulse * mult * m_ContactImpulseInfluence * 1900;
+            Vector3 newImpulseVelocity = collision.impulse * mult * m_Config.ContactImpulseInfluence * 1900;
             if (newImpulseVelocity.magnitude > m_ContactImpulse.magnitude)
             {
                 m_ContactImpulse = newImpulseVelocity;
             }
-            Vector3 newContactVelocity = relativeVelocity * mult * m_ContactVelocityInfluence * 100;
+            Vector3 newContactVelocity = relativeVelocity * mult * m_Config.ContactVelocityInfluence * 100;
             if (newContactVelocity.magnitude > m_ContactVelocity.magnitude)
             {
                 m_ContactVelocity = newContactVelocity;
@@ -215,11 +192,11 @@ public class ForceDetector : MonoBehaviour
 
         m_ForceDetected.Invoke();
 
-        if (m_HealthAttribute && m_AttributeOwner)
+        if (m_Config.HealthAttribute && m_AttributeOwner)
         {
-            m_AttributeOwner.ChangeAttributeBaseValue(m_HealthAttribute, v => v - 1);
+            m_AttributeOwner.ChangeAttributeBaseValue(m_Config.HealthAttribute, v => v - 1);
 
-            if (m_AttributeOwner.TryGetAttributeEvaluatedValue(m_HealthAttribute, out float health) && health > 0)
+            if (m_AttributeOwner.TryGetAttributeEvaluatedValue(m_Config.HealthAttribute, out float health) && health > 0)
             {
                 StartCoroutine(CO_Timeout());
                 return;

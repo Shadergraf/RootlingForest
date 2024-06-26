@@ -276,7 +276,7 @@ PrefabInstance:
     - target: {fileID: 2820277903825203249, guid: 8262b2170c2f0da4387d50da78b2fc03,
         type: 3}
       propertyPath: m_Name
-      value: SpittingCucumber Variant
+      value: SpittingCucumber
       objectReference: {fileID: 0}
     - target: {fileID: 4941498879713128372, guid: 8262b2170c2f0da4387d50da78b2fc03,
         type: 3}
@@ -388,17 +388,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1998e626f337f6e409931479ee6ff8dc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_ImpulseMagnitude: 1
+  m_Config: {fileID: 11400000, guid: e69def2551f5f4247af59dba60b80891, type: 2}
+  m_DisableDetection: 0
   m_SpawnObjects: []
   m_DestroyObject: 0
   m_Force: 0
   m_RadialForce: 1
-  m_UseMass: 0
+  m_EnableDebugGraphs: 0
+  m_OnlyBreakWhenBeingHit: 0
   m_ForceDetected:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 0}
-        m_TargetAssemblyTypeName: ObjectSpawner, Assembly-CSharp
+      - m_Target: {fileID: 4083832808741109902}
+        m_TargetAssemblyTypeName: ObjectSpawner, Manatea.RootlingForest.Runtime
         m_MethodName: SpawnSilent
         m_Mode: 1
         m_Arguments:

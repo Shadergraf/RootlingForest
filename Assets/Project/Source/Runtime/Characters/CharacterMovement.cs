@@ -1,6 +1,8 @@
 using Manatea.GameplaySystem;
+using NUnit.Framework;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Serialization;
 
@@ -18,7 +20,12 @@ namespace Manatea.AdventureRoots
         public float StationaryFriction = 1;
         public float MovementFriction = 0.1f;
         public float GroundRotationRate = 10;
-        public float AirRotationRate = .05f;
+        public float AirRotationRate = 0.05f;
+
+        public float LedgeDetectionDepth = 0.2f;
+        public float LedgeDetectionRadius = 0.2f;
+
+        public float LedgePullForce = 100;
 
         [Header("Collision Detection")]
         public Collider Collider;
@@ -174,6 +181,58 @@ namespace Manatea.AdventureRoots
                     m_IsStableGrounded = false;
                 }
             }
+
+
+            //bool ledgeFound = LedgeDetection(out Vector3 ledgeForce, out List<Vector3> ledgeDirs);
+            //if (m_IsStableGrounded && m_ScheduledMove != Vector3.zero && ledgeFound)
+            //{
+            //    //ledgeForce *= m_ScheduledMove.magnitude;
+            //    //ledgeForce *= LedgePullForce;
+            //    //ledgeForce = Vector3.ProjectOnPlane(ledgeForce, m_ScheduledMove.normalized);
+            //    //m_RigidBody.AddForceAtPosition(ledgeForce, FeetPos, ForceMode.Acceleration);
+            //
+            //    for (int i = 0; i < ledgeDirs.Count; i++)
+            //    {
+            //        if (Vector3.Dot(m_ScheduledMove.normalized, ledgeDirs[i]) > 0.95)
+            //        {
+            //            m_ScheduledMove = Vector3.zero;
+            //        }
+            //    }
+            //
+            //
+            //    for (int i = 0; i < ledgeDirs.Count; i++)
+            //    {
+            //        if (Vector3.Dot(m_ScheduledMove.normalized, ledgeDirs[i]) > 0.95)
+            //        {
+            //            m_ScheduledMove = Vector3.zero;
+            //        }
+            //    }
+            //
+            //    if (ledgeFound)
+            //    {
+            //        m_ScheduledMove *= 0.5f;
+            //    }
+            //}
+            //LedgeDetectionKernel();
+            List<RaycastHit> hitResults = new List<RaycastHit>();
+            bool ledgeFound = LedgeDetectionHitTest(hitResults);
+            //Vector3 ledgeForce = Vector3.zero;
+            //int count = 0;
+            //for (int i = 0; i < hitResults.Count; i++)
+            //{
+            //    var currentHit = hitResults[i];
+            //    if (currentHit.distance == 0)
+            //    {
+            //        continue;
+            //    }
+            //
+            //    Debug.DrawLine(currentHit.point, currentHit.point + currentHit.normal, Color.yellow, Time.fixedDeltaTime);
+            //    ledgeForce += currentHit.normal.FlattenY();
+            //    count++;
+            //}
+            //ledgeForce /= MMath.Max(count, 1);
+            //ledgeForce *= LedgePullForce;
+            //m_RigidBody.AddForceAtPosition(ledgeForce, FeetPos, ForceMode.Acceleration);
 
 
             // The direction we want to move in
@@ -393,6 +452,263 @@ namespace Manatea.AdventureRoots
                 preciseHit = groundHitResult.collider.Raycast(new Ray(groundHitResult.point - Vector3.up * 0.0001f + groundHitResult.normal * 0.001f, -groundHitResult.normal), out preciseGroundHitResult, 0.1f);
 
             return preciseHit;
+        }
+
+        private RaycastHit[] m_LedgeHits = new RaycastHit[8];
+        public int c_LedgeSamples = 16;
+        private bool LedgeDetection(out Vector3 ledgeDir, out List<Vector3> ledgeList)
+        {
+            ledgeDir = Vector3.zero;
+            ledgeList = new List<Vector3>();
+
+            float radius;
+            float height;
+            Vector3 worldCenter;
+
+            // TODO apply scaling here
+            if (Collider is CapsuleCollider)
+            {
+                var capsuleCollider = Collider as CapsuleCollider;
+                radius = capsuleCollider.radius;
+                height = capsuleCollider.height - radius * 2;
+                worldCenter = transform.TransformPoint(capsuleCollider.center);
+            }
+            else if (Collider is SphereCollider)
+            {
+                var sphereCollider = Collider as SphereCollider;
+                radius = sphereCollider.radius;
+                height = 0;
+                worldCenter = transform.TransformPoint(sphereCollider.center);
+            }
+            else
+            {
+                return false;
+            }
+
+            Vector3 offset = Vector3.forward * LedgeDetectionRadius;
+            
+
+
+            int hits;
+
+            int layerMask = LayerMaskExtensions.CalculatePhysicsLayerMask(gameObject.layer);
+
+            bool[] ledgeId = new bool[c_LedgeSamples];
+            int ledgeCount = 0;
+
+            Vector3 ledgeForce = Vector3.zero;
+            Vector3 p1 = worldCenter + Vector3.up * height / 2;
+            float distance = height + LedgeDetectionDepth;
+            float raycastRadius = radius - SkinThickness;
+            for (int i = 0; i < c_LedgeSamples; i++)
+            {
+                RaycastHit groundHitResult = new RaycastHit();
+                groundHitResult.distance = float.PositiveInfinity;
+
+                Vector3 finalOffset = Quaternion.Euler(0, i / (float)c_LedgeSamples * 360, 0) * offset;
+                hits = Physics.SphereCastNonAlloc(p1 + finalOffset, raycastRadius, Vector3.down, m_GroundHits, distance, layerMask);
+
+                for (int j =  0; j < hits; j++)
+                {
+                    // Discard overlaps
+                    if (m_GroundHits[j].distance == 0)
+                        continue;
+                    // Discard collisions that are further away
+                    if (m_GroundHits[j].distance > groundHitResult.distance)
+                        continue;
+                    // Discard self collisions
+                    if (m_GroundHits[j].collider.transform == Rigidbody.transform)
+                        continue;
+                    if (m_GroundHits[j].collider.transform.IsChildOf(Rigidbody.transform))
+                        continue;
+
+                    groundHitResult = m_GroundHits[j];
+                }
+
+                bool ledge = groundHitResult.distance == float.PositiveInfinity;
+                ledgeId[i] = ledge;
+                if (ledge)
+                {
+                    ledgeForce += finalOffset.normalized;
+                    ledgeList.Add(finalOffset.normalized);
+                    ledgeCount++;
+                }
+
+                if (DebugCharacter)
+                {
+                    DebugHelper.DrawWireSphere(p1 + finalOffset + Vector3.down * distance, raycastRadius, groundHitResult.distance < float.PositiveInfinity ? Color.red : Color.green, Time.fixedDeltaTime, false);
+                }
+            }
+            if (ledgeCount > 0)
+            {
+                ledgeForce *= 1f / ledgeCount;
+            }
+
+            ledgeDir = ledgeForce;
+            return ledgeCount > 0;
+        }
+        private bool LedgeDetectionHitTest(List<RaycastHit> hitResults)
+        {
+            hitResults.Clear();
+
+            float radius;
+            float height;
+            Vector3 worldCenter;
+
+            // TODO apply scaling here
+            if (Collider is CapsuleCollider)
+            {
+                var capsuleCollider = Collider as CapsuleCollider;
+                radius = capsuleCollider.radius;
+                height = capsuleCollider.height - radius * 2;
+                worldCenter = transform.TransformPoint(capsuleCollider.center);
+            }
+            else if (Collider is SphereCollider)
+            {
+                var sphereCollider = Collider as SphereCollider;
+                radius = sphereCollider.radius;
+                height = 0;
+                worldCenter = transform.TransformPoint(sphereCollider.center);
+            }
+            else
+            {
+                return false;
+            }
+
+            Vector3 offset = Vector3.forward * LedgeDetectionRadius;
+            
+
+
+            int hits;
+
+            int layerMask = LayerMaskExtensions.CalculatePhysicsLayerMask(gameObject.layer);
+
+            bool[] ledgeId = new bool[c_LedgeSamples];
+            int ledgeCount = 0;
+
+            Vector3 p1 = worldCenter + Vector3.up * height / 2;
+            float distance = height + LedgeDetectionDepth;
+            float raycastRadius = radius - SkinThickness;
+            for (int i = 0; i < c_LedgeSamples; i++)
+            {
+                RaycastHit groundHitResult = new RaycastHit();
+                groundHitResult.distance = float.PositiveInfinity;
+
+                Vector3 finalOffset = Quaternion.Euler(0, i / (float)c_LedgeSamples * 360, 0) * offset;
+                hits = Physics.SphereCastNonAlloc(p1 + finalOffset, raycastRadius, Vector3.down, m_GroundHits, distance, layerMask);
+
+                for (int j =  0; j < hits; j++)
+                {
+                    // Discard overlaps
+                    if (m_GroundHits[j].distance == 0)
+                        continue;
+                    // Discard collisions that are further away
+                    if (m_GroundHits[j].distance > groundHitResult.distance)
+                        continue;
+                    // Discard self collisions
+                    if (m_GroundHits[j].collider.transform == Rigidbody.transform)
+                        continue;
+                    if (m_GroundHits[j].collider.transform.IsChildOf(Rigidbody.transform))
+                        continue;
+
+                    groundHitResult = m_GroundHits[j];
+                }
+
+                bool ledge = groundHitResult.distance == float.PositiveInfinity;
+                ledgeId[i] = ledge;
+                if (ledge)
+                {
+                    hitResults.Add(new RaycastHit());
+                    ledgeCount++;
+                }
+                else
+                {
+                    hitResults.Add(groundHitResult);
+                }
+
+                if (DebugCharacter)
+                {
+                    DebugHelper.DrawWireSphere(p1 + finalOffset + Vector3.down * distance, raycastRadius, groundHitResult.distance < float.PositiveInfinity ? Color.red : Color.green, Time.fixedDeltaTime, false);
+                }
+            }
+
+            return ledgeCount > 0;
+        }
+
+        private const int c_LedgeKernelWidth = 4;
+        private void LedgeDetectionKernel()
+        {
+
+            float radius;
+            float height;
+            Vector3 worldCenter;
+
+            // TODO apply scaling here
+            if (Collider is CapsuleCollider)
+            {
+                var capsuleCollider = Collider as CapsuleCollider;
+                radius = capsuleCollider.radius;
+                height = capsuleCollider.height - radius * 2;
+                worldCenter = transform.TransformPoint(capsuleCollider.center);
+            }
+            else if (Collider is SphereCollider)
+            {
+                var sphereCollider = Collider as SphereCollider;
+                radius = sphereCollider.radius;
+                height = 0;
+                worldCenter = transform.TransformPoint(sphereCollider.center);
+            }
+            else
+            {
+                return;
+            }
+
+            Vector3 offset = Vector3.forward * LedgeDetectionRadius;
+
+
+
+            int hits;
+
+            int layerMask = LayerMaskExtensions.CalculatePhysicsLayerMask(gameObject.layer);
+
+            Vector3 p1 = worldCenter + Vector3.up * height / 2;
+            float distance = height + LedgeDetectionDepth;
+            float raycastRadius = radius - SkinThickness;
+            for (int i = 0; i <= c_LedgeKernelWidth; i++)
+            {
+                for (int j = 0; j <= c_LedgeKernelWidth; j++)
+                {
+                    RaycastHit groundHitResult = new RaycastHit();
+                    groundHitResult.distance = float.PositiveInfinity;
+
+                    Vector3 finalOffset = Vector3.right * (i / (float)c_LedgeKernelWidth * 2 - 1) * LedgeDetectionRadius + Vector3.forward * (j / (float)c_LedgeKernelWidth * 2 - 1) * LedgeDetectionRadius;
+                    hits = Physics.SphereCastNonAlloc(p1 + finalOffset, raycastRadius, Vector3.down, m_GroundHits, distance, layerMask);
+
+                    for (int k = 0; k < hits; k++)
+                    {
+                        // Discard overlaps
+                        if (m_GroundHits[k].distance == 0)
+                            continue;
+                        // Discard collisions that are further away
+                        if (m_GroundHits[k].distance > groundHitResult.distance)
+                            continue;
+                        // Discard self collisions
+                        if (m_GroundHits[k].collider.transform == Rigidbody.transform)
+                            continue;
+                        if (m_GroundHits[k].collider.transform.IsChildOf(Rigidbody.transform))
+                            continue;
+
+                        groundHitResult = m_GroundHits[k];
+                    }
+
+                    bool ledge = groundHitResult.distance == float.PositiveInfinity;
+
+                    if (DebugCharacter)
+                    {
+                        DebugHelper.DrawWireSphere(p1 + finalOffset + Vector3.down * distance, raycastRadius, ledge ? Color.red : Color.green, Time.fixedDeltaTime, false);
+                    }
+                }
+            }
         }
 
         private IEnumerator CO_Jump(Vector3 velocity, int iterations)

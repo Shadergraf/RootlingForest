@@ -106,49 +106,4 @@ public class PhysicsDebugger : MonoBehaviour
             // TODO use a spawned gameobject to create a spring joint
         }
     }
-
-
-
-
-    //private void Update()
-    //{
-    //    if (Input.GetMouseButtonDown(2))
-    //    {
-    //        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-    //        if (Physics.Raycast(ray, out RaycastHit hit))
-    //        {
-    //            m_GrabObject = hit.collider.GetComponentInParent<Rigidbody>();
-    //            if (m_GrabObject != null)
-    //            {
-    //                m_GrabPosLocal = m_GrabObject.transform.InverseTransformPoint(hit.point);
-    //                m_InitialGrabPosGlobal = hit.point;
-    //            }
-    //        }
-    //    }
-    //    if (Input.GetMouseButtonUp(2))
-    //    {
-    //    }
-    //}
-
-    //private void FixedUpdate()
-    //{
-    //    if (Input.GetMouseButton(2) && m_GrabObject)
-    //    {
-    //        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-    //        Plane plane = new Plane(Camera.main.transform.forward.FlattenY().normalized, m_InitialGrabPosGlobal);
-    //        if (plane.Raycast(ray, out float dist))
-    //        {
-    //            Vector3 targetPoint = ray.GetPoint(dist);
-    //            DebugHelper.DrawWireSphere(targetPoint, 0.1f, Color.red, Time.fixedDeltaTime);
-    //            Vector3 startPoint = m_GrabObject.transform.TransformPoint(m_GrabPosLocal);
-    //            DebugHelper.DrawWireSphere(startPoint, 0.1f, Color.green, Time.fixedDeltaTime);
-    //            Vector3 force = targetPoint - startPoint;
-
-    //            m_GrabObject.AddForceAtPosition(force * 5, m_GrabObject.transform.TransformPoint(m_GrabPosLocal));
-    //        }
-
-
-    //        // TODO use a spawned gameobject to create a spring joint
-    //    }
-    //}
 }

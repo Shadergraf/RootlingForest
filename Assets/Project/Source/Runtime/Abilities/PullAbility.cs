@@ -145,7 +145,9 @@ public class PullAbility : MonoBehaviour
             GrabOrientation bestOrientationMatch = null;
             for (int i = 0; i < m_Target_GrabPrefs.Orientations.Length; i++)
             {
-                float match = -Quaternion.Angle(transform.rotation, m_Target_GrabPrefs.Orientations[i].transform.rotation) / MMath.Max(MMath.Epsilon, m_Target_GrabPrefs.Orientations[i].Weight);
+                float match = -Quaternion.Angle(HandTransform.rotation, m_Target_GrabPrefs.Orientations[i].transform.rotation);
+                match -= Vector3.Distance(HandTransform.position, m_Target_GrabPrefs.Orientations[i].transform.position) * 44;
+                match /= MMath.Max(MMath.Epsilon, m_Target_GrabPrefs.Orientations[i].Weight);
                 if (match < bestMatch)
                 {
                     continue;
@@ -177,6 +179,7 @@ public class PullAbility : MonoBehaviour
         if (AutoTargetPosition)
         {
             // TODO ClosestPointOnBounds uses the bounding box instead of the actual collider. This is imprecise
+            // TODO remove this
             if (Target.TryGetComponent(out PullSettings pullSettings))
             {
                 switch (pullSettings.PullLocation)
@@ -490,7 +493,8 @@ public class PullAbility : MonoBehaviour
         if (anchorsOverlap && driveRotationMatches)
         {
             // line up grabbed object with it's target position and rotation
-            m_Joint.connectedBody.position = (m_Joint.transform.TransformPoint(m_Joint.anchor));
+            //m_Joint.connectedBody.position = m_Joint.transform.TransformPoint(m_Joint.anchor);
+            m_Joint.connectedBody.position += posDelta;
             if (m_Target_GrabPrefs.UseOrientations)
             {
                 m_Joint.connectedBody.rotation = transform.rotation * Quaternion.Inverse(Quaternion.Inverse(targetRotation) * startRotation);
@@ -504,8 +508,15 @@ public class PullAbility : MonoBehaviour
             Component copiedJoint = m_Joint.CopyComponent(gameObject);
             Destroy(m_Joint);
             m_Joint = copiedJoint as ConfigurableJoint;
-            
+
             m_GrabState = GrabState.GrabEstablished;
+        }
+
+        // Lerp to final grab walk/rotation modifiers
+        if (m_Attributes)
+        {
+            m_WalkSpeedModifier.Value = MMath.Damp(m_WalkSpeedModifier.Value, 0.4f, 20, Time.fixedDeltaTime);
+            m_RotationRateModifier.Value = MMath.Damp(m_WalkSpeedModifier.Value, 0.4f, 20, Time.fixedDeltaTime);
         }
     }
 
@@ -687,8 +698,12 @@ public class PullAbility : MonoBehaviour
         moveMult = MMath.Lerp(moveMult, MMath.RemapClamped(0.5f, 0, 1, 1.5f, Self.velocity.magnitude), m_PullingLoad);
         rotMult = MMath.Lerp(rotMult, 0, m_PullingLoad);
 
-        m_WalkSpeedModifier.Value = moveMult;
-        m_RotationRateModifier.Value = rotMult;
+        // Lerp to final grab walk/rotation modifiers
+        if (m_Attributes)
+        {
+            m_WalkSpeedModifier.Value = MMath.Damp(m_WalkSpeedModifier.Value, moveMult, 10, Time.fixedDeltaTime);
+            m_RotationRateModifier.Value = MMath.Damp(m_WalkSpeedModifier.Value, rotMult, 10, Time.fixedDeltaTime);
+        }
     }
 
 
