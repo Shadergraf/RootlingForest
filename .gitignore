@@ -55,3 +55,6 @@ Logs/
 # Nintendo Switch
 SwitchIL2CPPCache
 SwitchIL2CPPStats
+
+# Blender
+*.blend[0-9]*
