@@ -25,7 +25,11 @@ namespace Manatea.AdventureRoots
         public float LedgeDetectionDepth = 0.2f;
         public float LedgeDetectionRadius = 0.2f;
 
-        public float LedgePullForce = 100;
+        public float LedgeBalancingForce = 50;
+        public float LedgeMoveMultiplier = 0.75f;
+
+        public float LedgeStableBalancingForce = 150;
+        public float LedgeStableMoveMultiplier = 0.5f;
 
         [Header("Collision Detection")]
         public Collider Collider;
@@ -36,6 +40,7 @@ namespace Manatea.AdventureRoots
         [Header("Attributes & Tags")]
         public GameplayAttribute m_MoveSpeedAttribute;
         public GameplayAttribute m_RotationRateAttribute;
+        public GameplayAttribute m_LedgeBalancingAttribute;
         public GameplayTag m_NoStableGroundTag;
 
         [Header("Debug")]
@@ -44,6 +49,8 @@ namespace Manatea.AdventureRoots
         public Rigidbody Rigidbody => m_RigidBody;
 
         private Rigidbody m_RigidBody;
+        private GameplayAttributeOwner m_AttributeOwner;
+        private GameplayTagOwner m_TagOwner;
 
         // Input
         private Vector3 m_ScheduledMove;
@@ -70,10 +77,14 @@ namespace Manatea.AdventureRoots
         private void Awake()
         {
             m_RigidBody = GetComponent<Rigidbody>();
+            m_AttributeOwner = GetComponent<GameplayAttributeOwner>();
+            m_TagOwner = GetComponent<GameplayTagOwner>();
 
             m_PhysicsMaterial = new PhysicMaterial();
             m_PhysicsMaterial.frictionCombine = PhysicMaterialCombine.Minimum;
             Collider.material = m_PhysicsMaterial;
+
+
         }
 
         private void OnEnable()
@@ -122,13 +133,13 @@ namespace Manatea.AdventureRoots
             // Get Attributes
             float moveSpeedMult = 1;
             float rotRateMult = 1;
-            if (TryGetComponent(out GameplayAttributeOwner attributes))
+            if (m_AttributeOwner)
             {
-                if (attributes.TryGetAttributeEvaluatedValue(m_MoveSpeedAttribute, out float speed))
+                if (m_AttributeOwner.TryGetAttributeEvaluatedValue(m_MoveSpeedAttribute, out float speed))
                 {
                     moveSpeedMult = speed;
                 }
-                if (attributes.TryGetAttributeEvaluatedValue(m_RotationRateAttribute, out float rot))
+                if (m_AttributeOwner.TryGetAttributeEvaluatedValue(m_RotationRateAttribute, out float rot))
                 {
                     rotRateMult = rot;
                 }
@@ -183,56 +194,58 @@ namespace Manatea.AdventureRoots
             }
 
 
-            //bool ledgeFound = LedgeDetection(out Vector3 ledgeForce, out List<Vector3> ledgeDirs);
-            //if (m_IsStableGrounded && m_ScheduledMove != Vector3.zero && ledgeFound)
-            //{
-            //    //ledgeForce *= m_ScheduledMove.magnitude;
-            //    //ledgeForce *= LedgePullForce;
-            //    //ledgeForce = Vector3.ProjectOnPlane(ledgeForce, m_ScheduledMove.normalized);
-            //    //m_RigidBody.AddForceAtPosition(ledgeForce, FeetPos, ForceMode.Acceleration);
-            //
-            //    for (int i = 0; i < ledgeDirs.Count; i++)
-            //    {
-            //        if (Vector3.Dot(m_ScheduledMove.normalized, ledgeDirs[i]) > 0.95)
-            //        {
-            //            m_ScheduledMove = Vector3.zero;
-            //        }
-            //    }
-            //
-            //
-            //    for (int i = 0; i < ledgeDirs.Count; i++)
-            //    {
-            //        if (Vector3.Dot(m_ScheduledMove.normalized, ledgeDirs[i]) > 0.95)
-            //        {
-            //            m_ScheduledMove = Vector3.zero;
-            //        }
-            //    }
-            //
-            //    if (ledgeFound)
-            //    {
-            //        m_ScheduledMove *= 0.5f;
-            //    }
-            //}
-            //LedgeDetectionKernel();
             List<RaycastHit> hitResults = new List<RaycastHit>();
-            bool ledgeFound = LedgeDetectionHitTest(hitResults);
-            //Vector3 ledgeForce = Vector3.zero;
-            //int count = 0;
-            //for (int i = 0; i < hitResults.Count; i++)
-            //{
-            //    var currentHit = hitResults[i];
-            //    if (currentHit.distance == 0)
-            //    {
-            //        continue;
-            //    }
-            //
-            //    Debug.DrawLine(currentHit.point, currentHit.point + currentHit.normal, Color.yellow, Time.fixedDeltaTime);
-            //    ledgeForce += currentHit.normal.FlattenY();
-            //    count++;
-            //}
-            //ledgeForce /= MMath.Max(count, 1);
-            //ledgeForce *= LedgePullForce;
-            //m_RigidBody.AddForceAtPosition(ledgeForce, FeetPos, ForceMode.Acceleration);
+            bool ledgeFound = LedgeDetection(hitResults);
+            if (groundDetected && ledgeFound)
+            {
+                Vector3 ledgeForce = Vector3.zero;
+                int count = 0;
+                for (int i = 0; i < hitResults.Count; i++)
+                {
+                    var currentHit = hitResults[i];
+                    if (currentHit.distance == 0)
+                    {
+                        continue;
+                    }
+            
+                    Debug.DrawLine(currentHit.point, currentHit.point + currentHit.normal, Color.yellow, Time.fixedDeltaTime);
+                    ledgeForce += -currentHit.normal.FlattenY();
+                    count++;
+                }
+                ledgeForce /= MMath.Max(count, 1);
+
+                // Balancing wiggle
+                if (m_ScheduledMove != Vector3.zero)
+                {
+                    Vector3 imbalance = Vector3.Cross(m_ScheduledMove.normalized, Vector3.up);
+                    imbalance *= MMath.Pow(Mathf.PerlinNoise1D(Time.time * m_ScheduledMove.magnitude * 0.4f), 2) * 2 - 1;
+                    imbalance *= m_ScheduledMove.magnitude;
+                    imbalance *= 0.45f;
+                    m_ScheduledMove += imbalance;
+                }
+
+                // TODO remove this and put it in a dedicated ability that allows the player to balance better by using their hands
+                if (Input.GetMouseButton(0))
+                {
+                    ledgeForce *= LedgeStableBalancingForce;
+                    m_ScheduledMove *= LedgeStableMoveMultiplier;
+                }
+                else
+                {
+                    ledgeForce *= LedgeBalancingForce;
+                    m_ScheduledMove *= LedgeMoveMultiplier;
+                }
+
+                if (m_AttributeOwner && m_AttributeOwner.TryGetAttributeEvaluatedValue(m_LedgeBalancingAttribute, out float att_balance))
+                {
+                    ledgeForce *= att_balance;
+                }
+
+                m_RigidBody.AddForceAtPosition(ledgeForce, FeetPos, ForceMode.Acceleration);
+
+                m_IsStableGrounded = true;
+                m_IsSliding = false;
+            }
 
 
             // The direction we want to move in
@@ -456,98 +469,7 @@ namespace Manatea.AdventureRoots
 
         private RaycastHit[] m_LedgeHits = new RaycastHit[8];
         public int c_LedgeSamples = 16;
-        private bool LedgeDetection(out Vector3 ledgeDir, out List<Vector3> ledgeList)
-        {
-            ledgeDir = Vector3.zero;
-            ledgeList = new List<Vector3>();
-
-            float radius;
-            float height;
-            Vector3 worldCenter;
-
-            // TODO apply scaling here
-            if (Collider is CapsuleCollider)
-            {
-                var capsuleCollider = Collider as CapsuleCollider;
-                radius = capsuleCollider.radius;
-                height = capsuleCollider.height - radius * 2;
-                worldCenter = transform.TransformPoint(capsuleCollider.center);
-            }
-            else if (Collider is SphereCollider)
-            {
-                var sphereCollider = Collider as SphereCollider;
-                radius = sphereCollider.radius;
-                height = 0;
-                worldCenter = transform.TransformPoint(sphereCollider.center);
-            }
-            else
-            {
-                return false;
-            }
-
-            Vector3 offset = Vector3.forward * LedgeDetectionRadius;
-            
-
-
-            int hits;
-
-            int layerMask = LayerMaskExtensions.CalculatePhysicsLayerMask(gameObject.layer);
-
-            bool[] ledgeId = new bool[c_LedgeSamples];
-            int ledgeCount = 0;
-
-            Vector3 ledgeForce = Vector3.zero;
-            Vector3 p1 = worldCenter + Vector3.up * height / 2;
-            float distance = height + LedgeDetectionDepth;
-            float raycastRadius = radius - SkinThickness;
-            for (int i = 0; i < c_LedgeSamples; i++)
-            {
-                RaycastHit groundHitResult = new RaycastHit();
-                groundHitResult.distance = float.PositiveInfinity;
-
-                Vector3 finalOffset = Quaternion.Euler(0, i / (float)c_LedgeSamples * 360, 0) * offset;
-                hits = Physics.SphereCastNonAlloc(p1 + finalOffset, raycastRadius, Vector3.down, m_GroundHits, distance, layerMask);
-
-                for (int j =  0; j < hits; j++)
-                {
-                    // Discard overlaps
-                    if (m_GroundHits[j].distance == 0)
-                        continue;
-                    // Discard collisions that are further away
-                    if (m_GroundHits[j].distance > groundHitResult.distance)
-                        continue;
-                    // Discard self collisions
-                    if (m_GroundHits[j].collider.transform == Rigidbody.transform)
-                        continue;
-                    if (m_GroundHits[j].collider.transform.IsChildOf(Rigidbody.transform))
-                        continue;
-
-                    groundHitResult = m_GroundHits[j];
-                }
-
-                bool ledge = groundHitResult.distance == float.PositiveInfinity;
-                ledgeId[i] = ledge;
-                if (ledge)
-                {
-                    ledgeForce += finalOffset.normalized;
-                    ledgeList.Add(finalOffset.normalized);
-                    ledgeCount++;
-                }
-
-                if (DebugCharacter)
-                {
-                    DebugHelper.DrawWireSphere(p1 + finalOffset + Vector3.down * distance, raycastRadius, groundHitResult.distance < float.PositiveInfinity ? Color.red : Color.green, Time.fixedDeltaTime, false);
-                }
-            }
-            if (ledgeCount > 0)
-            {
-                ledgeForce *= 1f / ledgeCount;
-            }
-
-            ledgeDir = ledgeForce;
-            return ledgeCount > 0;
-        }
-        private bool LedgeDetectionHitTest(List<RaycastHit> hitResults)
+        private bool LedgeDetection(List<RaycastHit> hitResults)
         {
             hitResults.Clear();
 
@@ -586,7 +508,8 @@ namespace Manatea.AdventureRoots
             bool[] ledgeId = new bool[c_LedgeSamples];
             int ledgeCount = 0;
 
-            Vector3 p1 = worldCenter + Vector3.up * height / 2;
+            Vector3 p1 = worldCenter + Vector3.up * LedgeDetectionDepth;
+            Vector3 p2 = FeetPos;
             float distance = height + LedgeDetectionDepth;
             float raycastRadius = radius - SkinThickness;
             for (int i = 0; i < c_LedgeSamples; i++)
@@ -594,8 +517,9 @@ namespace Manatea.AdventureRoots
                 RaycastHit groundHitResult = new RaycastHit();
                 groundHitResult.distance = float.PositiveInfinity;
 
-                Vector3 finalOffset = Quaternion.Euler(0, i / (float)c_LedgeSamples * 360, 0) * offset;
-                hits = Physics.SphereCastNonAlloc(p1 + finalOffset, raycastRadius, Vector3.down, m_GroundHits, distance, layerMask);
+                Vector3 p1WithOffset = p1 + Quaternion.Euler(0, i / (float)c_LedgeSamples * 360, 0) * offset;
+                Vector3 p1toP2 = p2 - p1WithOffset;
+                hits = Physics.SphereCastNonAlloc(p1WithOffset, raycastRadius, p1toP2.normalized, m_GroundHits, p1toP2.magnitude, layerMask);
 
                 for (int j =  0; j < hits; j++)
                 {
@@ -628,87 +552,16 @@ namespace Manatea.AdventureRoots
 
                 if (DebugCharacter)
                 {
-                    DebugHelper.DrawWireSphere(p1 + finalOffset + Vector3.down * distance, raycastRadius, groundHitResult.distance < float.PositiveInfinity ? Color.red : Color.green, Time.fixedDeltaTime, false);
-                }
-            }
-
-            return ledgeCount > 0;
-        }
-
-        private const int c_LedgeKernelWidth = 4;
-        private void LedgeDetectionKernel()
-        {
-
-            float radius;
-            float height;
-            Vector3 worldCenter;
-
-            // TODO apply scaling here
-            if (Collider is CapsuleCollider)
-            {
-                var capsuleCollider = Collider as CapsuleCollider;
-                radius = capsuleCollider.radius;
-                height = capsuleCollider.height - radius * 2;
-                worldCenter = transform.TransformPoint(capsuleCollider.center);
-            }
-            else if (Collider is SphereCollider)
-            {
-                var sphereCollider = Collider as SphereCollider;
-                radius = sphereCollider.radius;
-                height = 0;
-                worldCenter = transform.TransformPoint(sphereCollider.center);
-            }
-            else
-            {
-                return;
-            }
-
-            Vector3 offset = Vector3.forward * LedgeDetectionRadius;
-
-
-
-            int hits;
-
-            int layerMask = LayerMaskExtensions.CalculatePhysicsLayerMask(gameObject.layer);
-
-            Vector3 p1 = worldCenter + Vector3.up * height / 2;
-            float distance = height + LedgeDetectionDepth;
-            float raycastRadius = radius - SkinThickness;
-            for (int i = 0; i <= c_LedgeKernelWidth; i++)
-            {
-                for (int j = 0; j <= c_LedgeKernelWidth; j++)
-                {
-                    RaycastHit groundHitResult = new RaycastHit();
-                    groundHitResult.distance = float.PositiveInfinity;
-
-                    Vector3 finalOffset = Vector3.right * (i / (float)c_LedgeKernelWidth * 2 - 1) * LedgeDetectionRadius + Vector3.forward * (j / (float)c_LedgeKernelWidth * 2 - 1) * LedgeDetectionRadius;
-                    hits = Physics.SphereCastNonAlloc(p1 + finalOffset, raycastRadius, Vector3.down, m_GroundHits, distance, layerMask);
-
-                    for (int k = 0; k < hits; k++)
+                    DebugHelper.DrawWireSphere(p1WithOffset, raycastRadius, groundHitResult.distance < float.PositiveInfinity ? Color.red : Color.green, Time.fixedDeltaTime, false);
+                    DebugHelper.DrawWireSphere(p1WithOffset + p1toP2, raycastRadius, groundHitResult.distance < float.PositiveInfinity ? Color.red : Color.green, Time.fixedDeltaTime, false);
+                    if (!ledge)
                     {
-                        // Discard overlaps
-                        if (m_GroundHits[k].distance == 0)
-                            continue;
-                        // Discard collisions that are further away
-                        if (m_GroundHits[k].distance > groundHitResult.distance)
-                            continue;
-                        // Discard self collisions
-                        if (m_GroundHits[k].collider.transform == Rigidbody.transform)
-                            continue;
-                        if (m_GroundHits[k].collider.transform.IsChildOf(Rigidbody.transform))
-                            continue;
-
-                        groundHitResult = m_GroundHits[k];
-                    }
-
-                    bool ledge = groundHitResult.distance == float.PositiveInfinity;
-
-                    if (DebugCharacter)
-                    {
-                        DebugHelper.DrawWireSphere(p1 + finalOffset + Vector3.down * distance, raycastRadius, ledge ? Color.red : Color.green, Time.fixedDeltaTime, false);
+                        Debug.DrawLine(groundHitResult.point, groundHitResult.point + groundHitResult.normal, Color.yellow, Time.fixedDeltaTime);
                     }
                 }
             }
+
+            return true;
         }
 
         private IEnumerator CO_Jump(Vector3 velocity, int iterations)
