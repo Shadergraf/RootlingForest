@@ -22,7 +22,8 @@ namespace Manatea.AdventureRoots
         public float GroundRotationRate = 10;
         public float AirRotationRate = 0.05f;
 
-        public float LedgeDetectionDepth = 0.2f;
+        public float LedgeDetectionStart = 0.2f;
+        public float LedgeDetectionEnd = -0.2f;
         public float LedgeDetectionRadius = 0.2f;
 
         public float LedgeBalancingForce = 50;
@@ -30,6 +31,9 @@ namespace Manatea.AdventureRoots
 
         public float LedgeStableBalancingForce = 150;
         public float LedgeStableMoveMultiplier = 0.5f;
+
+        public float LedgeBalancingWobbleTime = 0.8f;
+        public float LedgeBalancingWobbleAmount = 0.45f;
 
         [Header("Collision Detection")]
         public Collider Collider;
@@ -196,31 +200,17 @@ namespace Manatea.AdventureRoots
 
             List<RaycastHit> hitResults = new List<RaycastHit>();
             bool ledgeFound = LedgeDetection(hitResults);
-            if (groundDetected && ledgeFound)
+            if (m_IsStableGrounded && ledgeFound)
             {
-                Vector3 ledgeForce = Vector3.zero;
-                int count = 0;
-                for (int i = 0; i < hitResults.Count; i++)
-                {
-                    var currentHit = hitResults[i];
-                    if (currentHit.distance == 0)
-                    {
-                        continue;
-                    }
-            
-                    Debug.DrawLine(currentHit.point, currentHit.point + currentHit.normal, Color.yellow, Time.fixedDeltaTime);
-                    ledgeForce += -currentHit.normal.FlattenY();
-                    count++;
-                }
-                ledgeForce /= MMath.Max(count, 1);
+                Vector3 ledgeForce = (groundHitResult.point - FeetPos).FlattenY();
 
                 // Balancing wiggle
                 if (m_ScheduledMove != Vector3.zero)
                 {
                     Vector3 imbalance = Vector3.Cross(m_ScheduledMove.normalized, Vector3.up);
-                    imbalance *= MMath.Pow(Mathf.PerlinNoise1D(Time.time * m_ScheduledMove.magnitude * 0.4f), 2) * 2 - 1;
+                    imbalance *= Mathf.PerlinNoise1D(Time.time * m_ScheduledMove.magnitude * LedgeBalancingWobbleTime) * 2 - 1;
                     imbalance *= m_ScheduledMove.magnitude;
-                    imbalance *= 0.45f;
+                    imbalance *= LedgeBalancingWobbleAmount;
                     m_ScheduledMove += imbalance;
                 }
 
@@ -242,9 +232,6 @@ namespace Manatea.AdventureRoots
                 }
 
                 m_RigidBody.AddForceAtPosition(ledgeForce, FeetPos, ForceMode.Acceleration);
-
-                m_IsStableGrounded = true;
-                m_IsSliding = false;
             }
 
 
@@ -382,7 +369,7 @@ namespace Manatea.AdventureRoots
         private int m_GroundColliderCount = 0;
         private Collider[] m_GroundColliders = new Collider[8];
 
-        private RaycastHit[] m_GroundHits = new RaycastHit[8];
+        private RaycastHit[] m_GroundHits = new RaycastHit[32];
         private bool DetectGround(out RaycastHit groundHitResult, out RaycastHit preciseGroundHitResult)
         {
             groundHitResult = new RaycastHit();
@@ -467,8 +454,7 @@ namespace Manatea.AdventureRoots
             return preciseHit;
         }
 
-        private RaycastHit[] m_LedgeHits = new RaycastHit[8];
-        public int c_LedgeSamples = 16;
+        private const int c_LedgeSamples = 8;
         private bool LedgeDetection(List<RaycastHit> hitResults)
         {
             hitResults.Clear();
@@ -508,18 +494,14 @@ namespace Manatea.AdventureRoots
             bool[] ledgeId = new bool[c_LedgeSamples];
             int ledgeCount = 0;
 
-            Vector3 p1 = worldCenter + Vector3.up * LedgeDetectionDepth;
-            Vector3 p2 = FeetPos;
-            float distance = height + LedgeDetectionDepth;
-            float raycastRadius = radius - SkinThickness;
             for (int i = 0; i < c_LedgeSamples; i++)
             {
                 RaycastHit groundHitResult = new RaycastHit();
                 groundHitResult.distance = float.PositiveInfinity;
 
-                Vector3 p1WithOffset = p1 + Quaternion.Euler(0, i / (float)c_LedgeSamples * 360, 0) * offset;
-                Vector3 p1toP2 = p2 - p1WithOffset;
-                hits = Physics.SphereCastNonAlloc(p1WithOffset, raycastRadius, p1toP2.normalized, m_GroundHits, p1toP2.magnitude, layerMask);
+                Vector3 p1 = FeetPos + Vector3.up * LedgeDetectionStart + Quaternion.Euler(0, i / (float)c_LedgeSamples * 360, 0) * offset;
+                Vector3 p2 = FeetPos + Vector3.up * LedgeDetectionEnd + Quaternion.Euler(0, i / (float)c_LedgeSamples * 360, 0) * offset;
+                hits = Physics.SphereCastNonAlloc(p1, radius, (p2 - p1).normalized, m_GroundHits, (p2 - p1).magnitude, layerMask);
 
                 for (int j =  0; j < hits; j++)
                 {
@@ -552,8 +534,8 @@ namespace Manatea.AdventureRoots
 
                 if (DebugCharacter)
                 {
-                    DebugHelper.DrawWireSphere(p1WithOffset, raycastRadius, groundHitResult.distance < float.PositiveInfinity ? Color.red : Color.green, Time.fixedDeltaTime, false);
-                    DebugHelper.DrawWireSphere(p1WithOffset + p1toP2, raycastRadius, groundHitResult.distance < float.PositiveInfinity ? Color.red : Color.green, Time.fixedDeltaTime, false);
+                    DebugHelper.DrawWireSphere(p1, radius, groundHitResult.distance < float.PositiveInfinity ? Color.red : Color.green, Time.fixedDeltaTime, false);
+                    DebugHelper.DrawWireSphere(p2, radius, groundHitResult.distance < float.PositiveInfinity ? Color.red : Color.green, Time.fixedDeltaTime, false);
                     if (!ledge)
                     {
                         Debug.DrawLine(groundHitResult.point, groundHitResult.point + groundHitResult.normal, Color.yellow, Time.fixedDeltaTime);
@@ -561,7 +543,7 @@ namespace Manatea.AdventureRoots
                 }
             }
 
-            return true;
+            return ledgeCount > 0;
         }
 
         private IEnumerator CO_Jump(Vector3 velocity, int iterations)

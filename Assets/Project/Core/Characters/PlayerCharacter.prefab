@@ -280,12 +280,17 @@ PrefabInstance:
     - target: {fileID: 8597781962724660110, guid: 10e5fa5dfab45f14ab93f58ee4b2416d,
         type: 3}
       propertyPath: GroundRotationRate
-      value: 0.35
+      value: 0.45
       objectReference: {fileID: 0}
     - target: {fileID: 8597781962724660110, guid: 10e5fa5dfab45f14ab93f58ee4b2416d,
         type: 3}
       propertyPath: FeetAngularTraction
       value: 25.96
+      objectReference: {fileID: 0}
+    - target: {fileID: 8597781962724660110, guid: 10e5fa5dfab45f14ab93f58ee4b2416d,
+        type: 3}
+      propertyPath: FeetAngularResistance
+      value: 50
       objectReference: {fileID: 0}
     - target: {fileID: 8637521886535575888, guid: 10e5fa5dfab45f14ab93f58ee4b2416d,
         type: 3}
