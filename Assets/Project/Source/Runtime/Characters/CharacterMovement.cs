@@ -22,9 +22,12 @@ namespace Manatea.AdventureRoots
         public float GroundRotationRate = 10;
         public float AirRotationRate = 0.05f;
 
+        [Header("Ledge Detection")]
+        public int LedgeDetectionSamples = 8;
         public float LedgeDetectionStart = 0.2f;
         public float LedgeDetectionEnd = -0.2f;
-        public float LedgeDetectionRadius = 0.2f;
+        public float LedgeDetectionDistance = 0.2f;
+        public float LedgeDetectionRadius = 0.4f;
 
         public float LedgeBalancingForce = 50;
         public float LedgeMoveMultiplier = 0.75f;
@@ -59,7 +62,6 @@ namespace Manatea.AdventureRoots
         // Input
         private Vector3 m_ScheduledMove;
         private Vector3 m_TargetLookDir;
-        private bool m_IsRotating;
         private bool m_ScheduledJump;
 
         // Constants
@@ -71,9 +73,9 @@ namespace Manatea.AdventureRoots
         private float m_ForceAirborneTimer;
         private float m_AirborneTimer;
         private float m_JumpTimer;
+        private float m_LedgeTimer;
         private bool m_HasJumped;
         private PhysicMaterial m_PhysicsMaterial;
-        private Vector3 m_CurrentRotation;
 
         public Vector3 FeetPos => Collider.ClosestPoint(transform.position + Physics.gravity * 10000);
 
@@ -87,8 +89,6 @@ namespace Manatea.AdventureRoots
             m_PhysicsMaterial = new PhysicMaterial();
             m_PhysicsMaterial.frictionCombine = PhysicMaterialCombine.Minimum;
             Collider.material = m_PhysicsMaterial;
-
-
         }
 
         private void OnEnable()
@@ -105,7 +105,6 @@ namespace Manatea.AdventureRoots
             if (rotateTowardsMove && m_ScheduledMove != Vector3.zero)
             {
                 m_TargetLookDir = m_ScheduledMove.normalized;
-                m_IsRotating = true;
             }
         }
         public void SetTargetRotation(Vector3 targetRotation)
@@ -198,10 +197,29 @@ namespace Manatea.AdventureRoots
             }
 
 
+            #region Ledge Detection
+
             List<RaycastHit> hitResults = new List<RaycastHit>();
             bool ledgeFound = LedgeDetection(hitResults);
+
+
+            // TODO better analysis of what kind of ledge we are currently dealing with
+            // Single ledge, ledge on one distinct side of the samples (standing on on the edge of teh crater)
+            // Dual ledge, ledge on two distinct regions (when balancing on a beam)
+            // Multi ledge, multiple/random ledge regions (when balancing over a T-crossing)
+            // Pole ledge, ledges all around the player (when balancing on a single pole)
+
+
+            // TODO when detecting ground below the player (in a bigger radius) slightly push the player towards that direction
+            //      to make difficult jumps a bit easier (like landing on a thin pole, or making a long jump)
+
+
             if (m_IsStableGrounded && ledgeFound)
             {
+                m_LedgeTimer += dt;
+                float ledgeMult = 1;
+
+
                 Vector3 ledgeForce = (groundHitResult.point - FeetPos).FlattenY();
 
                 // Balancing wiggle
@@ -211,6 +229,7 @@ namespace Manatea.AdventureRoots
                     imbalance *= Mathf.PerlinNoise1D(Time.time * m_ScheduledMove.magnitude * LedgeBalancingWobbleTime) * 2 - 1;
                     imbalance *= m_ScheduledMove.magnitude;
                     imbalance *= LedgeBalancingWobbleAmount;
+                    imbalance *= ledgeMult;
                     m_ScheduledMove += imbalance;
                 }
 
@@ -218,21 +237,31 @@ namespace Manatea.AdventureRoots
                 if (Input.GetMouseButton(0))
                 {
                     ledgeForce *= LedgeStableBalancingForce;
-                    m_ScheduledMove *= LedgeStableMoveMultiplier;
+                    m_ScheduledMove *= MMath.Lerp(1, LedgeStableMoveMultiplier, ledgeMult);
                 }
                 else
                 {
                     ledgeForce *= LedgeBalancingForce;
-                    m_ScheduledMove *= LedgeMoveMultiplier;
+                    m_ScheduledMove *= MMath.Lerp(1, LedgeMoveMultiplier, ledgeMult);
                 }
 
                 if (m_AttributeOwner && m_AttributeOwner.TryGetAttributeEvaluatedValue(m_LedgeBalancingAttribute, out float att_balance))
                 {
                     ledgeForce *= att_balance;
                 }
+                ledgeForce *= ledgeMult;
 
                 m_RigidBody.AddForceAtPosition(ledgeForce, FeetPos, ForceMode.Acceleration);
             }
+            else
+            {
+                if (!ledgeFound)
+                {
+                    m_LedgeTimer = 0;
+                }
+            }
+
+            #endregion
 
 
             // The direction we want to move in
@@ -282,12 +311,6 @@ namespace Manatea.AdventureRoots
                 }
 
 
-                // Add rotation torque
-                if (m_IsRotating)
-                {
-                    m_CurrentRotation = Vector3.Slerp(transform.forward, m_TargetLookDir, MMath.Damp(0, 1, 100, dt));
-                    m_IsRotating = false;
-                }
                 // TODO adding 90 deg to the character rotation works out, it might be a hack tho and is not tested in every scenario, could break
                 float targetRotationTorque = MMath.DeltaAngle((m_RigidBody.rotation.eulerAngles.y + 90) * MMath.Deg2Rad, MMath.Atan2(m_TargetLookDir.z, -m_TargetLookDir.x)) * MMath.Rad2Deg;
                 if (m_IsStableGrounded && !m_IsSliding)
@@ -454,53 +477,28 @@ namespace Manatea.AdventureRoots
             return preciseHit;
         }
 
-        private const int c_LedgeSamples = 8;
         private bool LedgeDetection(List<RaycastHit> hitResults)
         {
             hitResults.Clear();
 
-            float radius;
-            float height;
-            Vector3 worldCenter;
+            float radius = LedgeDetectionRadius;
 
-            // TODO apply scaling here
-            if (Collider is CapsuleCollider)
-            {
-                var capsuleCollider = Collider as CapsuleCollider;
-                radius = capsuleCollider.radius;
-                height = capsuleCollider.height - radius * 2;
-                worldCenter = transform.TransformPoint(capsuleCollider.center);
-            }
-            else if (Collider is SphereCollider)
-            {
-                var sphereCollider = Collider as SphereCollider;
-                radius = sphereCollider.radius;
-                height = 0;
-                worldCenter = transform.TransformPoint(sphereCollider.center);
-            }
-            else
-            {
-                return false;
-            }
-
-            Vector3 offset = Vector3.forward * LedgeDetectionRadius;
+            Vector3 offset = Vector3.right * LedgeDetectionDistance;
             
-
-
             int hits;
 
             int layerMask = LayerMaskExtensions.CalculatePhysicsLayerMask(gameObject.layer);
 
-            bool[] ledgeId = new bool[c_LedgeSamples];
+            bool[] ledgeId = new bool[LedgeDetectionSamples];
             int ledgeCount = 0;
 
-            for (int i = 0; i < c_LedgeSamples; i++)
+            for (int i = 0; i < LedgeDetectionSamples; i++)
             {
                 RaycastHit groundHitResult = new RaycastHit();
                 groundHitResult.distance = float.PositiveInfinity;
 
-                Vector3 p1 = FeetPos + Vector3.up * LedgeDetectionStart + Quaternion.Euler(0, i / (float)c_LedgeSamples * 360, 0) * offset;
-                Vector3 p2 = FeetPos + Vector3.up * LedgeDetectionEnd + Quaternion.Euler(0, i / (float)c_LedgeSamples * 360, 0) * offset;
+                Vector3 p1 = FeetPos + Vector3.up * LedgeDetectionStart + Quaternion.Euler(0, -i / (float)LedgeDetectionSamples * 360, 0) * offset;
+                Vector3 p2 = FeetPos + Vector3.up * LedgeDetectionEnd + Quaternion.Euler(0, -i / (float)LedgeDetectionSamples * 360, 0) * offset;
                 hits = Physics.SphereCastNonAlloc(p1, radius, (p2 - p1).normalized, m_GroundHits, (p2 - p1).magnitude, layerMask);
 
                 for (int j =  0; j < hits; j++)
@@ -534,16 +532,16 @@ namespace Manatea.AdventureRoots
 
                 if (DebugCharacter)
                 {
-                    DebugHelper.DrawWireSphere(p1, radius, groundHitResult.distance < float.PositiveInfinity ? Color.red : Color.green, Time.fixedDeltaTime, false);
-                    DebugHelper.DrawWireSphere(p2, radius, groundHitResult.distance < float.PositiveInfinity ? Color.red : Color.green, Time.fixedDeltaTime, false);
-                    if (!ledge)
-                    {
-                        Debug.DrawLine(groundHitResult.point, groundHitResult.point + groundHitResult.normal, Color.yellow, Time.fixedDeltaTime);
-                    }
+                    //DebugHelper.DrawWireSphere(p1, radius, groundHitResult.distance < float.PositiveInfinity ? Color.red : Color.green, Time.fixedDeltaTime, false);
+                    DebugHelper.DrawWireSphere(p2, radius, ledge ? Color.green : Color.red, Time.fixedDeltaTime, false);
                 }
             }
 
             return ledgeCount > 0;
+        }
+        private int DirectionToLedgeId(Vector3 direction)
+        {
+            return MMath.Mod(MMath.RoundToInt(MMath.DirToAng(direction.XZ()) / MMath.TAU * LedgeDetectionSamples), LedgeDetectionSamples);
         }
 
         private IEnumerator CO_Jump(Vector3 velocity, int iterations)
