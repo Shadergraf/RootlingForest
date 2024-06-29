@@ -11364,7 +11364,7 @@ PrefabInstance:
     - target: {fileID: 4196628262980758534, guid: d62bf33f356aaad44b6590ec697f4088,
         type: 3}
       propertyPath: LedgeDetectionEnd
-      value: -0.5
+      value: -0.2
       objectReference: {fileID: 0}
     - target: {fileID: 4196628262980758534, guid: d62bf33f356aaad44b6590ec697f4088,
         type: 3}
@@ -11384,7 +11384,7 @@ PrefabInstance:
     - target: {fileID: 4196628262980758534, guid: d62bf33f356aaad44b6590ec697f4088,
         type: 3}
       propertyPath: LedgeDetectionRadius
-      value: 0.25
+      value: 0.2
       objectReference: {fileID: 0}
     - target: {fileID: 4196628262980758534, guid: d62bf33f356aaad44b6590ec697f4088,
         type: 3}

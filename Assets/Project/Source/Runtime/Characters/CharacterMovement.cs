@@ -23,7 +23,6 @@ namespace Manatea.AdventureRoots
         public float AirRotationRate = 0.05f;
 
         [Header("Ledge Detection")]
-        public int LedgeDetectionSamples = 8;
         public float LedgeDetectionStart = 0.2f;
         public float LedgeDetectionEnd = -0.2f;
         public float LedgeDetectionDistance = 0.2f;
@@ -37,6 +36,8 @@ namespace Manatea.AdventureRoots
 
         public float LedgeBalancingWobbleTime = 0.8f;
         public float LedgeBalancingWobbleAmount = 0.45f;
+
+        public float LedgeLandMagnetism = 1;
 
         [Header("Collision Detection")]
         public Collider Collider;
@@ -77,7 +78,24 @@ namespace Manatea.AdventureRoots
         private bool m_HasJumped;
         private PhysicMaterial m_PhysicsMaterial;
 
+        // Ledge Detection
+        private const int c_LedgeDetectionSamples = 8;
+        private const int c_LedgeDetectionIterations = 2;
+        private const int c_TotalLedgeDetectionSamples = c_LedgeDetectionSamples * c_LedgeDetectionIterations;
+        private LedgeSample[] m_LedgeSamples = new LedgeSample[c_LedgeDetectionSamples * c_LedgeDetectionIterations];
+        private int m_LedgeDetectionFrame = -1;
+
         public Vector3 FeetPos => Collider.ClosestPoint(transform.position + Physics.gravity * 10000);
+
+
+        private struct LedgeSample
+        {
+            public bool IsLedge;
+            public Vector3 Direction;
+            public Vector3 StartPosition;
+            public Vector3 EndPosition;
+            public RaycastHit Hit;
+        }
 
 
         private void Awake()
@@ -199,9 +217,16 @@ namespace Manatea.AdventureRoots
 
             #region Ledge Detection
 
-            List<RaycastHit> hitResults = new List<RaycastHit>();
-            bool ledgeFound = LedgeDetection(hitResults);
-
+            bool ledgeFound = LedgeDetection();
+            if (DebugCharacter)
+            {
+                for (int i = 0; i < c_TotalLedgeDetectionSamples; i++)
+                {
+                    var sample = m_LedgeSamples[i];
+                    //DebugHelper.DrawWireSphere(sample.StartPosition, LedgeDetectionRadius, sample.IsLedge ? Color.red : Color.green, Time.fixedDeltaTime, false);
+                    DebugHelper.DrawWireSphere(transform.position + sample.Direction, LedgeDetectionRadius, sample.IsLedge ? Color.red : Color.green, Time.fixedDeltaTime, false);
+                }
+            }
 
             // TODO better analysis of what kind of ledge we are currently dealing with
             // Single ledge, ledge on one distinct side of the samples (standing on on the edge of teh crater)
@@ -213,52 +238,60 @@ namespace Manatea.AdventureRoots
             // TODO when detecting ground below the player (in a bigger radius) slightly push the player towards that direction
             //      to make difficult jumps a bit easier (like landing on a thin pole, or making a long jump)
 
-
-            if (m_IsStableGrounded && ledgeFound)
+            if (ledgeFound)
             {
-                m_LedgeTimer += dt;
-                float ledgeMult = 1;
-
-
-                Vector3 ledgeForce = (groundHitResult.point - FeetPos).FlattenY();
-
-                // Balancing wiggle
-                if (m_ScheduledMove != Vector3.zero)
+                if (m_IsStableGrounded)
                 {
-                    Vector3 imbalance = Vector3.Cross(m_ScheduledMove.normalized, Vector3.up);
-                    imbalance *= Mathf.PerlinNoise1D(Time.time * m_ScheduledMove.magnitude * LedgeBalancingWobbleTime) * 2 - 1;
-                    imbalance *= m_ScheduledMove.magnitude;
-                    imbalance *= LedgeBalancingWobbleAmount;
-                    imbalance *= ledgeMult;
-                    m_ScheduledMove += imbalance;
-                }
+                    m_LedgeTimer += dt;
 
-                // TODO remove this and put it in a dedicated ability that allows the player to balance better by using their hands
-                if (Input.GetMouseButton(0))
-                {
-                    ledgeForce *= LedgeStableBalancingForce;
-                    m_ScheduledMove *= MMath.Lerp(1, LedgeStableMoveMultiplier, ledgeMult);
-                }
-                else
-                {
-                    ledgeForce *= LedgeBalancingForce;
-                    m_ScheduledMove *= MMath.Lerp(1, LedgeMoveMultiplier, ledgeMult);
-                }
+                    Vector3 ledgeDir = groundHitResult.point - FeetPos;
+                    Vector3 ledgeDirProjected = ledgeDir.FlattenY();
 
-                if (m_AttributeOwner && m_AttributeOwner.TryGetAttributeEvaluatedValue(m_LedgeBalancingAttribute, out float att_balance))
-                {
-                    ledgeForce *= att_balance;
-                }
-                ledgeForce *= ledgeMult;
+                    Vector3 ledgeForce = ledgeDirProjected;
 
-                m_RigidBody.AddForceAtPosition(ledgeForce, FeetPos, ForceMode.Acceleration);
+                    // Balancing wiggle
+                    if (m_ScheduledMove != Vector3.zero)
+                    {
+                        Vector3 imbalance = Vector3.Cross(m_ScheduledMove.normalized, Vector3.up);
+                        imbalance *= Mathf.PerlinNoise1D(Time.time * m_ScheduledMove.magnitude * LedgeBalancingWobbleTime) * 2 - 1;
+                        imbalance *= m_ScheduledMove.magnitude;
+                        imbalance *= LedgeBalancingWobbleAmount;
+                        m_ScheduledMove += imbalance;
+                    }
+
+                    // TODO remove this and put it in a dedicated ability that allows the player to balance better by using their hands
+                    // Stabilize when holding mouse
+                    if (Input.GetMouseButton(0))
+                    {
+                        ledgeForce *= LedgeStableBalancingForce;
+                        m_ScheduledMove *= LedgeStableMoveMultiplier;
+                    }
+                    else
+                    {
+                        ledgeForce *= LedgeBalancingForce;
+                        m_ScheduledMove *= LedgeMoveMultiplier;
+                    }
+
+                    // Balance attribute
+                    if (m_AttributeOwner && m_AttributeOwner.TryGetAttributeEvaluatedValue(m_LedgeBalancingAttribute, out float att_balance))
+                    {
+                        ledgeForce *= att_balance;
+                    }
+
+                    // Stabilize player when not moving
+                    if (m_ScheduledMove == Vector3.zero)
+                    {
+                        ledgeForce = Vector3.ProjectOnPlane(Vector3.up, groundHitResult.normal);
+                        ledgeForce = ledgeForce.FlattenY().normalized + ledgeForce.y * Vector3.up;
+                        ledgeForce *= 50;
+                    }
+
+                    m_RigidBody.AddForceAtPosition(ledgeForce, FeetPos, ForceMode.Acceleration);
+                }
             }
             else
             {
-                if (!ledgeFound)
-                {
-                    m_LedgeTimer = 0;
-                }
+                m_LedgeTimer = 0;
             }
 
             #endregion
@@ -477,31 +510,32 @@ namespace Manatea.AdventureRoots
             return preciseHit;
         }
 
-        private bool LedgeDetection(List<RaycastHit> hitResults)
+        private bool LedgeDetection()
         {
-            hitResults.Clear();
-
             float radius = LedgeDetectionRadius;
-
             Vector3 offset = Vector3.right * LedgeDetectionDistance;
-            
-            int hits;
-
             int layerMask = LayerMaskExtensions.CalculatePhysicsLayerMask(gameObject.layer);
 
-            bool[] ledgeId = new bool[LedgeDetectionSamples];
-            int ledgeCount = 0;
+            m_LedgeDetectionFrame++;
+            int frame = m_LedgeDetectionFrame % c_LedgeDetectionIterations;
 
-            for (int i = 0; i < LedgeDetectionSamples; i++)
+            int ledgeCount = 0;
+            int hitCount;
+
+            for (int i = 0; i < c_LedgeDetectionSamples; i++)
             {
+                int ledgeId = i * c_LedgeDetectionIterations + frame;
+
+                Vector3 direction = Quaternion.Euler(0, ledgeId / (float)c_TotalLedgeDetectionSamples * -360, 0) * offset;
+                Vector3 p1 = FeetPos + Vector3.up * LedgeDetectionStart + direction;
+                Vector3 p2 = FeetPos + Vector3.up * LedgeDetectionEnd + direction;
+
+                hitCount = Physics.SphereCastNonAlloc(p1, radius, (p2 - p1).normalized, m_GroundHits, (p2 - p1).magnitude, layerMask);
+
                 RaycastHit groundHitResult = new RaycastHit();
                 groundHitResult.distance = float.PositiveInfinity;
-
-                Vector3 p1 = FeetPos + Vector3.up * LedgeDetectionStart + Quaternion.Euler(0, -i / (float)LedgeDetectionSamples * 360, 0) * offset;
-                Vector3 p2 = FeetPos + Vector3.up * LedgeDetectionEnd + Quaternion.Euler(0, -i / (float)LedgeDetectionSamples * 360, 0) * offset;
-                hits = Physics.SphereCastNonAlloc(p1, radius, (p2 - p1).normalized, m_GroundHits, (p2 - p1).magnitude, layerMask);
-
-                for (int j =  0; j < hits; j++)
+                bool groundFound = false;
+                for (int j =  0; j < hitCount; j++)
                 {
                     // Discard overlaps
                     if (m_GroundHits[j].distance == 0)
@@ -516,24 +550,18 @@ namespace Manatea.AdventureRoots
                         continue;
 
                     groundHitResult = m_GroundHits[j];
+                    groundFound = true;
                 }
 
-                bool ledge = groundHitResult.distance == float.PositiveInfinity;
-                ledgeId[i] = ledge;
-                if (ledge)
+                m_LedgeSamples[ledgeId].IsLedge = !groundFound;
+                m_LedgeSamples[ledgeId].Direction = direction;
+                m_LedgeSamples[ledgeId].StartPosition = p1;
+                m_LedgeSamples[ledgeId].EndPosition = p2;
+                m_LedgeSamples[ledgeId].Hit = groundHitResult;
+
+                if (!groundFound)
                 {
-                    hitResults.Add(new RaycastHit());
                     ledgeCount++;
-                }
-                else
-                {
-                    hitResults.Add(groundHitResult);
-                }
-
-                if (DebugCharacter)
-                {
-                    //DebugHelper.DrawWireSphere(p1, radius, groundHitResult.distance < float.PositiveInfinity ? Color.red : Color.green, Time.fixedDeltaTime, false);
-                    DebugHelper.DrawWireSphere(p2, radius, ledge ? Color.green : Color.red, Time.fixedDeltaTime, false);
                 }
             }
 
@@ -541,7 +569,7 @@ namespace Manatea.AdventureRoots
         }
         private int DirectionToLedgeId(Vector3 direction)
         {
-            return MMath.Mod(MMath.RoundToInt(MMath.DirToAng(direction.XZ()) / MMath.TAU * LedgeDetectionSamples), LedgeDetectionSamples);
+            return MMath.Mod(MMath.RoundToInt(MMath.DirToAng(direction.XZ()) / MMath.TAU * c_LedgeDetectionSamples), c_LedgeDetectionSamples);
         }
 
         private IEnumerator CO_Jump(Vector3 velocity, int iterations)
@@ -565,19 +593,5 @@ namespace Manatea.AdventureRoots
                 yield return new WaitForFixedUpdate();
             }
         }
-
-        //private void OnGUI()
-        //{
-        //    GUILayout.BeginVertical();
-        //    GUI.color = Color.red;
-        //    GUILayout.Label("Is Grounded:" + m_IsStableGrounded);
-        //    GUILayout.Label("Is Sliding:" + m_IsSliding);
-        //    if (TryGetComponent(out Joint joint) && joint.connectedBody)
-        //    {
-        //        GUILayout.Label("Pulling:" + joint.connectedBody.name);
-        //        GUILayout.Label("Joint Force:" + joint.currentForce.magnitude);
-        //    }
-        //    GUILayout.EndVertical();
-        //}
     }
 }
