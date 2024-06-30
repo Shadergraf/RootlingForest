@@ -11383,6 +11383,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4196628262980758534, guid: d62bf33f356aaad44b6590ec697f4088,
         type: 3}
+      propertyPath: GroundMagnetismForce
+      value: 30
+      objectReference: {fileID: 0}
+    - target: {fileID: 4196628262980758534, guid: d62bf33f356aaad44b6590ec697f4088,
+        type: 3}
       propertyPath: LedgeDetectionRadius
       value: 0.2
       objectReference: {fileID: 0}
@@ -11395,6 +11400,11 @@ PrefabInstance:
         type: 3}
       propertyPath: LedgeStableMoveMultiplier
       value: 0.33
+      objectReference: {fileID: 0}
+    - target: {fileID: 4196628262980758534, guid: d62bf33f356aaad44b6590ec697f4088,
+        type: 3}
+      propertyPath: LedgeBalancingWobbleAmount
+      value: 0.55
       objectReference: {fileID: 0}
     - target: {fileID: 5176520583305314735, guid: d62bf33f356aaad44b6590ec697f4088,
         type: 3}

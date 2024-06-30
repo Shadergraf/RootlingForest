@@ -22,6 +22,11 @@ namespace Manatea.AdventureRoots
         public float GroundRotationRate = 10;
         public float AirRotationRate = 0.05f;
 
+        [Header("Ground Magnetism")]
+        public float GroundMagnetismRadius = 0.7f;
+        public float GroundMagnetismDepth = 0.5f;
+        public float GroundMagnetismForce = 50;
+
         [Header("Ledge Detection")]
         public float LedgeDetectionStart = 0.2f;
         public float LedgeDetectionEnd = -0.2f;
@@ -85,6 +90,9 @@ namespace Manatea.AdventureRoots
         private LedgeSample[] m_LedgeSamples = new LedgeSample[c_LedgeDetectionSamples * c_LedgeDetectionIterations];
         private int m_LedgeDetectionFrame = -1;
 
+        /// <summary>
+        /// The caracter feet position in world space
+        /// </summary>
         public Vector3 FeetPos => Collider.ClosestPoint(transform.position + Physics.gravity * 10000);
 
 
@@ -215,6 +223,9 @@ namespace Manatea.AdventureRoots
             }
 
 
+            Vector3 contactMove = m_ScheduledMove;
+
+
             #region Ledge Detection
 
             bool ledgeFound = LedgeDetection();
@@ -256,20 +267,20 @@ namespace Manatea.AdventureRoots
                         imbalance *= Mathf.PerlinNoise1D(Time.time * m_ScheduledMove.magnitude * LedgeBalancingWobbleTime) * 2 - 1;
                         imbalance *= m_ScheduledMove.magnitude;
                         imbalance *= LedgeBalancingWobbleAmount;
-                        m_ScheduledMove += imbalance;
+                        contactMove += imbalance * m_ScheduledMove.magnitude;
                     }
 
                     // TODO remove this and put it in a dedicated ability that allows the player to balance better by using their hands
                     // Stabilize when holding mouse
-                    if (Input.GetMouseButton(0))
+                    if (Input.GetMouseButton(0) || UnityEngine.InputSystem.Gamepad.current.buttonWest.ReadValue() > 0)
                     {
                         ledgeForce *= LedgeStableBalancingForce;
-                        m_ScheduledMove *= LedgeStableMoveMultiplier;
+                        contactMove *= LedgeStableMoveMultiplier;
                     }
                     else
                     {
                         ledgeForce *= LedgeBalancingForce;
-                        m_ScheduledMove *= LedgeMoveMultiplier;
+                        contactMove *= LedgeMoveMultiplier;
                     }
 
                     // Balance attribute
@@ -281,9 +292,11 @@ namespace Manatea.AdventureRoots
                     // Stabilize player when not moving
                     if (m_ScheduledMove == Vector3.zero)
                     {
-                        ledgeForce = Vector3.ProjectOnPlane(Vector3.up, groundHitResult.normal);
-                        ledgeForce = ledgeForce.FlattenY().normalized + ledgeForce.y * Vector3.up;
-                        ledgeForce *= 50;
+                        Vector3 stabilizationForce = Vector3.ProjectOnPlane(Vector3.up, groundHitResult.normal);
+                        stabilizationForce = stabilizationForce.FlattenY().normalized + stabilizationForce.y * Vector3.up;
+                        stabilizationForce *= 50;
+
+                        ledgeForce += stabilizationForce * (1 - m_ScheduledMove.magnitude);
                     }
 
                     m_RigidBody.AddForceAtPosition(ledgeForce, FeetPos, ForceMode.Acceleration);
@@ -292,6 +305,23 @@ namespace Manatea.AdventureRoots
             else
             {
                 m_LedgeTimer = 0;
+            }
+
+            #endregion
+
+
+            #region Ground Magnetism
+
+            bool groundMagnetFound = DetectGroundMagnetism(out RaycastHit groundMagnetHit);
+            if (groundMagnetFound)
+            {
+                if (Rigidbody.velocity.y < 0 && !groundDetected)
+                {
+                    Vector3 groundMagnetForce = groundMagnetHit.point - FeetPos;
+                    groundMagnetForce = groundMagnetForce.FlattenY();
+                    groundMagnetForce *= GroundMagnetismForce;
+                    Rigidbody.AddForce(groundMagnetForce, ForceMode.Acceleration);
+                }
             }
 
             #endregion
@@ -308,7 +338,6 @@ namespace Manatea.AdventureRoots
 
             // Contact Movement
             // movement that results from ground or surface contact
-            Vector3 contactMove = m_ScheduledMove;
             contactMove *= moveSpeedMult;
             if (contactMove != Vector3.zero)
             {
@@ -572,6 +601,76 @@ namespace Manatea.AdventureRoots
             return MMath.Mod(MMath.RoundToInt(MMath.DirToAng(direction.XZ()) / MMath.TAU * c_LedgeDetectionSamples), c_LedgeDetectionSamples);
         }
 
+
+        private bool DetectGroundMagnetism(out RaycastHit hit)
+        {
+            float radius = GroundMagnetismRadius;
+            Vector3 p1 = FeetPos + Vector3.up * radius;
+            Vector3 p2 = FeetPos - Vector3.up * GroundMagnetismDepth;
+            int layerMask = LayerMaskExtensions.CalculatePhysicsLayerMask(gameObject.layer);
+
+            int hitCount = Physics.SphereCastNonAlloc(p1, radius, (p2 - p1).normalized, m_GroundHits, (p2 - p1).magnitude, layerMask);
+
+            // Trajectory tests
+            Vector2 vel2D = new Vector2(Rigidbody.velocity.XZ().magnitude, Rigidbody.velocity.y);
+            (float a, float b) trajectoryParams = CalculateParabola(vel2D, Physics.gravity.y);
+            if (DebugCharacter)
+            {
+                for (int i = 0; i < 200; i++)
+                {
+                    float px1 = i * 0.1f;
+                    float px2 = (i + 1) * 0.1f;
+                    float py1 = Parabola(trajectoryParams.a, trajectoryParams.b, px1);
+                    float py2 = Parabola(trajectoryParams.a, trajectoryParams.b, px2);
+                    Debug.DrawLine(
+                        FeetPos + Rigidbody.velocity.FlattenY().normalized * px1 + Vector3.up * py1,
+                        FeetPos + Rigidbody.velocity.FlattenY().normalized * px2 + Vector3.up * py2, 
+                        Color.blue);
+                }
+            }
+
+            RaycastHit groundHitResult = new RaycastHit();
+            groundHitResult.distance = float.PositiveInfinity;
+            groundHitResult.point = Vector3.positiveInfinity;
+            float closestDistance = float.PositiveInfinity;
+            bool groundFound = false;
+            for (int i = 0; i < hitCount; i++)
+            {
+                // Discard overlaps
+                if (m_GroundHits[i].distance == 0)
+                    continue;
+                // Discard collisions that are further away
+                if (m_GroundHits[i].distance > groundHitResult.distance)
+                    continue;
+                // Discard self collisions
+                if (m_GroundHits[i].collider.transform == Rigidbody.transform)
+                    continue;
+                if (m_GroundHits[i].collider.transform.IsChildOf(Rigidbody.transform))
+                    continue;
+
+                // TODO correctly transform the 3D contact point so that the closest distance can be calculated
+                Vector3 pointFeetSpace = m_GroundHits[i].point - FeetPos;
+                Vector2 point2D = new Vector2(pointFeetSpace.XZ().magnitude, pointFeetSpace.y);
+                Vector2 sampledPoint = GetClosestPointOnParabola(trajectoryParams.a, trajectoryParams.b, point2D);
+                float sampledDistance = Vector2.Distance(point2D, sampledPoint);
+                if (sampledDistance > closestDistance)
+                    continue;
+
+                groundHitResult = m_GroundHits[i];
+                closestDistance = sampledDistance;
+                groundFound = true;
+            }
+
+            if (DebugCharacter)
+            {
+                DebugHelper.DrawWireSphere(p1, radius, groundFound ? Color.green : Color.red, Time.fixedDeltaTime, false);
+                DebugHelper.DrawWireSphere(p2, radius, groundFound ? Color.green : Color.red, Time.fixedDeltaTime, false);
+            }
+
+            hit = groundHitResult;
+            return groundFound;
+        }
+
         private IEnumerator CO_Jump(Vector3 velocity, int iterations)
         {
             for (int i = 0; i < iterations; i++)
@@ -593,5 +692,93 @@ namespace Manatea.AdventureRoots
                 yield return new WaitForFixedUpdate();
             }
         }
+
+        #region Parabolic Math Helper
+
+        /// <summary>
+        /// Defines a 2D parabola of form y=ax²+bx that starts in (0,0)
+        /// </summary>
+        static float Parabola(float a, float b, float x)
+        {
+            return a * x * x + b * x;
+        }
+        /// <summary>
+        /// Calculates the parabolic coefficients a and b that define a parabola matching a projectile path with initial velocity and signed gravity
+        /// </summary>
+        private static (float a, float b) CalculateParabola(Vector2 velocity, float gravity)
+        {
+            float a = gravity / (2 * velocity.x * velocity.x);
+            float b = velocity.y / velocity.x;
+            return (a, b);
+        }
+        /// <summary>
+        /// Calculates the closest location on a 2D parabola defined by a and b that starts in (0,0) to a specific point
+        /// </summary>
+        private static Vector2 GetClosestPointOnParabola(float a, float b, Vector2 point)
+        {
+            // ChatGPT to the rescue
+
+            // TODO return separate solutions for a = 0
+
+            // Coefficients of the cubic equation in the form Ax^3 + Bx^2 + Cx + D = 0
+            float A = 2 * a * a;
+            float B = 3 * a * b;
+            float C = -2 * a * point.y + b * b + 1;
+            float D = -b * point.y - point.x;
+
+            // Convert to a depressed cubic t^3 + pt + q = 0 using the substitution x = t - B/(3A)
+            float p = (3 * A * C - B * B) / (3 * A * A);
+            float q = (2 * B * B * B - 9 * A * B * C + 27 * A * A * D) / (27 * A * A * A);
+
+            // Calculate the discriminant
+            float discriminant = q * q / 4 + p * p * p / 27;
+
+            float[] roots;
+            if (discriminant > 0)
+            {
+                // One real root and two complex roots
+                float sqrtDiscriminant = MMath.Sqrt(discriminant);
+                float u = MMath.Cbrt(-q / 2 + sqrtDiscriminant);
+                float v = MMath.Cbrt(-q / 2 - sqrtDiscriminant);
+                float root1 = u + v - B / (3 * A);
+                roots = new float[] { root1 };
+            }
+            else if (discriminant == 0)
+            {
+                // All roots are real and at least two are equal
+                float u = MMath.Cbrt(-q / 2);
+                float root1 = 2 * u - B / (3 * A);
+                float root2 = -u - B / (3 * A);
+                roots = new float[] { root1, root2 };
+            }
+            else
+            {
+                // Three distinct real roots
+                float rho = MMath.Sqrt(-p * p * p / 27);
+                float theta = MMath.Acos(-q / (2 * rho));
+                float rhoCbrt = MMath.Cbrt(rho);
+                float root1 = 2 * rhoCbrt * MMath.Cos(theta / 3) - B / (3 * A);
+                float root2 = 2 * rhoCbrt * MMath.Cos((theta + 2 * MMath.PI) / 3) - B / (3 * A);
+                float root3 = 2 * rhoCbrt * MMath.Cos((theta + 4 * MMath.PI) / 3) - B / (3 * A);
+                roots = new float[] { root1, root2, root3 };
+            }
+
+            // Only return the closest point
+            float closestX = roots[0];
+            float closestY = Parabola(a, b, closestX);
+            for (int i = 0; i < roots.Length; i++)
+            {
+                float py = Parabola(a, b, roots[i]);
+                if (Vector2.Distance(new Vector2(closestX, closestY), point) > Vector2.Distance(new Vector2(roots[i], py), point))
+                {
+                    closestX = roots[i];
+                    closestY = py;
+                }
+            }
+
+            return new Vector2(closestX, closestY);
+        }
+
+        #endregion
     }
 }
