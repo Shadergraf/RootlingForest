@@ -12,12 +12,6 @@ public class ClosestPointToTrajectoryTester : MonoBehaviour
     public Vector3 StartVelocity;
     public Transform TargetPoint;
 
-    public float a, b;
-
-    public float deriv;
-
-    public bool debug;
-
     private Vector3 m_CurrentPosition;
     private Vector3 m_CurrentVelocity;
 
@@ -37,24 +31,18 @@ public class ClosestPointToTrajectoryTester : MonoBehaviour
         }
 
 
-        var coeffs = CalculateParabola(StartVelocity, Physics.gravity);
-        a = coeffs.Item1;
-        b = coeffs.Item2;
-
-        if (debug)
-        {
-            Vector2 closestPoint = GetClosestPointOnParabola(a, b, TargetPoint.position);
-            Debug.DrawLine(TargetPoint.position, closestPoint, Color.green);
-        }
+        var coeffs = CalculateParabola(StartVelocity, Physics.gravity.y);
+        Vector2 closestPoint = GetClosestPointOnParabola(coeffs.a, coeffs.b, TargetPoint.position);
+        Debug.DrawLine(TargetPoint.position, closestPoint, Color.green);
     }
 
     static float Parabola(float a, float b, float x)
     {
         return a * x * x + b * x;
     }
-    private static (float a, float b) CalculateParabola(Vector2 velocity, Vector2 gravity)
+    private static (float a, float b) CalculateParabola(Vector2 velocity, float gravity)
     {
-        float a = gravity.y / (2 * velocity.x * velocity.x);
+        float a = gravity / (2 * velocity.x * velocity.x);
         float b = velocity.y / velocity.x;
         return (a, b);
     }
