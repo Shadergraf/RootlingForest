@@ -5,6 +5,7 @@ using UnityEngine;
 
 namespace Manatea.GameplaySystem
 {
+    [DisallowMultipleComponent]
     public class GameplayTagOwner : MonoBehaviour
     {
         [SerializeField]

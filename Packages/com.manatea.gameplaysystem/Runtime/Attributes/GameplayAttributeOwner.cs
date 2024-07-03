@@ -5,6 +5,7 @@ using UnityEngine;
 
 namespace Manatea.GameplaySystem
 {
+    [DisallowMultipleComponent]
     public class GameplayAttributeOwner : MonoBehaviour
     {
         [Serializable]

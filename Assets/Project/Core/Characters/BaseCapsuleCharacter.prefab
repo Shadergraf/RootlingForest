@@ -528,6 +528,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5137507898606658623, guid: bf0177a3809de3d49ac5dcdb1afa9084,
         type: 3}
+      propertyPath: EnableLedgeDetection
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 5137507898606658623, guid: bf0177a3809de3d49ac5dcdb1afa9084,
+        type: 3}
       propertyPath: LedgeDetectionRadius
       value: 0.75
       objectReference: {fileID: 0}
