@@ -11,6 +11,7 @@ using UnityEngine.Serialization;
 
 namespace Manatea.AdventureRoots
 {
+
     [RequireComponent(typeof(Rigidbody))]
     public class CharacterMovement : MonoBehaviour
     {
@@ -47,7 +48,8 @@ namespace Manatea.AdventureRoots
         public float LedgeBalancingWobbleTime = 0.8f;
         public float LedgeBalancingWobbleAmount = 0.45f;
 
-        public float LedgeLandMagnetism = 1;
+        public float m_StabilizationForce = 50;
+        public float m_StabilizationForcePoles = 50;
 
         [Header("Collision Detection")]
         public Collider Collider;
@@ -111,6 +113,13 @@ namespace Manatea.AdventureRoots
             public Vector3 StartPosition;
             public Vector3 EndPosition;
             public RaycastHit Hit;
+        }
+        public enum LedgeType
+        {
+            Pole,
+            Cliff,
+            BalancingBeam,
+            UnevenTerrain,
         }
 
 
@@ -234,6 +243,21 @@ namespace Manatea.AdventureRoots
             Vector3 contactMove = m_ScheduledMove;
 
 
+            // Jump
+            if (m_ScheduledJump && !m_HasJumped && m_AirborneTimer < 0.1f)
+            {
+                m_ScheduledJump = false;
+                m_ForceAirborneTimer = 0.05f;
+                Vector3 jumpDir = -Physics.gravity.normalized;
+                // TODO add a sliding jump here that is perpendicular to the slide normal
+                m_RigidBody.velocity = Vector3.ProjectOnPlane(m_RigidBody.velocity, jumpDir);
+                Vector3 jumpForce = jumpDir * JumpForce;
+                StartCoroutine(CO_Jump(jumpForce, 3));
+
+                m_HasJumped = true;
+            }
+
+
             #region Ledge Detection
 
             if (EnableLedgeDetection)
@@ -258,10 +282,73 @@ namespace Manatea.AdventureRoots
                 // TODO when detecting ground below the player (in a bigger radius) slightly push the player towards that direction
                 //      to make difficult jumps a bit easier (like landing on a thin pole, or making a long jump)
 
-                if (ledgeFound)
+                if (ledgeFound && !m_ScheduledJump)
                 {
                     if (m_IsStableGrounded)
                     {
+                        #region Analyze Ledge Features
+
+                        // Average ledge direction
+                        Vector3 averageLedgeDir = FeetPos;
+                        for (int i = 0; i < m_LedgeSamples.Length; i++)
+                        {
+                            Vector3 delta = m_LedgeSamples[i].Direction;
+                            delta *= (m_LedgeSamples[i].IsLedge ? 1 : -1);
+                            delta /= m_LedgeSamples.Length;
+
+                            Debug.DrawLine(averageLedgeDir, averageLedgeDir + delta, m_LedgeSamples[i].IsLedge ? Color.red : Color.green);
+
+                            averageLedgeDir += delta;
+                        }
+                        averageLedgeDir -= FeetPos;
+                        DebugHelper.DrawWireSphere(averageLedgeDir, 0.2f, Color.blue);
+
+                        // Ledge noise level
+                        float noise = 0;
+                        for (int i = 0; i < m_LedgeSamples.Length; i++)
+                        {
+                            if (m_LedgeSamples[i].IsLedge ^ m_LedgeSamples[MMath.Mod(i + 1, m_LedgeSamples.Length)].IsLedge)
+                            {
+                                noise++;
+                            }
+                        }
+                        noise /= m_LedgeSamples.Length;
+                        Debug.Log("Noise level: " + noise);
+
+                        // Ledge amount
+                        float amount = 0;
+                        for (int i = 0; i < m_LedgeSamples.Length; i++)
+                        {
+                            if (m_LedgeSamples[i].IsLedge)
+                            {
+                                amount++;
+                            }
+                        }
+                        amount /= m_LedgeSamples.Length;
+                        Debug.Log("Ledge amount: " + amount);
+
+                        LedgeType currentLedgeType = LedgeType.Pole;
+                        if (noise <= 0.2 && amount >= 0.85)
+                        {
+                            currentLedgeType = LedgeType.Pole;
+                        }
+                        else if (noise <= 0.2 && amount < 0.75)
+                        {
+                            currentLedgeType = LedgeType.Cliff;
+                        }
+                        else if (noise > 0.2 && noise <= 0.55 && amount > 0.25)
+                        {
+                            currentLedgeType = LedgeType.BalancingBeam;
+                        }
+                        else
+                        {
+                            currentLedgeType = LedgeType.UnevenTerrain;
+                        }
+                        Debug.Log("Current Ledge Type: " + currentLedgeType);
+
+                        #endregion
+
+
                         m_LedgeTimer += dt;
 
                         Vector3 ledgeDir = m_GroundHitResult.point - FeetPos;
@@ -279,17 +366,25 @@ namespace Manatea.AdventureRoots
                             contactMove += imbalance * m_ScheduledMove.magnitude;
                         }
 
+
+                        // Disable ledge force if walking down a cliff
+                        float intentionalOverride = 0;
+                        if (currentLedgeType == LedgeType.Cliff && m_ScheduledMove != Vector3.zero)
+                        {
+                            intentionalOverride = MMath.RemapClamped(0.2f, -0.25f, 1, 0, Vector3.Dot(averageLedgeDir.normalized, m_ScheduledMove.normalized));
+                        }
+
                         // TODO remove this and put it in a dedicated ability that allows the player to balance better by using their hands
                         // Stabilize when holding mouse
-                        if (Input.GetMouseButton(0) || UnityEngine.InputSystem.Gamepad.current.buttonWest.ReadValue() > 0)
+                        if (Input.GetMouseButton(0) || (UnityEngine.InputSystem.Gamepad.current != null && UnityEngine.InputSystem.Gamepad.current.buttonWest.ReadValue() > 0))
                         {
                             ledgeForce *= LedgeStableBalancingForce;
                             contactMove *= LedgeStableMoveMultiplier;
                         }
                         else
                         {
-                            ledgeForce *= LedgeBalancingForce;
-                            contactMove *= LedgeMoveMultiplier;
+                            ledgeForce *= MMath.Lerp(LedgeBalancingForce, 1, intentionalOverride);
+                            contactMove *= MMath.Lerp(LedgeMoveMultiplier, 1, intentionalOverride);
                         }
 
                         // Balance attribute
@@ -303,7 +398,15 @@ namespace Manatea.AdventureRoots
                         {
                             Vector3 stabilizationForce = Vector3.ProjectOnPlane(m_PreciseGroundHitResult.normal, m_GroundHitResult.normal);
                             stabilizationForce = stabilizationForce.FlattenY().normalized + stabilizationForce.y * Vector3.up;
-                            stabilizationForce *= 50;
+                            if (currentLedgeType == LedgeType.Pole)
+                            {
+                                stabilizationForce *= m_StabilizationForcePoles;
+
+                            }
+                            else
+                            {
+                                stabilizationForce *= m_StabilizationForce;
+                            }
 
                             ledgeForce += stabilizationForce * (1 - m_ScheduledMove.magnitude);
                         }
@@ -422,21 +525,6 @@ namespace Manatea.AdventureRoots
             // TODO relax the rotation amount if we realize that we can not rotate under the current load we have
             //m_RotationRelaxation -= Vector3.Dot(m_TargetRotation, transform.forward) * dt;
             //m_RotationRelaxation = MMath.Clamp(m_RotationRelaxation, 0, 1);
-
-
-            // Jump
-            if (m_ScheduledJump && !m_HasJumped && m_AirborneTimer < 0.1f)
-            {
-                m_ScheduledJump = false;
-                m_ForceAirborneTimer = 0.05f;
-                Vector3 jumpDir = -Physics.gravity.normalized;
-                // TODO add a sliding jump here that is perpendicular to the slide normal
-                m_RigidBody.velocity = Vector3.ProjectOnPlane(m_RigidBody.velocity, jumpDir);
-                Vector3 jumpForce = jumpDir * JumpForce;
-                StartCoroutine(CO_Jump(jumpForce, 3));
-
-                m_HasJumped = true;
-            }
 
             // Feet drag
             if (m_IsStableGrounded && !m_IsSliding)
