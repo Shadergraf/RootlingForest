@@ -17,6 +17,7 @@ namespace Manatea
                 tangent = Vector3.Cross(normal, Vector3.right).normalized;
             if (tangent == Vector3.zero)
                 tangent = Vector3.Cross(normal, Vector3.forward).normalized;
+            tangent.Normalize();
 
             Vector3 lastPos = position + tangent * radius;
             for (int i = 1; i <= iterations; i++)
@@ -52,6 +53,7 @@ namespace Manatea
                 normal = Vector3.Cross(tangent, Vector3.right);
             if (normal == Vector3.zero)
                 normal = Vector3.Cross(tangent, Vector3.forward);
+            normal.Normalize();
             Vector3 binormal = Vector3.Cross(tangent, normal);
 
             DrawWireCircle(positionA, radius,  -normal, color, duration, depthTest, iterations / 2, binormal, 0.5f);

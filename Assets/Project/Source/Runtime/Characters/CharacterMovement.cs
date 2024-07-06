@@ -17,7 +17,6 @@ namespace Manatea.AdventureRoots
     {
         public float GroundMoveForce = 1;
         public float AirMoveForce = 1;
-        public float JumpForce = 5;
         public float StepHeight = 0.4f;
         public float FeetLinearResistance = 2;
         public float FeetAngularResistance = 2;
@@ -26,9 +25,14 @@ namespace Manatea.AdventureRoots
         public float GroundRotationRate = 10;
         public float AirRotationRate = 0.05f;
 
+        [Header("Jump")]
+        public float JumpForce = 5;
+        public float JumpMoveAlignment = 0.75f;
+
         [Header("Ground Magnetism")]
         public bool EnableGroundMagnetism = false;
-        public float GroundMagnetismRadius = 0.7f;
+        public float GroundMagnetismRadiusStart = 0.5f;
+        public float GroundMagnetismRadiusEnd = 1.5f;
         public float GroundMagnetismDepth = 0.5f;
         public float GroundMagnetismForce = 50;
 
@@ -64,7 +68,11 @@ namespace Manatea.AdventureRoots
         public GameplayTag m_NoStableGroundTag;
 
         [Header("Debug")]
-        public bool DebugCharacter = false;
+        public bool DebugLocomotion = false;
+        public bool DebugGroundDetection = false;
+        public bool DebugLedgeDetection = false;
+        public bool LogLedgeDetection = false;
+        public bool DebugGroundMagnetism = false;
 
         public Rigidbody Rigidbody => m_RigidBody;
 
@@ -112,6 +120,11 @@ namespace Manatea.AdventureRoots
             public Vector3 Direction;
             public Vector3 StartPosition;
             public Vector3 EndPosition;
+            public RaycastHit Hit;
+        }
+        private struct GroundMagnetismSample
+        {
+            public Vector3 ClosestPointOnTrajectory;
             public RaycastHit Hit;
         }
         public enum LedgeType
@@ -248,6 +261,14 @@ namespace Manatea.AdventureRoots
             {
                 m_ScheduledJump = false;
                 m_ForceAirborneTimer = 0.05f;
+
+                if (contactMove != Vector3.zero)
+                {
+                    Vector3 initialDir = m_RigidBody.velocity;
+                    Vector3 targetDir = contactMove.FlattenY().WithMagnitude(initialDir.FlattenY().magnitude) + Vector3.up * initialDir.y;
+                    m_RigidBody.velocity = Vector3.Slerp(initialDir, targetDir, contactMove.magnitude * JumpMoveAlignment);
+                }
+
                 Vector3 jumpDir = -Physics.gravity.normalized;
                 // TODO add a sliding jump here that is perpendicular to the slide normal
                 m_RigidBody.velocity = Vector3.ProjectOnPlane(m_RigidBody.velocity, jumpDir);
@@ -295,13 +316,18 @@ namespace Manatea.AdventureRoots
                             Vector3 delta = m_LedgeSamples[i].Direction;
                             delta *= (m_LedgeSamples[i].IsLedge ? 1 : -1);
                             delta /= m_LedgeSamples.Length;
-
-                            Debug.DrawLine(averageLedgeDir, averageLedgeDir + delta, m_LedgeSamples[i].IsLedge ? Color.red : Color.green);
-
+                            if (DebugLedgeDetection)
+                            {
+                                Debug.DrawLine(averageLedgeDir, averageLedgeDir + delta, m_LedgeSamples[i].IsLedge ? Color.red : Color.green);
+                            }
                             averageLedgeDir += delta;
                         }
                         averageLedgeDir -= FeetPos;
-                        DebugHelper.DrawWireSphere(averageLedgeDir, 0.2f, Color.blue);
+
+                        if (DebugLedgeDetection)
+                        {
+                            DebugHelper.DrawWireSphere(averageLedgeDir, 0.2f, Color.blue);
+                        }
 
                         // Ledge noise level
                         float noise = 0;
@@ -313,7 +339,6 @@ namespace Manatea.AdventureRoots
                             }
                         }
                         noise /= m_LedgeSamples.Length;
-                        Debug.Log("Noise level: " + noise);
 
                         // Ledge amount
                         float amount = 0;
@@ -325,7 +350,12 @@ namespace Manatea.AdventureRoots
                             }
                         }
                         amount /= m_LedgeSamples.Length;
-                        Debug.Log("Ledge amount: " + amount);
+
+                        if (LogLedgeDetection)
+                        {
+                            Debug.Log("Noise level: " + noise);
+                            Debug.Log("Ledge amount: " + amount);
+                        }
 
                         LedgeType currentLedgeType = LedgeType.Pole;
                         if (noise <= 0.2 && amount >= 0.85)
@@ -344,7 +374,10 @@ namespace Manatea.AdventureRoots
                         {
                             currentLedgeType = LedgeType.UnevenTerrain;
                         }
-                        Debug.Log("Current Ledge Type: " + currentLedgeType);
+                        if (LogLedgeDetection)
+                        {
+                            Debug.Log("Current Ledge Type: " + currentLedgeType);
+                        }
 
                         #endregion
 
@@ -432,17 +465,18 @@ namespace Manatea.AdventureRoots
                 // Nudge player in that direction so that the accumulated velocity from those nudges, over roughly the time it will
                 // take to reach the target point on the trajectory, equal the required delta to move the player from the
                 // target point on the trajectory to the actual hit point.
-                bool groundMagnetFound = DetectGroundMagnetism(out RaycastHit groundMagnetHit);
+                bool groundMagnetFound = DetectGroundMagnetismNEW(out RaycastHit groundMagnetHit);
                 if (groundMagnetFound)
                 {
-                    if (Rigidbody.velocity.y < 0 && !groundDetected)
-                    {
-                        Vector3 groundMagnetForce = groundMagnetHit.point - FeetPos;
-                        groundMagnetForce = groundMagnetForce.FlattenY();
-                        groundMagnetForce = groundMagnetForce.ClampMagnitude(0, 0.2f) * 5;
-                        groundMagnetForce *= GroundMagnetismForce;
-                        Rigidbody.AddForce(groundMagnetForce, ForceMode.Acceleration);
-                    }
+                    //if (Rigidbody.velocity.y < 0 && !groundDetected)
+                    //{
+                    //    Vector3 groundMagnetForce = groundMagnetHit.point - FeetPos;
+                    //    groundMagnetForce = groundMagnetForce.FlattenY();
+                    //    groundMagnetForce = groundMagnetForce.ClampMagnitude(0, 0.2f) * 5;
+                    //    groundMagnetForce *= GroundMagnetismForce;
+                    //    Rigidbody.AddForce(groundMagnetForce, ForceMode.Acceleration);
+                    //}
+
                 }
             }
 
@@ -450,7 +484,7 @@ namespace Manatea.AdventureRoots
 
 
             // The direction we want to move in
-            if (DebugCharacter)
+            if (DebugLocomotion)
             {
                 Debug.DrawLine(transform.position, transform.position + m_ScheduledMove, Color.blue, dt, false);
                 if (groundDetected)
@@ -470,7 +504,7 @@ namespace Manatea.AdventureRoots
                     {
                         // TODO only do this if we are moving TOWARDS the wall, not if we are moving away from it
                         Vector3 wallNormal = Vector3.ProjectOnPlane(m_PreciseGroundHitResult.normal, Physics.gravity.normalized).normalized;
-                        if (DebugCharacter)
+                        if (DebugGroundDetection)
                             Debug.DrawLine(m_PreciseGroundHitResult.point + Vector3.one, m_PreciseGroundHitResult.point + Vector3.one + wallNormal, Color.blue, dt, false);
                         if (Vector3.Dot(wallNormal, contactMove) < 0)
                         {
@@ -554,7 +588,7 @@ namespace Manatea.AdventureRoots
             m_PhysicsMaterial.staticFriction = frictionTarget;
             m_PhysicsMaterial.dynamicFriction = frictionTarget;
 
-            if (DebugCharacter)
+            if (DebugLocomotion)
                 Debug.DrawLine(transform.position, transform.position + contactMove, Color.green, dt, false);
         }
 
@@ -591,7 +625,7 @@ namespace Manatea.AdventureRoots
                 float raycastRadius = scaledRadius - SkinThickness;
                 hits = Physics.CapsuleCastNonAlloc(p1, p2, raycastRadius, Vector3.down, m_GroundHits, distance, layerMask);
 
-                if (DebugCharacter)
+                if (DebugGroundDetection)
                 {
                     DebugHelper.DrawWireCapsule(p2, p2 + Vector3.down * distance, raycastRadius, Color.red);
                 }
@@ -606,7 +640,7 @@ namespace Manatea.AdventureRoots
                 float radius = scaledRadius - SkinThickness;
                 hits = Physics.SphereCastNonAlloc(ray, radius, m_GroundHits, distance, layerMask);
 
-                if (DebugCharacter)
+                if (DebugGroundDetection)
                 {
                     DebugHelper.DrawWireCapsule(ray.origin, ray.GetPoint(distance), radius, Color.red);
                 }
@@ -664,7 +698,10 @@ namespace Manatea.AdventureRoots
                 Vector3 p2 = FeetPos + Vector3.up * LedgeDetectionEnd + direction;
 
                 hitCount = Physics.SphereCastNonAlloc(p1, radius, (p2 - p1).normalized, m_GroundHits, (p2 - p1).magnitude, layerMask);
-                DebugHelper.DrawWireCapsule(p1, p2, LedgeDetectionRadius, Color.black * 0.5f);
+                if (DebugLedgeDetection)
+                {
+                    DebugHelper.DrawWireCapsule(p1, p2, LedgeDetectionRadius, Color.black * 0.5f);
+                }
 
                 RaycastHit groundHitResult = new RaycastHit();
                 groundHitResult.distance = float.PositiveInfinity;
@@ -692,9 +729,11 @@ namespace Manatea.AdventureRoots
                     if (!IsSlopeWalkable(preciseHit.normal))
                         continue;
                     
-                    Debug.DrawLine(preciseHit.point, preciseHit.point + preciseHit.normal * 0.1f, Color.cyan);
-                    
-                    DebugHelper.DrawWireCapsule(p1, p1 + (p2 - p1).normalized * hit.distance, LedgeDetectionRadius, Color.green);
+                    if (DebugLedgeDetection)
+                    {
+                        Debug.DrawLine(preciseHit.point, preciseHit.point + preciseHit.normal * 0.1f, Color.cyan);
+                        DebugHelper.DrawWireCapsule(p1, p1 + (p2 - p1).normalized * hit.distance, LedgeDetectionRadius, Color.green);
+                    }
                     
                     // Test if this could be the ground we are currently standing on
                     Plane ledgeGroundPlane = new Plane(preciseHit.normal, preciseHit.point);
@@ -703,14 +742,17 @@ namespace Manatea.AdventureRoots
                     float contactDistance = MMath.Abs(feetGroundPlane.GetDistanceToPoint(preciseHit.point));
                     if (feetDistance > 0.3f && contactDistance > 0.4f)
                     {
-                        Debug.Log(feetDistance + " - " + contactDistance);
+                        if (LogLedgeDetection)
+                        {
+                            Debug.Log(feetDistance + " - " + contactDistance);
+                        }
                         continue;
                     }
 
                     groundHitResult = hit;
                     groundFound = true;
                 }
-                if (!groundFound)
+                if (DebugLedgeDetection && !groundFound)
                     DebugHelper.DrawWireCapsule(p1, p2, LedgeDetectionRadius, Color.red);
 
                 m_LedgeSamples[ledgeId].IsLedge = !groundFound;
@@ -735,7 +777,7 @@ namespace Manatea.AdventureRoots
 
         private bool DetectGroundMagnetism(out RaycastHit hit)
         {
-            float radius = GroundMagnetismRadius;
+            float radius = GroundMagnetismRadiusStart;
             Vector3 p1 = FeetPos + Vector3.up * radius;
             Vector3 p2 = FeetPos - Vector3.up * GroundMagnetismDepth;
             int layerMask = LayerMaskExtensions.CalculatePhysicsLayerMask(gameObject.layer);
@@ -745,18 +787,22 @@ namespace Manatea.AdventureRoots
             // Trajectory tests
             Vector2 vel2D = new Vector2(Rigidbody.velocity.XZ().magnitude, Rigidbody.velocity.y);
             (float a, float b) trajectoryParams = CalculateParabola(vel2D, Physics.gravity.y);
-            if (DebugCharacter)
+            if (DebugGroundMagnetism)
             {
-                for (int i = 0; i < 100; i++)
+                for (int i = 0; i < 4; i++)
                 {
-                    float px1 = i * 0.01f;
-                    float px2 = (i + 1) * 0.01f;
+                    const float c_StepSize = 0.5f;
+                    float px1 = i * c_StepSize;
+                    float px2 = (i + 1) * c_StepSize;
                     float py1 = Parabola(trajectoryParams.a, trajectoryParams.b, px1);
                     float py2 = Parabola(trajectoryParams.a, trajectoryParams.b, px2);
                     Debug.DrawLine(
                         FeetPos + Rigidbody.velocity.FlattenY().normalized * px1 + Vector3.up * py1,
-                        FeetPos + Rigidbody.velocity.FlattenY().normalized * px2 + Vector3.up * py2, 
+                        FeetPos + Rigidbody.velocity.FlattenY().normalized * px2 + Vector3.up * py2,
                         Color.blue);
+                    DebugHelper.DrawWireCircle(
+                        FeetPos + Rigidbody.velocity.FlattenY().normalized * px2 + Vector3.up * py2,
+                        0.4f, Vector3.up, Color.blue);
                 }
             }
 
@@ -791,8 +837,11 @@ namespace Manatea.AdventureRoots
                 Vector2 sampledPoint = GetClosestPointOnParabola(trajectoryParams.a, trajectoryParams.b, point2D);
                 Vector3 pointOnTrajectory = FeetPos + Rigidbody.velocity.FlattenY().normalized * sampledPoint.x + Vector3.up * sampledPoint.y;
                 float distanceHeuristic = Vector3.Distance(m_GroundHits[i].point, pointOnTrajectory) + Vector3.Distance(m_GroundHits[i].point, FeetPos);
-                DebugHelper.DrawWireSphere(pointOnTrajectory, 0.2f, Color.white);
-                DebugHelper.DrawWireSphere(m_GroundHits[i].point, 0.2f, Color.red);
+                if (DebugGroundMagnetism)
+                {
+                    DebugHelper.DrawWireSphere(pointOnTrajectory, 0.2f, Color.white);
+                    DebugHelper.DrawWireSphere(m_GroundHits[i].point, 0.2f, Color.red);
+                }
                 if (distanceHeuristic > closestDistance)
                     continue;
 
@@ -802,14 +851,95 @@ namespace Manatea.AdventureRoots
                 groundFound = true;
             }
 
-            if (DebugCharacter)
+            if (DebugGroundMagnetism)
             {
                 DebugHelper.DrawWireSphere(p1, radius, groundFound ? Color.green : Color.red, Time.fixedDeltaTime, false);
                 DebugHelper.DrawWireSphere(p2, radius, groundFound ? Color.green : Color.red, Time.fixedDeltaTime, false);
+
+                DebugHelper.DrawWireCircle(groundHitResult.point, 0.2f, Color.green);
             }
 
-            DebugHelper.DrawWireCircle(groundHitResult.point, 0.2f, Color.green);
             hit = groundHitResult;
+            return groundFound;
+        }
+        private bool DetectGroundMagnetismNEW(out RaycastHit hit)
+        {
+            int layerMask = LayerMaskExtensions.CalculatePhysicsLayerMask(gameObject.layer);
+
+
+            // Trajectory tests
+            Vector2 vel2D = new Vector2(Rigidbody.velocity.XZ().magnitude, Rigidbody.velocity.y);
+            (float a, float b) trajectoryParams = CalculateParabola(vel2D, Physics.gravity.y);
+
+            const int c_TrejectoryIterations = 4;
+            const float c_StepSize = 0.5f;
+            bool groundFound = false;
+            for (int i = 0; i <= c_TrejectoryIterations; i++)
+            {
+                float radius = MMath.Lerp(GroundMagnetismRadiusStart, GroundMagnetismRadiusEnd, i / (float)c_TrejectoryIterations);
+                float px1 = i * c_StepSize;
+                float px2 = (i + 1) * c_StepSize;
+                float py1 = Parabola(trajectoryParams.a, trajectoryParams.b, px1);
+                float py2 = Parabola(trajectoryParams.a, trajectoryParams.b, px2);
+                Vector3 p1 = FeetPos + Rigidbody.velocity.FlattenY().normalized * px1 + Vector3.up * py1;
+                Vector3 p2 = FeetPos + Rigidbody.velocity.FlattenY().normalized * px2 + Vector3.up * py2;
+                if (DebugGroundMagnetism)
+                {
+                    Debug.DrawLine(p1, p2, Color.blue);
+                    DebugHelper.DrawWireCircle(p2, 0.4f, Vector3.up, Color.blue);
+                }
+
+                Vector3 pp1 = p1 + (p1 - p2).normalized * radius / 2;
+                int hitCount = Physics.SphereCastNonAlloc(pp1, radius, (p2 - pp1).normalized, m_GroundHits, (p2 - pp1).magnitude, layerMask);
+                DebugHelper.DrawWireCapsule(pp1, p2, radius, Color.grey);
+
+                GroundMagnetismSample groundMagnet = new GroundMagnetismSample();
+                groundMagnet.Hit.distance = float.PositiveInfinity;
+                groundMagnet.Hit.point = Vector3.positiveInfinity;
+                float closestDistance = float.PositiveInfinity;
+                for (int j = 0; j < hitCount; j++)
+                {
+                    // Discard overlaps
+                    if (m_GroundHits[j].distance == 0)
+                        continue;
+                    // Discard collisions that are further away
+                    if (m_GroundHits[j].distance > groundMagnet.Hit.distance)
+                        continue;
+                    // Discard self collisions
+                    if (m_GroundHits[j].collider.transform == Rigidbody.transform)
+                        continue;
+                    if (m_GroundHits[j].collider.transform.IsChildOf(Rigidbody.transform))
+                        continue;
+                    if (m_GroundHits[j].normal.y <= 0)
+                        continue;
+                    if (m_GroundHits[j].point.y > FeetPos.y)
+                        continue;
+                    if (Vector3.Dot(m_GroundHits[j].point - FeetPos, Rigidbody.velocity) < 0)
+                        continue;
+
+                    // TODO correctly transform the 3D contact point so that the closest distance can be calculated
+                    Vector3 pointFeetSpace = m_GroundHits[j].point - FeetPos;
+                    Vector2 point2D = new Vector2(pointFeetSpace.XZ().magnitude, pointFeetSpace.y);
+                    Vector2 sampledPoint = GetClosestPointOnParabola(trajectoryParams.a, trajectoryParams.b, point2D);
+                    Vector3 pointOnTrajectory = FeetPos + Rigidbody.velocity.FlattenY().normalized * sampledPoint.x + Vector3.up * sampledPoint.y;
+                    float distanceHeuristic = Vector3.Distance(m_GroundHits[j].point, pointOnTrajectory) + Vector3.Distance(m_GroundHits[j].point, FeetPos);
+                    if (DebugGroundMagnetism)
+                    {
+                        DebugHelper.DrawWireSphere(pointOnTrajectory, 0.2f, Color.green);
+                        DebugHelper.DrawWireSphere(m_GroundHits[j].point, 0.2f, Color.red);
+                    }
+                    if (distanceHeuristic > closestDistance)
+                        continue;
+
+                    groundMagnet.ClosestPointOnTrajectory = pointOnTrajectory;
+                    groundMagnet.Hit = m_GroundHits[j];
+                    groundMagnet.Hit.point = pointOnTrajectory;
+                    closestDistance = distanceHeuristic;
+                    groundFound = true;
+                }
+            }
+
+            hit = new RaycastHit();
             return groundFound;
         }
 
