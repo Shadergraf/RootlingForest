@@ -77,7 +77,6 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   GroundMoveForce: 1
   AirMoveForce: 0.2
-  JumpForce: 8.75
   StepHeight: 0
   FeetLinearResistance: 20
   FeetAngularResistance: 25
@@ -85,6 +84,26 @@ MonoBehaviour:
   MovementFriction: 0.1
   GroundRotationRate: 0.25
   AirRotationRate: 0.005
+  JumpForce: 8.75
+  JumpMoveAlignment: 0.75
+  EnableGroundMagnetism: 0
+  GroundMagnetismRadiusStart: 0.5
+  GroundMagnetismRadiusEnd: 1.5
+  GroundMagnetismDepth: 0.5
+  GroundMagnetismForce: 50
+  EnableLedgeDetection: 0
+  LedgeDetectionStart: 0.2
+  LedgeDetectionEnd: -0.2
+  LedgeDetectionDistance: 0.2
+  LedgeDetectionRadius: 0.4
+  LedgeBalancingForce: 50
+  LedgeMoveMultiplier: 0.75
+  LedgeStableBalancingForce: 150
+  LedgeStableMoveMultiplier: 0.5
+  LedgeBalancingWobbleTime: 0.8
+  LedgeBalancingWobbleAmount: 0.45
+  m_StabilizationForce: 50
+  m_StabilizationForcePoles: 50
   Collider: {fileID: 0}
   SkinThickness: 0.05
   GroundDetectionDistance: 0.15
@@ -93,9 +112,14 @@ MonoBehaviour:
     type: 2}
   m_RotationRateAttribute: {fileID: 11400000, guid: 13efa8a8c038c3a47ae5293010294aa4,
     type: 2}
+  m_LedgeBalancingAttribute: {fileID: 0}
   m_NoStableGroundTag: {fileID: 11400000, guid: 942d62db9bc34ae499e56a855290abc6,
     type: 2}
-  DebugCharacter: 0
+  DebugLocomotion: 0
+  DebugGroundDetection: 0
+  DebugLedgeDetection: 0
+  LogLedgeDetection: 0
+  DebugGroundMagnetism: 0
 --- !u!114 &5171198309114388193
 MonoBehaviour:
   m_ObjectHideFlags: 0
