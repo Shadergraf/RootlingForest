@@ -4,6 +4,7 @@ using Manatea.GameplaySystem;
 using UnityEngine.Events;
 using System.Collections;
 using System;
+using UnityEngine.Serialization;
 
 // TODO cleanup this file
 
@@ -37,12 +38,12 @@ public class PullAbility : MonoBehaviour
     public float DriverSpring = 1000;
     public float DriverDamper = 10;
 
-    public float MinMovementForce = 10;
-    public float MaxMovementForce = 20;
+    [FormerlySerializedAs("MinMovementForce")]
+    public float OverburdenedThresholdMin = 10;
+    [FormerlySerializedAs("MaxMovementForce")]
+    public float OverburdenedThresholdMax = 20;
     public float OverburdenedMovementMult = 0.5f;
     public float OverburdenedRotationMult = 0.5f;
-    public float MinRotationForce = 10;
-    public float MaxRotationForce = 20;
 
     public LayerMask m_RaisingExcludeLayers;
     public LayerMask m_HandExcludeLayers;
@@ -516,7 +517,7 @@ public class PullAbility : MonoBehaviour
         if (m_Attributes)
         {
             m_WalkSpeedModifier.Value = MMath.Damp(m_WalkSpeedModifier.Value, 0.4f, 20, Time.fixedDeltaTime);
-            m_RotationRateModifier.Value = MMath.Damp(m_WalkSpeedModifier.Value, 0.4f, 20, Time.fixedDeltaTime);
+            m_RotationRateModifier.Value = MMath.Damp(m_RotationRateModifier.Value, 0.4f, 20, Time.fixedDeltaTime);
         }
     }
 
@@ -689,7 +690,7 @@ public class PullAbility : MonoBehaviour
         float rotMult = 1;
 
         // Heavy load
-        m_HeavyLoad = MMath.InverseLerpClamped(MinMovementForce, MaxMovementForce, m_SmoothPullingForce.magnitude);
+        m_HeavyLoad = MMath.InverseLerpClamped(OverburdenedThresholdMin, OverburdenedThresholdMax, m_SmoothPullingForce.magnitude);
         moveMult = MMath.Lerp(moveMult, OverburdenedMovementMult, m_HeavyLoad);
         rotMult = MMath.Lerp(rotMult, OverburdenedRotationMult, m_HeavyLoad);
 
@@ -702,7 +703,7 @@ public class PullAbility : MonoBehaviour
         if (m_Attributes)
         {
             m_WalkSpeedModifier.Value = MMath.Damp(m_WalkSpeedModifier.Value, moveMult, 10, Time.fixedDeltaTime);
-            m_RotationRateModifier.Value = MMath.Damp(m_WalkSpeedModifier.Value, rotMult, 10, Time.fixedDeltaTime);
+            m_RotationRateModifier.Value = MMath.Damp(m_RotationRateModifier.Value, rotMult, 10, Time.fixedDeltaTime);
         }
     }
 

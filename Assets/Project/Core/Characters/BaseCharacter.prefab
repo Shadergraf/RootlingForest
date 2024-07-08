@@ -46,7 +46,7 @@ Rigidbody:
   serializedVersion: 4
   m_Mass: 1
   m_Drag: 0.5
-  m_AngularDrag: 0.2
+  m_AngularDrag: 8
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
   m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
@@ -57,7 +57,7 @@ Rigidbody:
     serializedVersion: 2
     m_Bits: 0
   m_ImplicitCom: 0
-  m_ImplicitTensor: 1
+  m_ImplicitTensor: 0
   m_UseGravity: 1
   m_IsKinematic: 0
   m_Interpolate: 1
@@ -84,6 +84,8 @@ MonoBehaviour:
   MovementFriction: 0.1
   GroundRotationRate: 0.25
   AirRotationRate: 0.005
+  GroundRotationForce: 1
+  AirRotationForce: 1
   JumpForce: 8.75
   JumpMoveAlignment: 0.75
   EnableGroundMagnetism: 0
@@ -91,6 +93,8 @@ MonoBehaviour:
   GroundMagnetismRadiusEnd: 1.5
   GroundMagnetismDepth: 0.5
   GroundMagnetismForce: 50
+  GroundMagnetismTrejectoryIterations: 4
+  GroundMagnetismStepSize: 0.5
   EnableLedgeDetection: 0
   LedgeDetectionStart: 0.2
   LedgeDetectionEnd: -0.2

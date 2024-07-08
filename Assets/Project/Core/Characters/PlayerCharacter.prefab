@@ -390,12 +390,10 @@ MonoBehaviour:
   rotationAngle: {x: 0, y: 0, z: 0}
   DriverSpring: 50
   DriverDamper: 5
-  MinMovementForce: 25
-  MaxMovementForce: 35
+  OverburdenedThresholdMin: 25
+  OverburdenedThresholdMax: 35
   OverburdenedMovementMult: 0.6
-  OverburdenedRotationMult: 0.7
-  MinRotationForce: 80
-  MaxRotationForce: 100
+  OverburdenedRotationMult: 0.4
   m_RaisingExcludeLayers:
     serializedVersion: 2
     m_Bits: 4294967295

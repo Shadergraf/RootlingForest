@@ -17,6 +17,8 @@ namespace Manatea.AdventureRoots
         public float MovementFriction = 0.1f;
         public float GroundRotationRate = 10;
         public float AirRotationRate = 0.05f;
+        public float GroundRotationForce = 1;
+        public float AirRotationForce = 1;
 
         [Header("Jump")]
         public float JumpForce = 5;
@@ -88,6 +90,7 @@ namespace Manatea.AdventureRoots
         private bool m_IsSliding;
         private float m_ForceAirborneTimer;
         private float m_AirborneTimer;
+        private Vector3 m_TargetLookDir;
         private float m_JumpTimer;
         private float m_GroundTimer;
         private bool m_HasJumped;
@@ -145,9 +148,6 @@ namespace Manatea.AdventureRoots
         private void OnEnable()
         {
             m_ScheduledLookDir = transform.forward;
-
-            Rigidbody.automaticInertiaTensor = false;
-            Rigidbody.inertiaTensorRotation = Quaternion.Euler(0, 360, 0);
         }
 
         public void Move(Vector3 moveVector, bool rotateTowardsMove = true)
@@ -508,16 +508,26 @@ namespace Manatea.AdventureRoots
 
 
                 // TODO adding 90 deg to the character rotation works out, it might be a hack tho and is not tested in every scenario, could break
-                float targetRotationTorque = MMath.DeltaAngle((m_RigidBody.rotation.eulerAngles.y + 90) * MMath.Deg2Rad, MMath.Atan2(m_ScheduledLookDir.z, -m_ScheduledLookDir.x)) * MMath.Rad2Deg;
+                float targetRotationRate = 1;
                 if (m_IsStableGrounded && !m_IsSliding)
                 {
-                    targetRotationTorque *= GroundRotationRate;
+                    targetRotationRate *= GroundRotationRate;
                 }
                 else
                 {
-                    targetRotationTorque *= AirRotationRate;
+                    targetRotationRate *= AirRotationRate;
                 }
+                m_TargetLookDir = Vector3.RotateTowards(m_TargetLookDir, m_ScheduledLookDir, targetRotationRate * MMath.Deg2Rad * Time.fixedDeltaTime, 1);
+                float targetRotationTorque = MMath.DeltaAngle((m_RigidBody.rotation.eulerAngles.y + 90) * MMath.Deg2Rad, MMath.Atan2(m_TargetLookDir.z, -m_TargetLookDir.x)) * MMath.Rad2Deg;
                 targetRotationTorque *= rotRateMult;
+                if (m_IsStableGrounded && !m_IsSliding)
+                {
+                    targetRotationTorque *= GroundRotationForce;
+                }
+                else
+                {
+                    targetRotationTorque *= AirRotationForce;
+                }
                 //rotMult = MMath.RemapClamped(0.5f, 1, 1, 0, m_RotationRelaxation);
                 //rotMult *= MMath.RemapClamped(180, 90, 0.1f, 1f, MMath.Abs(targetRotationTorque));
                 //rotMult *= MMath.RemapClamped(1, 3, 0.01f, 1f, MMath.Abs(m_RigidBody.angularVelocity.y));
@@ -805,6 +815,8 @@ namespace Manatea.AdventureRoots
                         if (m_GroundHits[k].point.y > FeetPos.y)
                             continue;
                         if (Vector3.Dot(m_GroundHits[k].point - FeetPos, Rigidbody.velocity) < 0)
+                            continue;
+                        if (!IsSlopeWalkable(m_GroundHits[k].normal))
                             continue;
 
                         // TODO correctly transform the 3D contact point so that the closest distance can be calculated
