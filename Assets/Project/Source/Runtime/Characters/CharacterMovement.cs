@@ -93,6 +93,7 @@ namespace Manatea.AdventureRoots
         private Vector3 m_TargetLookDir;
         private float m_JumpTimer;
         private float m_GroundTimer;
+        private float m_SmoothMoveMagnitude;
         private bool m_HasJumped;
         private PhysicMaterial m_PhysicsMaterial;
         private RaycastHit m_GroundHitResult;
@@ -201,7 +202,6 @@ namespace Manatea.AdventureRoots
 
             // Update timers
             m_ForceAirborneTimer = MMath.Max(m_ForceAirborneTimer - dt, 0);
-
             if (m_IsStableGrounded)
             {
                 m_GroundTimer += dt;
@@ -216,6 +216,8 @@ namespace Manatea.AdventureRoots
             {
                 m_JumpTimer += dt;
             }
+            m_SmoothMoveMagnitude = MMath.Damp(m_SmoothMoveMagnitude, m_ScheduledMove.magnitude, 1, Time.fixedDeltaTime * 2);
+            Debug.Log(m_SmoothMoveMagnitude);
 
             // Ground detection
             bool groundDetected = DetectGround(out m_GroundHitResult, out m_PreciseGroundHitResult);
@@ -379,6 +381,7 @@ namespace Manatea.AdventureRoots
                     if (currentLedgeType == LedgeType.Cliff && m_ScheduledMove != Vector3.zero)
                     {
                         intentionalOverride = MMath.RemapClamped(-0.15f, -0.35f, 1, 0, Vector3.Dot(averageLedgeDir.normalized, m_ScheduledMove.normalized));
+                        intentionalOverride *= MMath.RemapClamped(0.2f, 0.5f, 0, 1, m_SmoothMoveMagnitude);
                     }
 
                     // TODO remove this and put it in a dedicated ability that allows the player to balance better by using their hands
