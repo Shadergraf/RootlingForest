@@ -6,32 +6,62 @@ using UnityEngine.Rendering.Universal.Internal;
 
 public class PainterlyRenderFeature : ScriptableRendererFeature
 {
-    private static readonly LayerMask AllLayers = ~0;
-
     private const int FilterKernelSize = 32;
 
     public Settings m_Settings;
     
     private PainterlyRenderPass m_RenderPass;
     
+
+    private int m_LastFilterKernelSectors;
+    private float m_LastFilterKernelSmoothness;
+
     public override void Create()
     {
-        var structureTensorMaterial = CoreUtils.CreateEngineMaterial("Hidden/Painterly/StructureTensor");
-        var kuwaharaFilterMaterial = CoreUtils.CreateEngineMaterial("Hidden/Painterly/KuwaharaAnisotropic");
-        var lineIntegralConvolutionMaterial = CoreUtils.CreateEngineMaterial("Hidden/Painterly/LineIntegralConvolution");
-        var compositorMaterial = CoreUtils.CreateEngineMaterial("Hidden/Painterly/Composite");
+#if UNITY_EDITOR
+        ResourceReloader.TryReloadAllNullIn(this, UniversalRenderPipelineAsset.packagePath);
+#endif
 
-        m_RenderPass = new PainterlyRenderPass(structureTensorMaterial, kuwaharaFilterMaterial, lineIntegralConvolutionMaterial, compositorMaterial);
-        m_RenderPass.renderPassEvent = RenderPassEvent.BeforeRenderingPostProcessing;
+        if (m_RenderPass == null)
+        {
+            var structureTensorMaterial = CoreUtils.CreateEngineMaterial("Hidden/Painterly/StructureTensor");
+            var kuwaharaFilterMaterial = CoreUtils.CreateEngineMaterial("Hidden/Painterly/KuwaharaAnisotropic");
+            var lineIntegralConvolutionMaterial = CoreUtils.CreateEngineMaterial("Hidden/Painterly/LineIntegralConvolution");
+            var compositorMaterial = CoreUtils.CreateEngineMaterial("Hidden/Painterly/Composite");
+            m_RenderPass = new PainterlyRenderPass(structureTensorMaterial, kuwaharaFilterMaterial, lineIntegralConvolutionMaterial, compositorMaterial);
+            m_RenderPass.renderPassEvent = RenderPassEvent.BeforeRenderingPostProcessing;
+        }
 
-        var texture = new Texture2D(FilterKernelSize, FilterKernelSize, TextureFormat.RFloat, true);
-        InitializeFilterKernelTexture(texture,
-        FilterKernelSize,
-        m_Settings.anisotropicKuwaharaFilterSettings.filterKernelSectors,
-        m_Settings.anisotropicKuwaharaFilterSettings.filterKernelSmoothness);
+        if (m_LastFilterKernelSmoothness != m_Settings.anisotropicKuwaharaFilterSettings.filterKernelSmoothness ||
+            m_LastFilterKernelSectors != m_Settings.anisotropicKuwaharaFilterSettings.filterKernelSectors)
+        {
+            var texture = new Texture2D(FilterKernelSize, FilterKernelSize, TextureFormat.RFloat, true);
+            InitializeFilterKernelTexture(texture,
+            FilterKernelSize,
+            m_Settings.anisotropicKuwaharaFilterSettings.filterKernelSectors,
+            m_Settings.anisotropicKuwaharaFilterSettings.filterKernelSmoothness);
 
-        m_Settings.anisotropicKuwaharaFilterSettings.filterKernelTexture = texture;
+            if (m_Settings.anisotropicKuwaharaFilterSettings.filterKernelTexture != null)
+            {
+                CoreUtils.Destroy(m_Settings.anisotropicKuwaharaFilterSettings.filterKernelTexture);
+            }
+            m_Settings.anisotropicKuwaharaFilterSettings.filterKernelTexture = texture;
+            m_LastFilterKernelSectors = m_Settings.anisotropicKuwaharaFilterSettings.filterKernelSectors;
+            m_LastFilterKernelSmoothness = m_Settings.anisotropicKuwaharaFilterSettings.filterKernelSmoothness;
+
+            Debug.Log("Regenerated filterKernelTexture");
+        }
+
+        Debug.Log("PainterlyRenderFeature created");
     }
+    protected override void Dispose(bool disposing)
+    {
+        m_RenderPass?.Dispose();
+        m_RenderPass = null;
+
+        Debug.Log("PainterlyRenderFeature disposed");
+    }
+
 
     public override void AddRenderPasses(ScriptableRenderer renderer, ref RenderingData renderingData)
     {
@@ -159,11 +189,15 @@ public class PainterlyRenderFeature : ScriptableRendererFeature
     [Serializable]
     public class AnisotropicKuwaharaFilterSettings
     {
+        [Range(1, 8)]
+        public int structureTensorIterations = 2;
+        [Range(0.1f, 3)]
+        public float structureTensorSpread = 1;
+
         [Range(3, 8)]
         public int filterKernelSectors = 8;
         [Range(0f, 1f)]
         public float filterKernelSmoothness = 0.33f;
-        [NonSerialized]
         public Texture2D filterKernelTexture;
 
         [Range(2f, 12f)]

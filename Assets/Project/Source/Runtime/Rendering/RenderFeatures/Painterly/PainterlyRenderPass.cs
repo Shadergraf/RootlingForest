@@ -3,12 +3,15 @@ using UnityEngine;
 using UnityEngine.Experimental.Rendering.RenderGraphModule;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
+using UnityEngine.UIElements;
 
 public class PainterlyRenderPass : ScriptableRenderPass
 {
-    private RTHandle m_StructureTensorRT;
+    private RTHandle m_StructureTensorRT_A;
+    private RTHandle m_StructureTensorRT_B;
     private RenderTextureDescriptor m_KuwaharaDesc;
-    private RTHandle m_KuwaharaRT;
+    private RTHandle m_KuwaharaRT_A;
+    private RTHandle m_KuwaharaRT_B;
     private RTHandle m_EdgeFlowRT;
 
     private readonly Material m_StructureTensorMaterial;
@@ -36,6 +39,9 @@ public class PainterlyRenderPass : ScriptableRenderPass
     }
     private void SetupKuwaharaFilter(PainterlyRenderFeature.AnisotropicKuwaharaFilterSettings kuwaharaFilterSettings)
     {
+        m_StructureTensorMaterial.SetInt("_StructureTensorIterations", kuwaharaFilterSettings.structureTensorIterations);
+        m_StructureTensorMaterial.SetFloat("_StructureTensorSpread", kuwaharaFilterSettings.structureTensorSpread);
+
         m_KuwaharaMaterial.SetInt("_FilterKernelSectors", kuwaharaFilterSettings.filterKernelSectors);
         m_KuwaharaMaterial.SetTexture("_FilterKernelTex", kuwaharaFilterSettings.filterKernelTexture);
         m_KuwaharaMaterial.SetFloat("_FilterRadius", kuwaharaFilterSettings.filterRadius);
@@ -59,24 +65,29 @@ public class PainterlyRenderPass : ScriptableRenderPass
         m_CompositorEnabled = compositorSettings.enableCompositor;
     }
 
-    public override void Configure(CommandBuffer cmd, RenderTextureDescriptor cameraTextureDescriptor)
+
+    /// <inheritdoc/>
+    public override void OnCameraSetup(CommandBuffer cmd, ref RenderingData renderingData)
     {
-        RenderTextureDescriptor structureTensorDesc = cameraTextureDescriptor;
+        RenderTextureDescriptor structureTensorDesc = renderingData.cameraData.cameraTargetDescriptor;
         structureTensorDesc.depthBufferBits = 0;
         structureTensorDesc.colorFormat = RenderTextureFormat.ARGBFloat;
-        RenderingUtils.ReAllocateIfNeeded(ref m_StructureTensorRT, structureTensorDesc);
+        RenderingUtils.ReAllocateIfNeeded(ref m_StructureTensorRT_A, structureTensorDesc);
+        RenderingUtils.ReAllocateIfNeeded(ref m_StructureTensorRT_B, structureTensorDesc);
 
-        RenderTextureDescriptor kuwaharaDesc = cameraTextureDescriptor;
+        RenderTextureDescriptor kuwaharaDesc = renderingData.cameraData.cameraTargetDescriptor;
         kuwaharaDesc.depthBufferBits = 0;
         kuwaharaDesc.colorFormat = RenderTextureFormat.ARGBFloat;
         m_KuwaharaDesc = kuwaharaDesc;
-        RenderingUtils.ReAllocateIfNeeded(ref m_KuwaharaRT, kuwaharaDesc);
+        RenderingUtils.ReAllocateIfNeeded(ref m_KuwaharaRT_A, kuwaharaDesc);
+        RenderingUtils.ReAllocateIfNeeded(ref m_KuwaharaRT_B, kuwaharaDesc);
 
-        RenderTextureDescriptor edgeFlowDesc = cameraTextureDescriptor;
+        RenderTextureDescriptor edgeFlowDesc = renderingData.cameraData.cameraTargetDescriptor;
         edgeFlowDesc.depthBufferBits = 0;
         edgeFlowDesc.colorFormat = RenderTextureFormat.RFloat;
         RenderingUtils.ReAllocateIfNeeded(ref m_EdgeFlowRT, edgeFlowDesc);
     }
+
 
     public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
     {
@@ -84,33 +95,36 @@ public class PainterlyRenderPass : ScriptableRenderPass
 
         RTHandle cameraTargetHandle = renderingData.cameraData.renderer.cameraColorTargetHandle;
 
-        cmd.Blit(cameraTargetHandle, m_StructureTensorRT, m_StructureTensorMaterial, -1);
+        cmd.Blit(cameraTargetHandle, m_StructureTensorRT_A, m_StructureTensorMaterial, 0);
+        cmd.Blit(m_StructureTensorRT_A, m_StructureTensorRT_B, m_StructureTensorMaterial, 1);
+        cmd.Blit(m_StructureTensorRT_B, m_StructureTensorRT_A, m_StructureTensorMaterial, 2);
+        cmd.Blit(m_StructureTensorRT_A, m_StructureTensorRT_B, m_StructureTensorMaterial, 3);
 
-        m_KuwaharaMaterial.SetTexture("_StructureTensorTex", m_StructureTensorRT);
-        cmd.Blit(cameraTargetHandle, m_KuwaharaRT, m_KuwaharaMaterial, -1);
+        // Debug
+        //cmd.Blit(m_StructureTensorRT, cameraTargetHandle);
 
+        m_KuwaharaMaterial.SetTexture("_StructureTensorTex", m_StructureTensorRT_B);
+        cmd.Blit(cameraTargetHandle, m_KuwaharaRT_A, m_KuwaharaMaterial, -1);
+        
         if (m_KuwaharaFilterIterations > 1)
         {
-            int temporaryRT = Shader.PropertyToID("_TemporaryRT");
-            cmd.GetTemporaryRT(temporaryRT, m_KuwaharaDesc);
             for (int i = 0; i < m_KuwaharaFilterIterations - 1; i++)
             {
-                cmd.Blit(m_KuwaharaRT, temporaryRT, m_KuwaharaMaterial, -1);
-                cmd.Blit(temporaryRT, m_KuwaharaRT, m_KuwaharaMaterial, -1);
+                cmd.Blit(m_KuwaharaRT_A, m_KuwaharaRT_B, m_KuwaharaMaterial, -1);
+                cmd.Blit(m_KuwaharaRT_B, m_KuwaharaRT_A, m_KuwaharaMaterial, -1);
             }
-            cmd.ReleaseTemporaryRT(temporaryRT);
         }
-
+        
         if (m_CompositorEnabled)
         {
-            cmd.Blit(m_StructureTensorRT, m_EdgeFlowRT, m_LineConvolutionMaterial, -1);
-
+            cmd.Blit(m_StructureTensorRT_A, m_EdgeFlowRT, m_LineConvolutionMaterial, -1);
+        
             m_CompositeMaterial.SetTexture("_EdgeFlowTex", m_EdgeFlowRT);
-            cmd.Blit(m_KuwaharaRT, cameraTargetHandle, m_CompositeMaterial, -1);
+            cmd.Blit(m_KuwaharaRT_A, cameraTargetHandle, m_CompositeMaterial, -1);
         }
         else
         {
-            cmd.Blit(m_KuwaharaRT, cameraTargetHandle);
+            cmd.Blit(m_KuwaharaRT_A, cameraTargetHandle);
         }
 
         context.ExecuteCommandBuffer(cmd);
@@ -119,21 +133,15 @@ public class PainterlyRenderPass : ScriptableRenderPass
 
     public void Dispose()
     {
-#if UNITY_EDITOR
-        if (EditorApplication.isPlaying)
-        {
-            Object.Destroy(m_StructureTensorMaterial);
-        }
-        else
-        {
-            Object.DestroyImmediate(m_StructureTensorMaterial);
-        }
-#else
-            Object.Destroy(m_StructureTensorMaterial);
-#endif
+        CoreUtils.Destroy(m_StructureTensorMaterial);
+        CoreUtils.Destroy(m_KuwaharaMaterial);
+        CoreUtils.Destroy(m_LineConvolutionMaterial);
+        CoreUtils.Destroy(m_CompositeMaterial);
 
-        m_StructureTensorRT?.Release();
-        m_KuwaharaRT?.Release();
+        m_StructureTensorRT_A?.Release();
+        m_StructureTensorRT_B?.Release();
+        m_KuwaharaRT_A?.Release();
+        m_KuwaharaRT_B?.Release();
         m_EdgeFlowRT?.Release();
     }
 }

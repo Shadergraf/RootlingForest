@@ -24,6 +24,10 @@ Shader "Hidden/Painterly/KuwaharaAnisotropic"
             #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/SurfaceInput.hlsl"
             #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/Color.hlsl"
             
+            #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/GlobalSamplers.hlsl"
+            #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DeclareDepthTexture.hlsl"
+            
+
             #define PIXEL_X (_ScreenParams.z - 1)
             #define PIXEL_Y (_ScreenParams.w - 1)
 
@@ -108,8 +112,30 @@ Shader "Hidden/Painterly/KuwaharaAnisotropic"
                 return r;
             }
 
+            float invLerp(float from, float to, float value)
+            {
+                return (value - from) / (to - from);
+            }
+
             half4 frag(Varyings input) : SV_Target
             {
+                #if UNITY_REVERSED_Z
+                float deviceDepth = SAMPLE_TEXTURE2D_X(_CameraDepthTexture, sampler_PointClamp, input.uv.xy).r;
+                #else
+                float deviceDepth = SAMPLE_TEXTURE2D_X(_CameraDepthTexture, sampler_PointClamp, input.uv.xy).r;
+                deviceDepth = deviceDepth * 2.0 - 1.0;
+                #endif
+
+                //Fetch shadow coordinates for cascade.
+                float3 wpos = ComputeWorldSpacePosition(input.uv.xy, deviceDepth, unity_MatrixInvVP);
+                deviceDepth = frac(deviceDepth * 120);
+                deviceDepth = abs(wpos.y - 2);
+                deviceDepth = saturate(invLerp(0.5, 1, deviceDepth));
+                float amount = deviceDepth;
+                //return float4(deviceDepth, deviceDepth, deviceDepth, 1);
+
+
+
                 float4 tensor = SampleStructureTensor(input.uv);
 
                 float2 v = tensor.xy;
