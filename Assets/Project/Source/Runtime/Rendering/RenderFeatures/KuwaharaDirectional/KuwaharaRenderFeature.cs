@@ -11,11 +11,12 @@ public class KuwaharaRenderFeature : ScriptableRendererFeature
     public BlurSettings m_PostBlurSettings;
     public CompositeSettings m_CompositeSettings;
 
+    private Material m_KuwaharaMaterial;
     private KuwaharaRenderPass m_RenderPass;
 
 
     [Serializable]
-    public struct KuwaharaSettings
+    public class KuwaharaSettings
     {
         [Range(1, 16)]
         public int Radius;
@@ -28,7 +29,7 @@ public class KuwaharaRenderFeature : ScriptableRendererFeature
         public int Downscale;
     }
     [Serializable]
-    public struct BlurSettings
+    public class BlurSettings
     {
         public bool Enabled;
         [Range(1, 16)]
@@ -37,7 +38,7 @@ public class KuwaharaRenderFeature : ScriptableRendererFeature
         public float Spread;
     }
     [Serializable]
-    public struct CompositeSettings
+    public class CompositeSettings
     {
         [Range(0, 1)]
         public float Blend;
@@ -52,8 +53,14 @@ public class KuwaharaRenderFeature : ScriptableRendererFeature
         ResourceReloader.TryReloadAllNullIn(this, UniversalRenderPipelineAsset.packagePath);
 #endif
 
-        var kuwaharaMaterial = CoreUtils.CreateEngineMaterial("Hidden/Kuwahara/Kuwahara");
-        m_RenderPass = new KuwaharaRenderPass(kuwaharaMaterial);
+        if (m_KuwaharaMaterial == null)
+        {
+            m_KuwaharaMaterial = CoreUtils.CreateEngineMaterial("Hidden/Kuwahara/Kuwahara");
+        }
+        if (m_RenderPass == null)
+        {
+            m_RenderPass = new KuwaharaRenderPass();
+        }
     }
     protected override void Dispose(bool disposing)
     {
@@ -64,7 +71,7 @@ public class KuwaharaRenderFeature : ScriptableRendererFeature
 
     public override void AddRenderPasses(ScriptableRenderer renderer, ref RenderingData renderingData)
     {
-        m_RenderPass.Setup(ref m_KuwaharaSettings, ref m_PreBlurSettings, ref m_PostBlurSettings, ref m_CompositeSettings);
+        m_RenderPass.Setup(m_KuwaharaMaterial, m_KuwaharaSettings, m_PreBlurSettings, m_PostBlurSettings, m_CompositeSettings);
         renderer.EnqueuePass(m_RenderPass);
     }
 }

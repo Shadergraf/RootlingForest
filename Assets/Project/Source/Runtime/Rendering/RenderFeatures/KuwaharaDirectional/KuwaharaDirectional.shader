@@ -17,7 +17,13 @@ Shader "Hidden/Kuwahara/Kuwahara"
     
     TEXTURE2D(_EffectTex);
     SAMPLER(sampler_EffectTex);
-            
+
+    TEXTURE2D(_MaskTex);
+    SAMPLER(sampler_MaskTex);
+
+    TEXTURE2D(_DepthTex);
+    SAMPLER(sampler_DepthTex);
+
     int _Radius;
     float _Spread;
     float _SampleRotation;
@@ -93,6 +99,10 @@ Shader "Hidden/Kuwahara/Kuwahara"
     {
         return SAMPLE_TEXTURE2D(_EffectTex, sampler_EffectTex, uv).rgb;
     }
+    float SampleMask(float2 uv)
+    {
+        return SAMPLE_TEXTURE2D(_MaskTex, sampler_MaskTex, uv).r;
+    }
             
     float Sobel(float2 uv)
     {
@@ -146,6 +156,8 @@ Shader "Hidden/Kuwahara/Kuwahara"
         float s = sin(angle);
         float c = cos(angle);
 
+        float spread = _Spread * SampleMask(uv);
+
         float3 col;
         float2 offset;
         float2 pixelSize = float2(1, PIXEL_Y / PIXEL_X);
@@ -159,7 +171,7 @@ Shader "Hidden/Kuwahara/Kuwahara"
                     offset = float2(j, k) + offsets[i];
                     offset = float2(offset.x * c - offset.y * s, offset.x * s + offset.y * c);  // rotate sample by angle
 
-                    float2 uvpos = uv + offset * pixelSize * _Spread;
+                    float2 uvpos = uv + offset * pixelSize * spread;
                     col = SampleMain(uvpos);
 
                     mean[i] += col;
@@ -203,6 +215,8 @@ Shader "Hidden/Kuwahara/Kuwahara"
 		int upper = iterations;
 		int lower = -upper;
 
+        spread = spread * SampleMask(uv);
+
         float2 pixelSize = float2(1, PIXEL_Y / PIXEL_X);
 		for (int x = lower; x <= upper; ++x)
 		{
@@ -217,6 +231,7 @@ Shader "Hidden/Kuwahara/Kuwahara"
     
     half3 sharpenEffect(float2 uv, float spread)
     {
+        spread = spread * SampleMask(uv);
 		float3 col = float3(0.0f, 0.0f, 0.0f);
         float2 pixelSize = float2(1, PIXEL_Y / PIXEL_X);
 		for (int i = 0; i < 5; ++i)
@@ -224,6 +239,26 @@ Shader "Hidden/Kuwahara/Kuwahara"
 			col += SampleEffect(uv + sharpen_kernels[i].xy * pixelSize * spread).xyz * sharpen_kernels[i].z;
 		}
 		return col;
+    }
+
+    half DepthMask(float2 uv)
+    {
+        #if UNITY_REVERSED_Z
+            real depth = SampleSceneDepth(uv);
+        #else
+            // Adjust z to match NDC for OpenGL
+            real depth = lerp(UNITY_NEAR_CLIP_VALUE, 1, SampleSceneDepth(uv));
+        #endif
+
+        float3 worldPos = ComputeWorldSpacePosition(uv, depth, UNITY_MATRIX_I_VP);
+
+        return saturate(max(0, abs(worldPos.y - 5) - 2) / 3);
+    }
+    half ScreenMask(float2 uv)
+    {
+        float mask = length(uv - 0.5) * 2 * 0.707;
+        mask = mask;
+        return mask;
     }
     
 
@@ -246,10 +281,21 @@ Shader "Hidden/Kuwahara/Kuwahara"
 
         float4 col = float4(0, 0, 0, 1);
 
-        col.rgb = lerp(main, effect, _Blend);
+        float blend = _Blend;
+        blend *= SampleMask(input.uv).r;
+
+        col.rgb = lerp(main, effect, blend);
 
 		return col;
     }
+    half FragMask(Varyings input) : SV_Target
+    {
+		float mask = 0;
+		mask += DepthMask(input.uv);
+		mask += ScreenMask(input.uv);
+		return saturate(mask);
+    }
+
 
     ENDHLSL
     
@@ -288,6 +334,13 @@ Shader "Hidden/Kuwahara/Kuwahara"
             HLSLPROGRAM
             #pragma vertex vert
             #pragma fragment FragComposite
+            ENDHLSL
+        }
+        Pass
+        {
+            HLSLPROGRAM
+            #pragma vertex vert
+            #pragma fragment FragMask
             ENDHLSL
         }
     }

@@ -10,23 +10,24 @@ public class KuwaharaRenderPass : ScriptableRenderPass
     private RTHandle m_BlurRT0;
     private RTHandle m_BlurRT1;
     private RTHandle m_CamMirrorRT;
+    private RTHandle m_MaskRT;
 
-    private readonly Material m_KuwaharaMaterial;
+    private Material m_KuwaharaMaterial;
     private const string k_KeywordDirectional = "_KUWAHARA_DIRECTIONAL";
 
     private int m_Downscale = 0;
     private KuwaharaRenderFeature.BlurSettings m_PreBlurSettings;
     private KuwaharaRenderFeature.BlurSettings m_PostBlurSettings;
 
-    public KuwaharaRenderPass(Material KuwaharaMaterial)
+    public KuwaharaRenderPass()
     {
-        m_KuwaharaMaterial = KuwaharaMaterial;
-
         renderPassEvent = RenderPassEvent.BeforeRenderingPostProcessing;
     }
 
-    public void Setup(ref KuwaharaRenderFeature.KuwaharaSettings kuwaharaSettings, ref KuwaharaRenderFeature.BlurSettings preBlurSettings, ref KuwaharaRenderFeature.BlurSettings postBlurSettings, ref KuwaharaRenderFeature.CompositeSettings compositeSettings)
+    public void Setup(Material kuwaharaMaterial, KuwaharaRenderFeature.KuwaharaSettings kuwaharaSettings, KuwaharaRenderFeature.BlurSettings preBlurSettings, KuwaharaRenderFeature.BlurSettings postBlurSettings, KuwaharaRenderFeature.CompositeSettings compositeSettings)
     {
+        m_KuwaharaMaterial = kuwaharaMaterial;
+
         CoreUtils.SetKeyword(m_KuwaharaMaterial, k_KeywordDirectional, kuwaharaSettings.Directional);
         m_KuwaharaMaterial.SetInt("_Radius", kuwaharaSettings.Radius);
         m_KuwaharaMaterial.SetFloat("_Spread", kuwaharaSettings.Spread / 500);
@@ -58,6 +59,11 @@ public class KuwaharaRenderPass : ScriptableRenderPass
         RenderTextureDescriptor camDesc = renderingData.cameraData.cameraTargetDescriptor;
         camDesc.depthBufferBits = 0;
         RenderingUtils.ReAllocateIfNeeded(ref m_CamMirrorRT, camDesc, FilterMode.Bilinear, TextureWrapMode.Clamp, name: "_CamMirrorRT");
+
+        RenderTextureDescriptor maskDesc = renderingData.cameraData.cameraTargetDescriptor;
+        maskDesc.depthBufferBits = 0;
+        maskDesc.colorFormat = RenderTextureFormat.RHalf;
+        RenderingUtils.ReAllocateIfNeeded(ref m_MaskRT, maskDesc, FilterMode.Point, TextureWrapMode.Clamp, name: "_MaskRT");
     }
 
 
@@ -65,19 +71,24 @@ public class KuwaharaRenderPass : ScriptableRenderPass
     {
         CommandBuffer cmd = CommandBufferPool.Get("Kuwahara");
 
-        RTHandle cameraTargetHandle = renderingData.cameraData.renderer.cameraColorTargetHandle;
-        cmd.Blit(cameraTargetHandle, m_CamMirrorRT);
+        RTHandle cameraColorRt = renderingData.cameraData.renderer.cameraColorTargetHandle;
+        cmd.Blit(cameraColorRt, m_CamMirrorRT);
+
+        RTHandle cameraDepthRT = renderingData.cameraData.renderer.cameraDepthTargetHandle;
+        cmd.Blit(cameraDepthRT, m_MaskRT, m_KuwaharaMaterial, 4);
+
+        cmd.SetGlobalTexture(Shader.PropertyToID("_MaskTex"), m_MaskRT);
 
         if (m_PreBlurSettings.Enabled)
         {
             cmd.SetGlobalInt(Shader.PropertyToID("_BlurIterations"), m_PreBlurSettings.Iterations);
             cmd.SetGlobalFloat(Shader.PropertyToID("_BlurSpread"), m_PreBlurSettings.Spread / 500);
-            cmd.Blit(cameraTargetHandle, m_BlurRT0, m_KuwaharaMaterial, 1);
+            cmd.Blit(cameraColorRt, m_BlurRT0, m_KuwaharaMaterial, 1);
             cmd.Blit(m_BlurRT0, m_BlurRT1, m_KuwaharaMaterial, 2);
         }
         else
         {
-            cmd.Blit(cameraTargetHandle, m_BlurRT1);
+            cmd.Blit(cameraColorRt, m_BlurRT1);
         }
 
         cmd.SetGlobalInt(Shader.PropertyToID("_BlurIterations"), m_PreBlurSettings.Iterations);
@@ -92,7 +103,7 @@ public class KuwaharaRenderPass : ScriptableRenderPass
         }
 
         cmd.SetGlobalTexture(Shader.PropertyToID("_EffectTex"), m_KuwaharaRT);
-        cmd.Blit(m_CamMirrorRT, cameraTargetHandle, m_KuwaharaMaterial, 3);
+        cmd.Blit(m_CamMirrorRT, cameraColorRt, m_KuwaharaMaterial, 3);
 
         context.ExecuteCommandBuffer(cmd);
         CommandBufferPool.Release(cmd);
