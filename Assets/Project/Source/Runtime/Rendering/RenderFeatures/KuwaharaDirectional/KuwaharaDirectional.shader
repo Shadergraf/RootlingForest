@@ -1,4 +1,4 @@
-Shader "Hidden/KuwaharaDirectional/KuwaharaDirectional"
+Shader "Hidden/Kuwahara/Kuwahara"
 {
     HLSLINCLUDE
     
@@ -132,7 +132,7 @@ Shader "Hidden/KuwaharaDirectional/KuwaharaDirectional"
         return angle;
     }
 
-    float3 KuwaharaDirectional(float2 uv)
+    float3 Kuwahara(float2 uv)
     {
                 
         float angle = _SampleRotation;
@@ -227,12 +227,9 @@ Shader "Hidden/KuwaharaDirectional/KuwaharaDirectional"
     }
     
 
-    half4 FragKuwaharaDirectional(Varyings input) : SV_Target
+    half4 FragKuwahara(Varyings input) : SV_Target
     {
-        //return float4(_MainTex_TexelSize.zw / float2(1920, 1080) / 2, 0, 1);
-        //return half4(replicate3(dot(SampleMain(input.uv), float3(0.2126, 0.7152, 0.0722))), 1);
-        //return half4(replicate3(Sobel(input.uv)), 1);
-        return half4(KuwaharaDirectional(input.uv), 1);
+        return half4(Kuwahara(input.uv), 1);
     }
     half4 FragGaussV(Varyings input) : SV_Target
     {
@@ -269,7 +266,7 @@ Shader "Hidden/KuwaharaDirectional/KuwaharaDirectional"
         {
             HLSLPROGRAM
             #pragma vertex vert
-            #pragma fragment FragKuwaharaDirectional
+            #pragma fragment FragKuwahara
             ENDHLSL
         }
         Pass
