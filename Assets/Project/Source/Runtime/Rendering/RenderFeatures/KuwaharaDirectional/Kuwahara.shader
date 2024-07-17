@@ -8,6 +8,8 @@ Shader "Hidden/Kuwahara/Kuwahara"
     #include "Packages/com.unity.render-pipelines.core/ShaderLibrary/GlobalSamplers.hlsl"
     #include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/DeclareDepthTexture.hlsl"
     
+    #include "Packages/com.unity.render-pipelines.universal/Shaders/PostProcessing/Common.hlsl"
+    
     #pragma multi_compile_fragment _ _KUWAHARA_DIRECTIONAL
 
 
@@ -34,6 +36,17 @@ Shader "Hidden/Kuwahara/Kuwahara"
     // Post processing
     float _SharpenSpread;
     float _Blend;
+    
+    float4 _Focus_Params;
+    #define FocusDistance   _Focus_Params.x
+    #define FocusStart      _Focus_Params.y
+    #define FocusEnd        _Focus_Params.z
+
+    float4 _Vignette_Params;
+    #define VignetteIntensity       _Vignette_Params.x
+    #define VignetteSmoothness      _Vignette_Params.y
+    #define VignetteRoundness       _Vignette_Params.z
+
             
 
     static const float sobelX[9] = {-1, -2, -1, 0, 0, 0, 1, 2, 1};
@@ -68,21 +81,21 @@ Shader "Hidden/Kuwahara/Kuwahara"
     #define replicate3(x) float3(x, x, x)
 
 
-    struct Attributes
+    struct VertexAttributes
     {
         float4 positionOS : POSITION;
         float2 uv         : TEXCOORD0;
     };
     
-    struct Varyings
+    struct FragmentVaryings
     {
         float2 uv     : TEXCOORD0;
         float4 vertex : SV_POSITION;
     };
 
-    Varyings vert(Attributes input)
+    FragmentVaryings VertToFrag(VertexAttributes input)
     {
-        Varyings output = (Varyings)0;
+        FragmentVaryings output = (FragmentVaryings)0;
     
         VertexPositionInputs vertexInput = GetVertexPositionInputs(input.positionOS.xyz);
         output.vertex = vertexInput.positionCS;
@@ -251,8 +264,9 @@ Shader "Hidden/Kuwahara/Kuwahara"
         #endif
 
         float3 worldPos = ComputeWorldSpacePosition(uv, depth, UNITY_MATRIX_I_VP);
+        float3 focusPos = _WorldSpaceCameraPos + mul((float3x3)unity_CameraToWorld, float3(0,0,1)) * FocusDistance;
 
-        return saturate(max(0, abs(worldPos.y - 5) - 2) / 3);
+        return saturate(max(0, abs(focusPos.y - worldPos.y) - FocusStart) / FocusEnd);
     }
     half ScreenMask(float2 uv)
     {
@@ -262,19 +276,19 @@ Shader "Hidden/Kuwahara/Kuwahara"
     }
     
 
-    half4 FragKuwahara(Varyings input) : SV_Target
+    half4 FragKuwahara(FragmentVaryings input) : SV_Target
     {
         return half4(Kuwahara(input.uv), 1);
     }
-    half4 FragGaussV(Varyings input) : SV_Target
+    half4 FragGaussV(FragmentVaryings input) : SV_Target
     {
 		return float4(gauss(input.uv, float2(1.0, 0.0), _BlurIterations, _BlurSpread), 1.0f);
     }
-    half4 FragGaussH(Varyings input) : SV_Target
+    half4 FragGaussH(FragmentVaryings input) : SV_Target
     {
 		return float4(gauss(input.uv, float2(0.0, 1.0), _BlurIterations, _BlurSpread), 1.0f);
     }
-    half4 FragComposite(Varyings input) : SV_Target
+    half4 FragComposite(FragmentVaryings input) : SV_Target
     {
         float3 main = SampleMain(input.uv).rgb;
         float3 effect = sharpenEffect(input.uv, _SharpenSpread);
@@ -288,11 +302,11 @@ Shader "Hidden/Kuwahara/Kuwahara"
 
 		return col;
     }
-    half FragMask(Varyings input) : SV_Target
+    half FragMask(FragmentVaryings input) : SV_Target
     {
 		float mask = 0;
 		mask += DepthMask(input.uv);
-		mask += ScreenMask(input.uv);
+		mask += 1 - ApplyVignette((1.0).rrr, input.uv, (0.5).xx, VignetteIntensity, VignetteRoundness, VignetteSmoothness, (0.0).rrr).r;
 		return saturate(mask);
     }
 
@@ -311,35 +325,35 @@ Shader "Hidden/Kuwahara/Kuwahara"
         Pass
         {
             HLSLPROGRAM
-            #pragma vertex vert
+            #pragma vertex VertToFrag
             #pragma fragment FragKuwahara
             ENDHLSL
         }
         Pass
         {
             HLSLPROGRAM
-            #pragma vertex vert
+            #pragma vertex VertToFrag
             #pragma fragment FragGaussV
             ENDHLSL
         }
         Pass
         {
             HLSLPROGRAM
-            #pragma vertex vert
+            #pragma vertex VertToFrag
             #pragma fragment FragGaussH
             ENDHLSL
         }
         Pass
         {
             HLSLPROGRAM
-            #pragma vertex vert
+            #pragma vertex VertToFrag
             #pragma fragment FragComposite
             ENDHLSL
         }
         Pass
         {
             HLSLPROGRAM
-            #pragma vertex vert
+            #pragma vertex VertToFrag
             #pragma fragment FragMask
             ENDHLSL
         }

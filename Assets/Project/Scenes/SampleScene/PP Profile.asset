@@ -1,6 +1,6 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
---- !u!114 &-8914253041300922596
+--- !u!114 &-5554678462755192101
 MonoBehaviour:
   m_ObjectHideFlags: 3
   m_CorrespondingSourceObject: {fileID: 0}
@@ -9,42 +9,55 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: c01700fd266d6914ababb731e09af2eb, type: 3}
-  m_Name: DepthOfField
+  m_Script: {fileID: 11500000, guid: 899c54efeace73346a0a16faa3afe726, type: 3}
+  m_Name: Vignette
   m_EditorClassIdentifier: 
-  active: 0
-  mode:
-    m_OverrideState: 1
-    m_Value: 2
-  gaussianStart:
-    m_OverrideState: 1
-    m_Value: 101.7
-  gaussianEnd:
-    m_OverrideState: 1
-    m_Value: 32.9
-  gaussianMaxRadius:
+  active: 1
+  color:
     m_OverrideState: 0
-    m_Value: 1
-  highQualitySampling:
+    m_Value: {r: 0, g: 0, b: 0, a: 1}
+  center:
+    m_OverrideState: 0
+    m_Value: {x: 0.5, y: 0.5}
+  intensity:
     m_OverrideState: 0
     m_Value: 0
+  smoothness:
+    m_OverrideState: 0
+    m_Value: 0.2
+  rounded:
+    m_OverrideState: 0
+    m_Value: 0
+--- !u!114 &-5014051953248372799
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5d028ff0c5d631640bf1c27577442258, type: 3}
+  m_Name: KuwaharaComponent
+  m_EditorClassIdentifier: 
+  active: 1
   focusDistance:
     m_OverrideState: 1
     m_Value: 25
-  aperture:
+  focusStart:
     m_OverrideState: 1
-    m_Value: 2.3
-  focalLength:
+    m_Value: 2.5
+  focusEnd:
     m_OverrideState: 1
-    m_Value: 300
-  bladeCount:
-    m_OverrideState: 0
-    m_Value: 6
-  bladeCurvature:
+    m_Value: 4
+  vignetteIntensity:
     m_OverrideState: 1
-    m_Value: 0
-  bladeRotation:
-    m_OverrideState: 0
+    m_Value: 1.4
+  vignetteSmoothness:
+    m_OverrideState: 1
+    m_Value: 1
+  vignetteRounded:
+    m_OverrideState: 1
     m_Value: 0
 --- !u!114 &11400000
 MonoBehaviour:
@@ -59,4 +72,5 @@ MonoBehaviour:
   m_Name: PP Profile
   m_EditorClassIdentifier: 
   components:
-  - {fileID: -8914253041300922596}
+  - {fileID: -5554678462755192101}
+  - {fileID: -5014051953248372799}

@@ -30,12 +30,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Active: 1
   m_PreBlurSettings:
-    Enabled: 0
+    Enabled: 1
     Iterations: 1
-    Spread: 0.677
+    Spread: 0.856
   m_KuwaharaSettings:
     Radius: 3
-    Spread: 0.5
+    Spread: 0.667
     SampleRotation: 45
     Directional: 1
     Downscale: 1

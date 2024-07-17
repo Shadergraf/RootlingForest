@@ -45,6 +45,12 @@ public class KuwaharaRenderPass : ScriptableRenderPass
     /// <inheritdoc/>
     public override void OnCameraSetup(CommandBuffer cmd, ref RenderingData renderingData)
     {
+        if (!VolumeManager.instance.stack.isValid)
+            return;
+        KuwaharaComponent kuwahara = VolumeManager.instance.stack.GetComponent<KuwaharaComponent>();
+        if (!kuwahara || !kuwahara.active)
+            return;
+
         RenderTextureDescriptor kuwaharaDesc = renderingData.cameraData.cameraTargetDescriptor;
         kuwaharaDesc.depthBufferBits = 0;
         kuwaharaDesc.width = MMath.RoundToInt(kuwaharaDesc.width / MMath.Pow(2, m_Downscale));
@@ -64,11 +70,24 @@ public class KuwaharaRenderPass : ScriptableRenderPass
         maskDesc.depthBufferBits = 0;
         maskDesc.colorFormat = RenderTextureFormat.RHalf;
         RenderingUtils.ReAllocateIfNeeded(ref m_MaskRT, maskDesc, FilterMode.Point, TextureWrapMode.Clamp, name: "_MaskRT");
+
+        var aspectRatio = renderingData.cameraData.cameraTargetDescriptor.width / (float)renderingData.cameraData.cameraTargetDescriptor.height;
+        m_KuwaharaMaterial.SetVector(Shader.PropertyToID("_Vignette_Params"), new Vector4(kuwahara.vignetteIntensity.value, kuwahara.vignetteSmoothness.value, kuwahara.vignetteRounded.value ? aspectRatio : 1.0f));
+
+        m_KuwaharaMaterial.SetVector(Shader.PropertyToID("_Focus_Params"), new Vector4(kuwahara.focusDistance.value, kuwahara.focusStart.value, kuwahara.focusEnd.value));
     }
 
 
     public override void Execute(ScriptableRenderContext context, ref RenderingData renderingData)
     {
+        if (renderingData.cameraData.isSceneViewCamera)
+            return;
+        if (!VolumeManager.instance.stack.isValid)
+            return;
+        KuwaharaComponent kuwahara = VolumeManager.instance.stack.GetComponent<KuwaharaComponent>();
+        if (!kuwahara || !kuwahara.active)
+            return;
+
         CommandBuffer cmd = CommandBufferPool.Get("Kuwahara");
 
         RTHandle cameraColorRt = renderingData.cameraData.renderer.cameraColorTargetHandle;
