@@ -96,7 +96,8 @@ MonoBehaviour:
   m_RendererFeatures:
   - {fileID: 8132107582494267668}
   - {fileID: -2024668485343099023}
-  m_RendererFeatureMap: 14d9d4b1c20cdb707147325fbdeee6e3
+  - {fileID: 1861333187328616062}
+  m_RendererFeatureMap: 14d9d4b1c20cdb707147325fbdeee6e37e265e0facc8d419
   m_UseNativeRenderPass: 1
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
   xrSystemData: {fileID: 11400000, guid: 60e1133243b97e347b653163a8c01b64, type: 2}
@@ -139,6 +140,21 @@ MonoBehaviour:
   m_CopyDepthMode: 0
   m_AccurateGbufferNormals: 0
   m_IntermediateTextureMode: 0
+--- !u!114 &1861333187328616062
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6304ea6039536d844a203070bb246440, type: 3}
+  m_Name: SoftShadowsRenderFeature
+  m_EditorClassIdentifier: 
+  m_Active: 1
+  m_Shader: {fileID: 4807578003741378534, guid: bd77cea0457fc144fa21ec526ee340c8,
+    type: 3}
 --- !u!114 &8132107582494267668
 MonoBehaviour:
   m_ObjectHideFlags: 0
