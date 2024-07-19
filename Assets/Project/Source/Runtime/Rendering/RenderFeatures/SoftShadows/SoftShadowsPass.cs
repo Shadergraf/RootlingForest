@@ -67,10 +67,11 @@ public class SoftShadowsRenderPass : ScriptableRenderPass
         cmd.BuildRayTracingAccelerationStructure(m_RayTraceAccStruct);
         cmd.SetRayTracingAccelerationStructure(m_RayTraceShader, Shader.PropertyToID("g_SceneAccelStruct"), m_RayTraceAccStruct);
         cmd.SetRayTracingTextureParam(m_RayTraceShader, Shader.PropertyToID("g_Output"), m_RayTraceResultRT_B);
-        cmd.SetRayTracingFloatParam(m_RayTraceShader, Shader.PropertyToID("g_Zoom"), Mathf.Tan(Mathf.Deg2Rad * Camera.main.fieldOfView * 0.5f) * softShadows.m_Zoom.value);
+        cmd.SetRayTracingFloatParam(m_RayTraceShader, Shader.PropertyToID("g_Zoom"), Mathf.Tan(Mathf.Deg2Rad * renderingData.cameraData.camera.fieldOfView * 0.5f) * softShadows.m_Zoom.value);
         cmd.SetRayTracingFloatParam(m_RayTraceShader, Shader.PropertyToID("g_AspectRatio"), cameraDesc.width / (float)cameraDesc.height);
 
         cmd.Blit(cameraColorRt, m_RayTraceResultRT_A);
+        cmd.SetRayTracingShaderPass(m_RayTraceShader, "RayTracing");
         cmd.DispatchRays(m_RayTraceShader, "MainRayGenShader", (uint)cameraDesc.width, (uint)cameraDesc.height, 1, renderingData.cameraData.camera);
         cmd.Blit(m_RayTraceResultRT_B, cameraColorRt);
 

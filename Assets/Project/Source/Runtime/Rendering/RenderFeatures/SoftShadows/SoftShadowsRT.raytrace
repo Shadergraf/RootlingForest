@@ -13,18 +13,12 @@ RWTexture2D<float4> g_Output;
 struct RayPayload
 {
     float4 color;
-    float depth;
-
 };
-            struct AttributeData
-            {
-                float2 barycentrics;
-            };
 
 [shader("miss")]
 void MainMissShader(inout RayPayload payload : SV_RayPayload)
 {
-    payload.color = float4(0, 0, 0, 1);
+    payload.color = float4(0, 0, 0.1, 1);
 }
 
 [shader("raygeneration")]
@@ -32,47 +26,30 @@ void MainRayGenShader()
 {
     uint2 launchIndex = uint2(DispatchRaysIndex().x, DispatchRaysDimensions().y - DispatchRaysIndex().y - 1);
     uint2 launchDim = DispatchRaysDimensions().xy;
-
+    
     float2 frameCoord = launchIndex + float2(0.5, 0.5);
     
-    float2 ndcCoords = (frameCoord) / float2(launchDim.x - 1, launchDim.y - 1);
+    float2 ndcCoords = frameCoord / float2(launchDim.x, launchDim.y);
         
     ndcCoords = ndcCoords * 2 - float2(1, 1);
     ndcCoords = ndcCoords * g_Zoom;
     
     // Get a ray in view space.
     float3 viewDirection = normalize(float3(ndcCoords.x * g_AspectRatio, ndcCoords.y, 1));
-
+    
     // Rotate the ray from view space to world space.
     float3 rayDirection = mul((float3x3)unity_CameraToWorld, viewDirection);
-
+    
     
     RayDesc ray; // DXR defined
-    ray.Origin = _WorldSpaceCameraPos ;
+    ray.Origin = _WorldSpaceCameraPos;
     ray.Direction = rayDirection;
     ray.TMin = 0;
     ray.TMax = 1e20f;
     RayPayload payload;
     payload.color = float4(1, 1, 1, 1);
     TraceRay(g_SceneAccelStruct, 0, 0xFF, 0, 1, 0, ray, payload); // DXR callback
-
+    
     g_Output[frameCoord] = payload.color * float4(frameCoord, 0, 0) / 1000.0;
-
-    //uint2 launchIdx = DispatchRaysIndex().xy; // DXR callback
-    //uint2 launchDim = DispatchRaysDimensions().xy; // DXR callback
-    //float2 frameCoord = float2(launchIdx.x, launchDim.y - launchIdx.y - 1) + float2(0.5, 0.5);
-    //float2 ndcCoords = frameCoord / float2(launchDim.x - 1, launchDim.y - 1);
-    //float aspectRatio = (float)launchDim.x / (float)launchDim.y;
-    //float3 viewDirection = normalize(float3(ndcCoords.x * aspectRatio, ndcCoords.y, 1));
-    //RayDesc ray; // DXR defined
-    //ray.Origin = _WorldSpaceCameraPos;
-    //ray.Direction = normalize(mul((float3x3)unity_CameraToWorld, viewDirection));
-    //ray.TMin = 0;
-    //ray.TMax = 1e20f;
-    //RayPayload payload;
-    //payload.color = float4(1, 1, 1, 1);
-    //TraceRay(g_SceneAccelStruct, 0, 0xFF, 0, 1, 0, ray, payload); // DXR callback
-    //
-    //
-    //g_Output[frameCoord] = payload.color;
+    g_Output[frameCoord] = payload.color;
 }
