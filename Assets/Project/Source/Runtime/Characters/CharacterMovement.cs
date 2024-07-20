@@ -925,7 +925,7 @@ namespace Manatea.AdventureRoots
 
             float radius = CalculateFootprintRadius();
             float height = CalculateBodyHeight();
-            Vector3 top = FeetPos + Rigidbody.rotation * Vector3.forward * radius * 2 + Vector3.up * (VaultingMaxHeight + height - radius);
+            Vector3 top = FeetPos + Rigidbody.rotation * Vector3.forward * radius * 2 + Vector3.up * (VaultingMaxHeight + height);
             int hitCount = Physics.SphereCastNonAlloc(top, radius, Vector3.down, m_GroundHits, VaultingMaxHeight + height - radius, layerMask);
 
             if (DebugVaulting)
@@ -952,10 +952,19 @@ namespace Manatea.AdventureRoots
 
                 validHits.Add(m_GroundHits[i]);
             }
-            validHits.Sort((a, b) => a.distance.CompareTo(b.distance));
+            validHits.Sort((a, b) => b.distance.CompareTo(a.distance));
+
 
             for (int i = 0; i < validHits.Count; i++)
             {
+                DebugHelper.DrawWireSphere(top + Vector3.down * validHits[i].distance, radius, Color.Lerp(Color.green, Color.red, i / (float)validHits.Count));
+                float distA = validHits[i].distance;
+                float distB = i < validHits.Count - 1 ? validHits[i + 1].distance : 0;
+                if (distA - distB >= height)
+                {
+                   DebugHelper.DrawWireCapsule(top + Vector3.down * distA, top + Vector3.down * (distA - height), radius, Color.green);
+
+                }
             }
 
             //if (DebugVaulting)
