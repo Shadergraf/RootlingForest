@@ -1,5 +1,7 @@
 using Manatea.GameplaySystem;
 using System.Collections;
+using System.Collections.Generic;
+using System.Collections.Specialized;
 using UnityEngine;
 
 namespace Manatea.AdventureRoots
@@ -23,6 +25,11 @@ namespace Manatea.AdventureRoots
         [Header("Jump")]
         public float JumpForce = 5;
         public float JumpMoveAlignment = 0.75f;
+
+        [Header("Vaulting")]
+        public bool EnableVaulting = false;
+        public float VaultingMaxHeight;
+        public float VaultingSpeed;
 
         [Header("Ground Magnetism")]
         public bool EnableGroundMagnetism = false;
@@ -70,6 +77,7 @@ namespace Manatea.AdventureRoots
         public bool DebugLedgeDetection = false;
         public bool LogLedgeDetection = false;
         public bool DebugGroundMagnetism = false;
+        public bool DebugVaulting = false;
 
         public Rigidbody Rigidbody => m_RigidBody;
 
@@ -217,7 +225,6 @@ namespace Manatea.AdventureRoots
                 m_JumpTimer += dt;
             }
             m_SmoothMoveMagnitude = MMath.Damp(m_SmoothMoveMagnitude, m_ScheduledMove.magnitude, 1, Time.fixedDeltaTime * 2);
-            Debug.Log(m_SmoothMoveMagnitude);
 
             // Ground detection
             bool groundDetected = DetectGround(out m_GroundHitResult, out m_PreciseGroundHitResult);
@@ -464,6 +471,20 @@ namespace Manatea.AdventureRoots
             #endregion
 
 
+            #region Vaulting
+
+            bool vaultingValid = DetectVaulting(out RaycastHit vaultingHit);
+            if (vaultingValid)
+            {
+                if (Vector3.Dot(m_ScheduledMove, vaultingHit.point) > 0.3)
+                {
+                    // move up
+                }
+            }
+
+            #endregion
+
+
             // The direction we want to move in
             if (DebugLocomotion)
             {
@@ -587,6 +608,49 @@ namespace Manatea.AdventureRoots
         public bool IsSlopeWalkable(Vector3 normal)
         {
             return MMath.Acos(MMath.ClampNeg1to1(Vector3.Dot(normal, -Physics.gravity.normalized))) * MMath.Rad2Deg <= MaxSlopeAngle;
+        }
+
+        private float CalculateBodyHeight()
+        {
+            float height = 0;
+            if (Collider is CapsuleCollider)
+            {
+                CapsuleCollider capsuleCollider = (CapsuleCollider)Collider;
+                height = MMath.Max(capsuleCollider.height, capsuleCollider.radius * 2) * (capsuleCollider.direction == 0 ? transform.localScale.x : (capsuleCollider.direction == 1 ? transform.localScale.y : transform.localScale.z));
+            }
+            else if (Collider is SphereCollider)
+            {
+                SphereCollider sphereCollider = (SphereCollider)Collider;
+                height = sphereCollider.radius * MMath.Max(transform.localScale) * 2;
+            }
+            else
+                Debug.Assert(false, "Collider type is not supported!", gameObject);
+            return height;
+        }
+        private float CalculateFootprintRadius()
+        {
+            float radius = 0;
+            if (Collider is CapsuleCollider)
+            {
+                CapsuleCollider capsuleCollider = (CapsuleCollider)Collider;
+                float scaledRadius = capsuleCollider.radius * MMath.Max(Vector3.ProjectOnPlane(transform.localScale, capsuleCollider.direction == 0 ? Vector3.right : (capsuleCollider.direction == 1 ? Vector3.up : Vector3.forward)));
+                float scaledHeight = MMath.Max(capsuleCollider.height, capsuleCollider.radius * 2) * (capsuleCollider.direction == 0 ? transform.localScale.x : (capsuleCollider.direction == 1 ? transform.localScale.y : transform.localScale.z));
+
+                float capsuleHalfHeightWithoutHemisphereScaled = scaledHeight / 2 - scaledRadius;
+                radius = scaledRadius;
+            }
+            else if (Collider is SphereCollider)
+            {
+                SphereCollider sphereCollider = (SphereCollider)Collider;
+                Ray ray = new Ray();
+                ray.origin = transform.TransformPoint(sphereCollider.center);
+                ray.direction = Vector3.down;
+                float scaledRadius = sphereCollider.radius * MMath.Max(transform.localScale);
+                radius = scaledRadius;
+            }
+            else
+                Debug.Assert(false, "Collider type is not supported!", gameObject);
+            return radius;
         }
 
 
@@ -852,6 +916,55 @@ namespace Manatea.AdventureRoots
             }
 
             return groundFound;
+        }
+        private bool DetectVaulting(out RaycastHit vaultingHit)
+        {
+            int layerMask = LayerMaskExtensions.CalculatePhysicsLayerMask(gameObject.layer);
+
+            bool groundFound = false;
+
+            float radius = CalculateFootprintRadius();
+            float height = CalculateBodyHeight();
+            Vector3 top = FeetPos + Rigidbody.rotation * Vector3.forward * radius * 2 + Vector3.up * (VaultingMaxHeight + height - radius);
+            int hitCount = Physics.SphereCastNonAlloc(top, radius, Vector3.down, m_GroundHits, VaultingMaxHeight + height - radius, layerMask);
+
+            if (DebugVaulting)
+            {
+                DebugHelper.DrawWireCapsule(top, top + Vector3.down * (VaultingMaxHeight + height - radius), radius, Color.grey);
+            }
+
+
+            List<RaycastHit> validHits = new List<RaycastHit>();
+            for (int i = 0; i < hitCount; i++)
+            {
+                // Discard overlaps
+                if (m_GroundHits[i].distance == 0)
+                    continue;
+                // Discard self collisions
+                if (m_GroundHits[i].collider.transform == Rigidbody.transform)
+                    continue;
+                if (m_GroundHits[i].collider.transform.IsChildOf(Rigidbody.transform))
+                    continue;
+                if (m_GroundHits[i].normal.y <= 0)
+                    continue;
+                if (!IsSlopeWalkable(m_GroundHits[i].normal))
+                    continue;
+
+                validHits.Add(m_GroundHits[i]);
+            }
+            validHits.Sort((a, b) => a.distance.CompareTo(b.distance));
+
+            for (int i = 0; i < validHits.Count; i++)
+            {
+            }
+
+            //if (DebugVaulting)
+            //{
+            //    DebugHelper.DrawWireCapsule(top, top + Vector3.down * vaultingHit.distance, radius, groundFound ? Color.green : Color.red);
+            //}
+
+            vaultingHit = new RaycastHit();
+            return true;
         }
 
         private IEnumerator CO_Jump(Vector3 velocity, int iterations)
