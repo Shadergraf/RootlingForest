@@ -75,43 +75,49 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5266fe543a7f7d64388b4cde3b2c86bf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  GroundMoveForce: 1
-  AirMoveForce: 0.2
-  StepHeight: 0
-  FeetLinearResistance: 20
-  FeetAngularResistance: 25
-  StationaryFriction: 1
-  MovementFriction: 0.1
-  GroundRotationRate: 0.25
-  AirRotationRate: 0.005
-  GroundRotationForce: 1
-  AirRotationForce: 1
-  JumpForce: 8.75
-  JumpMoveAlignment: 0.75
-  EnableGroundMagnetism: 0
-  GroundMagnetismRadiusStart: 0.5
-  GroundMagnetismRadiusEnd: 1.5
-  GroundMagnetismDepth: 0.5
-  GroundMagnetismForce: 50
-  GroundMagnetismTrejectoryIterations: 4
-  GroundMagnetismStepSize: 0.5
-  EnableLedgeDetection: 0
-  LedgeDetectionStart: 0.2
-  LedgeDetectionEnd: -0.2
-  LedgeDetectionDistance: 0.2
-  LedgeDetectionRadius: 0.4
-  LedgeBalancingForce: 50
-  LedgeMoveMultiplier: 0.75
-  LedgeStableBalancingForce: 150
-  LedgeStableMoveMultiplier: 0.5
-  LedgeBalancingWobbleTime: 0.8
-  LedgeBalancingWobbleAmount: 0.45
-  m_StabilizationForce: 50
-  m_StabilizationForcePoles: 50
-  Collider: {fileID: 0}
-  SkinThickness: 0.05
-  GroundDetectionDistance: 0.15
-  MaxSlopeAngle: 46
+  m_GroundMoveForce: 1
+  m_AirMoveForce: 0.2
+  m_StepHeight: 0.31
+  m_FeetLinearResistance: 20
+  m_FeetAngularResistance: 50
+  m_StationaryFriction: 1
+  m_MovementFriction: 0.1
+  m_GroundRotationRate: 1080
+  m_AirRotationRate: 360
+  m_GroundRotationForce: 8
+  m_AirRotationForce: 0.5
+  m_PushForce: 1
+  m_JumpForce: 9
+  m_JumpMoveAlignment: 0.75
+  m_EnableVaulting: 1
+  m_VaultingDetectionDistance: 0.45
+  m_VaultingMaxHeight: 0.52
+  m_VaultingMaxTime: 1
+  m_VaultingForce: 3
+  m_EnableGroundMagnetism: 1
+  m_GroundMagnetismRadiusStart: 0.5
+  m_GroundMagnetismRadiusEnd: 1.5
+  m_GroundMagnetismDepth: 3
+  m_GroundMagnetismForce: 3
+  m_GroundMagnetismTrejectoryIterations: 4
+  m_GroundMagnetismStepSize: 0.5
+  m_EnableLedgeDetection: 1
+  m_LedgeDetectionStart: 0.5
+  m_LedgeDetectionEnd: 0
+  m_LedgeDetectionDistance: 0.75
+  m_LedgeDetectionRadius: 0.75
+  m_LedgeBalancingForce: 50
+  m_LedgeMoveMultiplier: 0.6
+  m_LedgeStableBalancingForce: 150
+  m_LedgeStableMoveMultiplier: 0.4
+  m_LedgeBalancingWobbleTime: 0.8
+  m_LedgeBalancingWobbleAmount: 0.55
+  m_StabilizationForce: 35
+  m_StabilizationForcePoles: 60
+  m_Collider: {fileID: 0}
+  m_SkinThickness: 0.001
+  m_GroundDetectionDistance: 0.15
+  m_MaxSlopeAngle: 46
   m_MoveSpeedAttribute: {fileID: 11400000, guid: b08ce0e4b3536694bbf575ddf6619fa5,
     type: 2}
   m_RotationRateAttribute: {fileID: 11400000, guid: 13efa8a8c038c3a47ae5293010294aa4,
@@ -119,11 +125,12 @@ MonoBehaviour:
   m_LedgeBalancingAttribute: {fileID: 0}
   m_NoStableGroundTag: {fileID: 11400000, guid: 942d62db9bc34ae499e56a855290abc6,
     type: 2}
-  DebugLocomotion: 0
-  DebugGroundDetection: 0
-  DebugLedgeDetection: 0
-  LogLedgeDetection: 0
-  DebugGroundMagnetism: 0
+  m_DebugLocomotion: 0
+  m_DebugGroundDetection: 0
+  m_DebugLedgeDetection: 0
+  m_LogLedgeDetection: 0
+  m_DebugGroundMagnetism: 0
+  m_DebugVaulting: 0
 --- !u!114 &5171198309114388193
 MonoBehaviour:
   m_ObjectHideFlags: 0

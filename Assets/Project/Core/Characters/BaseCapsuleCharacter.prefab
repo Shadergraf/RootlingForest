@@ -503,6 +503,11 @@ PrefabInstance:
       objectReference: {fileID: -2380540039210584354}
     - target: {fileID: 5137507898606658623, guid: bf0177a3809de3d49ac5dcdb1afa9084,
         type: 3}
+      propertyPath: m_Collider
+      value: 
+      objectReference: {fileID: -2380540039210584354}
+    - target: {fileID: 5137507898606658623, guid: bf0177a3809de3d49ac5dcdb1afa9084,
+        type: 3}
       propertyPath: c_LedgeSamples
       value: 8
       objectReference: {fileID: 0}
