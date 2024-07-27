@@ -16,6 +16,9 @@ namespace Manatea
 
         public LayerMask m_GrabLayerMask;
 
+        [Header("Debug")]
+        public Vector3 m_DebugMoveInput;
+
         private Collider[] Colliders;
         private int OverlapCount;
 
@@ -122,7 +125,7 @@ namespace Manatea
 
             inputVector = m_MovementAction.ReadValue<Vector2>().XZtoXYZ();
 
-            CharacterMovement.Move(inputVector);
+            CharacterMovement.Move((inputVector + m_DebugMoveInput).ClampMagnitude(0, 1));
 
 
             // TODO test if single button grab/throw input feels good

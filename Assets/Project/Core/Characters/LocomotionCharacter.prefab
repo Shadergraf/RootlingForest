@@ -165,37 +165,37 @@ PrefabInstance:
     - target: {fileID: 1314052735505241016, guid: 10e5fa5dfab45f14ab93f58ee4b2416d,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: -12.19
+      value: 4.46
       objectReference: {fileID: 0}
     - target: {fileID: 1314052735505241016, guid: 10e5fa5dfab45f14ab93f58ee4b2416d,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: 5.56
+      value: 1.41
       objectReference: {fileID: 0}
     - target: {fileID: 1314052735505241016, guid: 10e5fa5dfab45f14ab93f58ee4b2416d,
         type: 3}
       propertyPath: m_LocalPosition.z
-      value: 3.5
+      value: 3.4
       objectReference: {fileID: 0}
     - target: {fileID: 1314052735505241016, guid: 10e5fa5dfab45f14ab93f58ee4b2416d,
         type: 3}
       propertyPath: m_LocalRotation.w
-      value: 0.9965012
+      value: 0.7071068
       objectReference: {fileID: 0}
     - target: {fileID: 1314052735505241016, guid: 10e5fa5dfab45f14ab93f58ee4b2416d,
         type: 3}
       propertyPath: m_LocalRotation.x
-      value: -0
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1314052735505241016, guid: 10e5fa5dfab45f14ab93f58ee4b2416d,
         type: 3}
       propertyPath: m_LocalRotation.y
-      value: 0.08357889
+      value: -0.7071068
       objectReference: {fileID: 0}
     - target: {fileID: 1314052735505241016, guid: 10e5fa5dfab45f14ab93f58ee4b2416d,
         type: 3}
       propertyPath: m_LocalRotation.z
-      value: -0
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1314052735505241016, guid: 10e5fa5dfab45f14ab93f58ee4b2416d,
         type: 3}
@@ -205,7 +205,7 @@ PrefabInstance:
     - target: {fileID: 1314052735505241016, guid: 10e5fa5dfab45f14ab93f58ee4b2416d,
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.y
-      value: 9.589
+      value: -90
       objectReference: {fileID: 0}
     - target: {fileID: 1314052735505241016, guid: 10e5fa5dfab45f14ab93f58ee4b2416d,
         type: 3}
@@ -269,8 +269,38 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8597781962724660110, guid: 10e5fa5dfab45f14ab93f58ee4b2416d,
         type: 3}
+      propertyPath: JumpForce
+      value: 9
+      objectReference: {fileID: 0}
+    - target: {fileID: 8597781962724660110, guid: 10e5fa5dfab45f14ab93f58ee4b2416d,
+        type: 3}
+      propertyPath: StepHeight
+      value: 0.31
+      objectReference: {fileID: 0}
+    - target: {fileID: 8597781962724660110, guid: 10e5fa5dfab45f14ab93f58ee4b2416d,
+        type: 3}
       propertyPath: RotationRate
       value: 0.25
+      objectReference: {fileID: 0}
+    - target: {fileID: 8597781962724660110, guid: 10e5fa5dfab45f14ab93f58ee4b2416d,
+        type: 3}
+      propertyPath: SkinThickness
+      value: 0.001
+      objectReference: {fileID: 0}
+    - target: {fileID: 8597781962724660110, guid: 10e5fa5dfab45f14ab93f58ee4b2416d,
+        type: 3}
+      propertyPath: VaultingForce
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 8597781962724660110, guid: 10e5fa5dfab45f14ab93f58ee4b2416d,
+        type: 3}
+      propertyPath: EnableVaulting
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8597781962724660110, guid: 10e5fa5dfab45f14ab93f58ee4b2416d,
+        type: 3}
+      propertyPath: AirRotationRate
+      value: 360
       objectReference: {fileID: 0}
     - target: {fileID: 8597781962724660110, guid: 10e5fa5dfab45f14ab93f58ee4b2416d,
         type: 3}
@@ -279,8 +309,28 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8597781962724660110, guid: 10e5fa5dfab45f14ab93f58ee4b2416d,
         type: 3}
+      propertyPath: VaultingMaxTime
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8597781962724660110, guid: 10e5fa5dfab45f14ab93f58ee4b2416d,
+        type: 3}
+      propertyPath: AirRotationForce
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 8597781962724660110, guid: 10e5fa5dfab45f14ab93f58ee4b2416d,
+        type: 3}
+      propertyPath: LedgeDetectionEnd
+      value: -1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8597781962724660110, guid: 10e5fa5dfab45f14ab93f58ee4b2416d,
+        type: 3}
+      propertyPath: VaultingMaxHeight
+      value: 0.52
+      objectReference: {fileID: 0}
+    - target: {fileID: 8597781962724660110, guid: 10e5fa5dfab45f14ab93f58ee4b2416d,
+        type: 3}
       propertyPath: GroundRotationRate
-      value: 0.45
+      value: 1080
       objectReference: {fileID: 0}
     - target: {fileID: 8597781962724660110, guid: 10e5fa5dfab45f14ab93f58ee4b2416d,
         type: 3}
@@ -289,8 +339,73 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8597781962724660110, guid: 10e5fa5dfab45f14ab93f58ee4b2416d,
         type: 3}
+      propertyPath: GroundRotationForce
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 8597781962724660110, guid: 10e5fa5dfab45f14ab93f58ee4b2416d,
+        type: 3}
+      propertyPath: LedgeDetectionStart
+      value: 1.3
+      objectReference: {fileID: 0}
+    - target: {fileID: 8597781962724660110, guid: 10e5fa5dfab45f14ab93f58ee4b2416d,
+        type: 3}
+      propertyPath: LedgeMoveMultiplier
+      value: 0.55
+      objectReference: {fileID: 0}
+    - target: {fileID: 8597781962724660110, guid: 10e5fa5dfab45f14ab93f58ee4b2416d,
+        type: 3}
+      propertyPath: GroundMagnetismDepth
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 8597781962724660110, guid: 10e5fa5dfab45f14ab93f58ee4b2416d,
+        type: 3}
+      propertyPath: GroundMagnetismForce
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 8597781962724660110, guid: 10e5fa5dfab45f14ab93f58ee4b2416d,
+        type: 3}
+      propertyPath: LedgeDetectionRadius
+      value: 0.2
+      objectReference: {fileID: 0}
+    - target: {fileID: 8597781962724660110, guid: 10e5fa5dfab45f14ab93f58ee4b2416d,
+        type: 3}
+      propertyPath: m_StabilizationForce
+      value: 35
+      objectReference: {fileID: 0}
+    - target: {fileID: 8597781962724660110, guid: 10e5fa5dfab45f14ab93f58ee4b2416d,
+        type: 3}
+      propertyPath: EnableGroundMagnetism
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8597781962724660110, guid: 10e5fa5dfab45f14ab93f58ee4b2416d,
+        type: 3}
       propertyPath: FeetAngularResistance
       value: 50
+      objectReference: {fileID: 0}
+    - target: {fileID: 8597781962724660110, guid: 10e5fa5dfab45f14ab93f58ee4b2416d,
+        type: 3}
+      propertyPath: LedgeDetectionDistance
+      value: 0.75
+      objectReference: {fileID: 0}
+    - target: {fileID: 8597781962724660110, guid: 10e5fa5dfab45f14ab93f58ee4b2416d,
+        type: 3}
+      propertyPath: LedgeStableMoveMultiplier
+      value: 0.33
+      objectReference: {fileID: 0}
+    - target: {fileID: 8597781962724660110, guid: 10e5fa5dfab45f14ab93f58ee4b2416d,
+        type: 3}
+      propertyPath: VaultingDetectionDistance
+      value: 0.45
+      objectReference: {fileID: 0}
+    - target: {fileID: 8597781962724660110, guid: 10e5fa5dfab45f14ab93f58ee4b2416d,
+        type: 3}
+      propertyPath: m_StabilizationForcePoles
+      value: 60
+      objectReference: {fileID: 0}
+    - target: {fileID: 8597781962724660110, guid: 10e5fa5dfab45f14ab93f58ee4b2416d,
+        type: 3}
+      propertyPath: LedgeBalancingWobbleAmount
+      value: 0.55
       objectReference: {fileID: 0}
     - target: {fileID: 8637521886535575888, guid: 10e5fa5dfab45f14ab93f58ee4b2416d,
         type: 3}
@@ -437,8 +552,8 @@ CapsuleCollider:
   m_ProvidesContacts: 0
   m_Enabled: 0
   serializedVersion: 2
-  m_Radius: 0.35
-  m_Height: 1
+  m_Radius: 0.4
+  m_Height: 1.5
   m_Direction: 1
   m_Center: {x: 0, y: -0.25, z: 0.5}
 --- !u!4 &6868106048537390128 stripped

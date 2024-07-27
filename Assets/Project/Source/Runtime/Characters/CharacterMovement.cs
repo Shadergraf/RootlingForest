@@ -21,6 +21,7 @@ namespace Manatea.AdventureRoots
         public float AirRotationRate = 0.05f;
         public float GroundRotationForce = 1;
         public float AirRotationForce = 1;
+        public float PushForce = 1;
 
         [Header("Jump")]
         public float JumpForce = 5;
@@ -28,8 +29,10 @@ namespace Manatea.AdventureRoots
 
         [Header("Vaulting")]
         public bool EnableVaulting = false;
+        public float VaultingDetectionDistance;
         public float VaultingMaxHeight;
-        public float VaultingSpeed;
+        public float VaultingMaxTime;
+        public float VaultingForce;
 
         [Header("Ground Magnetism")]
         public bool EnableGroundMagnetism = false;
@@ -79,7 +82,14 @@ namespace Manatea.AdventureRoots
         public bool DebugGroundMagnetism = false;
         public bool DebugVaulting = false;
 
+        // Public
         public Rigidbody Rigidbody => m_RigidBody;
+        public Vector3 ScheduledMove => m_ScheduledMove;
+        public Vector3 MoveSpeedMult => m_ScheduledMove;
+        public RaycastHit GroundLowerHit => m_GroundLowerHit;
+        public RaycastHit PreciseGroundLowerHit => m_PreciseGroundLowerHit;
+        public RaycastHit GroundUpperHit => m_GroundUpperHit;
+        public RaycastHit PreciseGroundUpperHit => m_PreciseGroundUpperHit;
 
         private Rigidbody m_RigidBody;
         private GameplayAttributeOwner m_AttributeOwner;
@@ -103,9 +113,15 @@ namespace Manatea.AdventureRoots
         private float m_GroundTimer;
         private float m_SmoothMoveMagnitude;
         private bool m_HasJumped;
+        private bool m_IsStepping;
         private PhysicMaterial m_PhysicsMaterial;
-        private RaycastHit m_GroundHitResult;
-        private RaycastHit m_PreciseGroundHitResult;
+        private RaycastHit m_GroundLowerHit;
+        private RaycastHit m_PreciseGroundLowerHit;
+        private RaycastHit m_GroundUpperHit;
+        private RaycastHit m_PreciseGroundUpperHit;
+
+        private bool m_VaultingActive;
+        private float m_VaultingTimer;
 
         // Ledge Detection
         // TODO increase iterations and decrease samples to deffer ledge sampling over multiple frames
@@ -114,6 +130,10 @@ namespace Manatea.AdventureRoots
         private const int c_TotalLedgeDetectionSamples = c_LedgeDetectionSamples * c_LedgeDetectionIterations;
         private LedgeSample[] m_LedgeSamples = new LedgeSample[c_LedgeDetectionSamples * c_LedgeDetectionIterations];
         private int m_LedgeDetectionFrame = -1;
+
+        float m_CachedMoveSpeedMult = 1;
+        float m_CachedRotRateMult = 1;
+        private Dictionary<Collider, bool> m_CachedWalkableColliders = new Dictionary<Collider, bool>();
 
         /// <summary>
         /// The caracter feet position in world space
@@ -188,23 +208,29 @@ namespace Manatea.AdventureRoots
             Debug.Assert(Collider, "No collider setup!", gameObject);
             Debug.Assert(m_RigidBody, "No rigidbody attached!", gameObject);
 
+            PrePhysics();
             UpdatePhysics(Time.fixedDeltaTime);
+        }
+
+        protected void PrePhysics()
+        {
+            m_CachedWalkableColliders.Clear();
         }
 
         protected void UpdatePhysics(float dt)
         {
             // Get Attributes
-            float moveSpeedMult = 1;
-            float rotRateMult = 1;
+            m_CachedMoveSpeedMult = 1;
+            m_CachedRotRateMult = 1;
             if (m_AttributeOwner)
             {
                 if (m_AttributeOwner.TryGetAttributeEvaluatedValue(m_MoveSpeedAttribute, out float speed))
                 {
-                    moveSpeedMult = speed;
+                    m_CachedMoveSpeedMult = speed;
                 }
                 if (m_AttributeOwner.TryGetAttributeEvaluatedValue(m_RotationRateAttribute, out float rot))
                 {
-                    rotRateMult = rot;
+                    m_CachedRotRateMult = rot;
                 }
             }
 
@@ -227,14 +253,15 @@ namespace Manatea.AdventureRoots
             m_SmoothMoveMagnitude = MMath.Damp(m_SmoothMoveMagnitude, m_ScheduledMove.magnitude, 1, Time.fixedDeltaTime * 2);
 
             // Ground detection
-            bool groundDetected = DetectGround(out m_GroundHitResult, out m_PreciseGroundHitResult);
+            bool groundDetected = DetectGround(out m_GroundLowerHit, out m_PreciseGroundLowerHit, out m_GroundUpperHit, out m_PreciseGroundUpperHit);
             m_IsStableGrounded = groundDetected;
             m_IsStableGrounded &= m_ForceAirborneTimer <= 0;
-            m_IsSliding = m_IsStableGrounded && !IsSlopeWalkable(m_PreciseGroundHitResult.normal);
+            m_IsSliding = m_IsStableGrounded && !IsRaycastHitWalkable(m_PreciseGroundLowerHit) && !m_VaultingActive;
             m_IsStableGrounded &= !m_IsSliding;
-            // Step height
-            if (m_IsSliding && Vector3.Dot(m_PreciseGroundHitResult.normal, m_GroundHitResult.normal) < 0.9f && Vector3.Project(m_PreciseGroundHitResult.point - FeetPos, transform.up).magnitude < StepHeight)
+            // Stepping
+            if (IsObjectWalkable(m_PreciseGroundUpperHit.collider) && groundDetected && !m_VaultingActive && Vector3.Dot(m_PreciseGroundUpperHit.normal, m_GroundLowerHit.normal) < 0.9f && Vector3.Project(m_PreciseGroundUpperHit.point - FeetPos, transform.up).magnitude < StepHeight)
             {
+                m_IsStepping = true;
                 m_IsStableGrounded = true;
                 m_IsSliding = false;
             }
@@ -249,17 +276,21 @@ namespace Manatea.AdventureRoots
                 m_HasJumped = false;
                 m_JumpTimer = 0;
             }
-            if (m_IsStableGrounded && m_NoStableGroundTag)
-            {
-                var tagOwner = m_GroundHitResult.collider.GetComponentInParent<GameplayTagOwner>();
-                if (tagOwner && tagOwner.Tags.Contains(m_NoStableGroundTag))
-                {
-                    m_IsStableGrounded = false;
-                }
-            }
 
 
             Vector3 contactMove = m_ScheduledMove;
+            // The direction we want to move in
+            if (DebugLocomotion)
+            {
+                Debug.DrawLine(transform.position, transform.position + m_ScheduledMove, Color.blue, dt, false);
+                if (groundDetected)
+                    Debug.DrawLine(m_PreciseGroundLowerHit.point, m_PreciseGroundLowerHit.point + m_PreciseGroundLowerHit.normal, Color.black, dt, false);
+
+                if (StepHeight > 0)
+                {
+                    DebugHelper.DrawWireCircle(FeetPos + Vector3.up * StepHeight, CalculateFootprintRadius() * 1.2f, Vector3.up, Color.grey);
+                }
+            }
 
 
             // Jump
@@ -283,7 +314,60 @@ namespace Manatea.AdventureRoots
 
                 m_HasJumped = true;
             }
-            
+
+
+
+            #region Vaulting
+
+            if (EnableVaulting)
+            {
+                bool vaultingValid = DetectVaulting(out RaycastHit vaultingHit);
+                if (vaultingValid)
+                {
+                    Vector3 vaultingDir = (vaultingHit.point - FeetPos).FlattenY().normalized;
+                    if (!m_VaultingActive)
+                    {
+                        if (Vector3.Dot(m_ScheduledMove.normalized, vaultingDir) > 0.4 && Rigidbody.velocity.FlattenY().magnitude < 1 && m_IsStableGrounded)
+                        {
+                            m_VaultingTimer += Time.fixedDeltaTime;
+                        }
+                        else
+                        {
+                            m_VaultingTimer = 0;
+                        }
+                        if (m_VaultingTimer > 0.1)
+                        {
+                            m_VaultingActive = true;
+                            m_VaultingTimer = 0;
+                        }
+                    }
+
+                    if (m_VaultingActive)
+                    {
+                        m_VaultingTimer += Time.fixedDeltaTime;
+                        if (Rigidbody.velocity.y < 0.5f)
+                        {
+                            Vector3 vaultingForce = Vector3.up;
+                            vaultingForce *= VaultingForce;
+                            Rigidbody.AddForce(vaultingForce, ForceMode.VelocityChange);
+                        }
+                        contactMove = vaultingDir;
+
+                        if (MMath.Abs(vaultingHit.point.y - FeetPos.y) < CalculateFootprintRadius() * 0.005f
+                            || m_VaultingTimer > VaultingMaxTime
+                            || (m_VaultingTimer > 0.2 && m_IsStableGrounded))
+                        {
+                            m_VaultingActive = false;
+                        }
+                    }
+                }
+            }
+            else
+            {
+                m_VaultingActive = false;
+            }
+
+            #endregion
 
             #region Ledge Detection
 
@@ -367,7 +451,7 @@ namespace Manatea.AdventureRoots
                     #endregion
 
 
-                    Vector3 ledgeDir = m_GroundHitResult.point - FeetPos;
+                    Vector3 ledgeDir = m_GroundLowerHit.point - FeetPos;
                     Vector3 ledgeDirProjected = ledgeDir.FlattenY();
 
                     Vector3 ledgeForce = ledgeDirProjected;
@@ -422,7 +506,7 @@ namespace Manatea.AdventureRoots
                     }
 
                     // Stabilize player when not moving
-                    Vector3 stabilizationForce = Vector3.ProjectOnPlane(m_PreciseGroundHitResult.normal, m_GroundHitResult.normal);
+                    Vector3 stabilizationForce = Vector3.ProjectOnPlane(m_PreciseGroundLowerHit.normal, m_GroundLowerHit.normal);
                     stabilizationForce = stabilizationForce.FlattenY().normalized + stabilizationForce.y * Vector3.up;
                     if (currentLedgeType == LedgeType.Pole)
                     {
@@ -441,7 +525,6 @@ namespace Manatea.AdventureRoots
             }
 
             #endregion
-
 
             #region Ground Magnetism
 
@@ -463,40 +546,15 @@ namespace Manatea.AdventureRoots
                         targetVel *= MMath.Sqrt(MMath.InverseLerp(0, 0.3f, m_AirborneTimer));
                         Rigidbody.AddForce(targetVel, ForceMode.Force);
                     }
-
-
                 }
             }
 
             #endregion
-
-
-            #region Vaulting
-
-            bool vaultingValid = DetectVaulting(out RaycastHit vaultingHit);
-            if (vaultingValid)
-            {
-                if (Vector3.Dot(m_ScheduledMove, vaultingHit.point) > 0.3)
-                {
-                    // move up
-                }
-            }
-
-            #endregion
-
-
-            // The direction we want to move in
-            if (DebugLocomotion)
-            {
-                Debug.DrawLine(transform.position, transform.position + m_ScheduledMove, Color.blue, dt, false);
-                if (groundDetected)
-                    Debug.DrawLine(m_PreciseGroundHitResult.point, m_PreciseGroundHitResult.point + m_PreciseGroundHitResult.normal, Color.black, dt, false);
-            }
 
 
             // Contact Movement
             // movement that results from ground or surface contact
-            contactMove *= moveSpeedMult;
+            contactMove *= m_CachedMoveSpeedMult;
             if (contactMove != Vector3.zero)
             {
                 if (m_IsStableGrounded)
@@ -505,20 +563,42 @@ namespace Manatea.AdventureRoots
                     if (m_IsSliding)
                     {
                         // TODO only do this if we are moving TOWARDS the wall, not if we are moving away from it
-                        Vector3 wallNormal = Vector3.ProjectOnPlane(m_PreciseGroundHitResult.normal, Physics.gravity.normalized).normalized;
+                        Vector3 wallNormal = Vector3.ProjectOnPlane(m_GroundUpperHit.normal, Physics.gravity.normalized).normalized;
                         if (DebugGroundDetection)
-                            Debug.DrawLine(m_PreciseGroundHitResult.point + Vector3.one, m_PreciseGroundHitResult.point + Vector3.one + wallNormal, Color.blue, dt, false);
-                        if (Vector3.Dot(wallNormal, contactMove) < 0)
+                            Debug.DrawLine(m_GroundUpperHit.point + Vector3.one, m_GroundUpperHit.point + Vector3.one + wallNormal, Color.blue, dt, false);
+                        if (Vector3.Dot(wallNormal, contactMove) > 0)
                         {
                             contactMove = Vector3.ProjectOnPlane(contactMove, wallNormal).normalized * contactMove.magnitude;
                         }
                     }
                     else
                     {
+                        // Treat upperGroundHit as wall if it were unwalkable
+                        if (!IsRaycastHitWalkable(m_PreciseGroundUpperHit))
+                        {
+                            Vector3 wallNormal = Vector3.ProjectOnPlane(m_PreciseGroundUpperHit.normal, Physics.gravity.normalized).normalized;
+                            if (Vector3.Dot(wallNormal, contactMove) < 0)
+                            {
+                                if (m_PreciseGroundUpperHit.collider.attachedRigidbody)
+                                {
+                                    // TODO push collider
+                                    Vector3 pushForce = Vector3.Project(contactMove, wallNormal);
+                                    m_PreciseGroundUpperHit.collider.attachedRigidbody.AddForce(pushForce.normalized * PushForce, ForceMode.Force);
+                                }
+
+                                contactMove = Vector3.ProjectOnPlane(contactMove, wallNormal) + Vector3.Project(contactMove, wallNormal) * 0.3f;
+                            }
+                        }
+
                         // When we walk perpendicular to a slope we do not expect to move down, we expect the height not to change
                         // So here we cancel out the gravity factor to reduce this effect
-                        contactMove += -Physics.gravity * dt * (1 + Vector3.Dot(contactMove, -m_PreciseGroundHitResult.normal)) * 0.5f;
-                        contactMove = Vector3.ProjectOnPlane(contactMove, m_PreciseGroundHitResult.normal);
+                        Vector3 groundNormal = m_PreciseGroundLowerHit.normal;
+                        if (m_IsStepping)
+                        {
+                            groundNormal = m_GroundUpperHit.normal;
+                        }
+                        contactMove += -Physics.gravity * dt * (1 + Vector3.Dot(contactMove, -groundNormal)) * 0.5f;
+                        contactMove = Vector3.ProjectOnPlane(contactMove, groundNormal);
                     }
 
                     m_RigidBody.AddForceAtPosition(contactMove * GroundMoveForce, FeetPos, ForceMode.Acceleration);
@@ -530,6 +610,14 @@ namespace Manatea.AdventureRoots
                     m_RigidBody.AddForceAtPosition(contactMove * AirMoveForce * airSpeedMult, FeetPos, ForceMode.Acceleration);
                 }
 
+                // Push at feet
+                for (int i = 0; i < m_GroundColliderCount; i++)
+                {
+                    if (m_GroundColliders[i].attachedRigidbody)
+                    {
+                        m_GroundColliders[i].attachedRigidbody.AddForceAtPosition(-m_ScheduledMove * PushForce, FeetPos, ForceMode.Force);
+                    }
+                }
 
                 // TODO adding 90 deg to the character rotation works out, it might be a hack tho and is not tested in every scenario, could break
                 float targetRotationRate = 1;
@@ -543,7 +631,7 @@ namespace Manatea.AdventureRoots
                 }
                 m_TargetLookDir = Vector3.RotateTowards(m_TargetLookDir, m_ScheduledLookDir, targetRotationRate * MMath.Deg2Rad * Time.fixedDeltaTime, 1);
                 float targetRotationTorque = MMath.DeltaAngle((m_RigidBody.rotation.eulerAngles.y + 90) * MMath.Deg2Rad, MMath.Atan2(m_TargetLookDir.z, -m_TargetLookDir.x)) * MMath.Rad2Deg;
-                targetRotationTorque *= rotRateMult;
+                targetRotationTorque *= m_CachedRotRateMult;
                 if (m_IsStableGrounded && !m_IsSliding)
                 {
                     targetRotationTorque *= GroundRotationForce;
@@ -605,9 +693,38 @@ namespace Manatea.AdventureRoots
         }
 
 
+        public bool IsRaycastHitWalkable(RaycastHit hit)
+        {
+            return IsSlopeWalkable(hit.normal) && IsObjectWalkable(hit.collider);
+        }
         public bool IsSlopeWalkable(Vector3 normal)
         {
             return MMath.Acos(MMath.ClampNeg1to1(Vector3.Dot(normal, -Physics.gravity.normalized))) * MMath.Rad2Deg <= MaxSlopeAngle;
+        }
+        public bool IsObjectWalkable(Collider collider)
+        {
+            if (!m_NoStableGroundTag)
+            {
+                return true;
+            }
+            if (!collider)
+            {
+                return false;
+            }
+
+            // Test colliders walkable tag
+            if (!m_CachedWalkableColliders.ContainsKey(collider))
+            {
+                GameplayTagOwner tagOwner = collider.GetComponentInParent<GameplayTagOwner>();
+                bool walkable = true;
+                if (tagOwner && tagOwner.Tags.Contains(m_NoStableGroundTag))
+                {
+                    walkable = false;
+                }
+                m_CachedWalkableColliders.Add(collider, walkable);
+            }
+
+            return m_CachedWalkableColliders[collider];
         }
 
         private float CalculateBodyHeight()
@@ -655,17 +772,21 @@ namespace Manatea.AdventureRoots
 
 
         private int m_GroundColliderCount = 0;
-        private Collider[] m_GroundColliders = new Collider[8];
+        private Collider[] m_GroundColliders = new Collider[32];
 
         private RaycastHit[] m_GroundHits = new RaycastHit[32];
-        private bool DetectGround(out RaycastHit groundHitResult, out RaycastHit preciseGroundHitResult)
+        private bool DetectGround(out RaycastHit groundLowerHit, out RaycastHit preciseGroundLowerHit, out RaycastHit groundUpperHit, out RaycastHit preciseGroundUpperHit)
         {
-            groundHitResult = new RaycastHit();
-            preciseGroundHitResult = new RaycastHit();
+            groundLowerHit = new RaycastHit();
+            preciseGroundLowerHit = new RaycastHit();
+            groundUpperHit = new RaycastHit();
+            preciseGroundUpperHit = new RaycastHit();
 
-            
             int layerMask = LayerMaskExtensions.CalculatePhysicsLayerMask(gameObject.layer);
             float distance = GroundDetectionDistance + SkinThickness;
+
+            Ray detectionRay = new Ray();
+            float radius = 0;
 
             int hits = 0;
             if (Collider is CapsuleCollider)
@@ -675,46 +796,34 @@ namespace Manatea.AdventureRoots
                 float scaledHeight = MMath.Max(capsuleCollider.height, capsuleCollider.radius * 2) * (capsuleCollider.direction == 0 ? transform.localScale.x : (capsuleCollider.direction == 1 ? transform.localScale.y : transform.localScale.z));
 
                 float capsuleHalfHeightWithoutHemisphereScaled = scaledHeight / 2 - scaledRadius;
-                Vector3 p1 = transform.TransformPoint(capsuleCollider.center) + transform.TransformDirection(Vector2.up) * capsuleHalfHeightWithoutHemisphereScaled;
-                Vector3 p2 = transform.TransformPoint(capsuleCollider.center) - transform.TransformDirection(Vector2.up) * capsuleHalfHeightWithoutHemisphereScaled;
-                float raycastRadius = scaledRadius - SkinThickness;
-                hits = Physics.CapsuleCastNonAlloc(p1, p2, raycastRadius, Vector3.down, m_GroundHits, distance, layerMask);
-
-                if (DebugGroundDetection)
-                {
-                    DebugHelper.DrawWireCapsule(p2, p2 + Vector3.down * distance, raycastRadius, Color.red);
-                }
+                detectionRay.origin = transform.TransformPoint(capsuleCollider.center) - transform.TransformDirection(Vector2.up) * capsuleHalfHeightWithoutHemisphereScaled;
+                detectionRay.direction = Vector3.down;
+                radius = scaledRadius - SkinThickness;
+                hits = Physics.SphereCastNonAlloc(detectionRay, radius, m_GroundHits, distance, layerMask, QueryTriggerInteraction.Ignore);
             }
             else if (Collider is SphereCollider)
             {
                 SphereCollider sphereCollider = (SphereCollider)Collider;
-                Ray ray = new Ray();
-                ray.origin = transform.TransformPoint(sphereCollider.center);
-                ray.direction = Vector3.down;
+                detectionRay.origin = transform.TransformPoint(sphereCollider.center);
+                detectionRay.direction = Vector3.down;
                 float scaledRadius = sphereCollider.radius * MMath.Max(transform.localScale);
-                float radius = scaledRadius - SkinThickness;
-                hits = Physics.SphereCastNonAlloc(ray, radius, m_GroundHits, distance, layerMask);
+                radius = scaledRadius - SkinThickness;
+                hits = Physics.SphereCastNonAlloc(detectionRay, radius, m_GroundHits, distance, layerMask, QueryTriggerInteraction.Ignore);
 
-                if (DebugGroundDetection)
-                {
-                    DebugHelper.DrawWireCapsule(ray.origin, ray.GetPoint(distance), radius, Color.red);
-                }
             }
             else
                 Debug.Assert(false, "Collider type is not supported!", gameObject);
 
             if (hits == 0)
                 return false;
-
-            groundHitResult.distance = float.PositiveInfinity;
+            
+            groundLowerHit.point = new Vector3(0, float.PositiveInfinity, 0);
+            groundUpperHit.point = new Vector3(0, float.NegativeInfinity, 0);
             m_GroundColliderCount = 0;
             for (int i = 0; i < hits; i++)
             {
                 // Discard overlaps
                 if (m_GroundHits[i].distance == 0)
-                    continue;
-                // Discard collisions that are further away
-                if (m_GroundHits[i].distance > groundHitResult.distance)
                     continue;
                 // Discard self collisions
                 if (m_GroundHits[i].collider.transform == Rigidbody.transform)
@@ -722,15 +831,48 @@ namespace Manatea.AdventureRoots
                 if (m_GroundHits[i].collider.transform.IsChildOf(Rigidbody.transform))
                     continue;
 
-                groundHitResult = m_GroundHits[i];
-                m_GroundColliders[i] = groundHitResult.collider;
+                m_GroundColliders[m_GroundColliderCount] = m_GroundHits[i].collider;
                 m_GroundColliderCount++;
+
+                if (m_GroundHits[i].point.y < groundLowerHit.point.y)
+                {
+                    groundLowerHit = m_GroundHits[i];
+                }
+                if (m_GroundHits[i].point.y > groundUpperHit.point.y)
+                {
+                    groundUpperHit = m_GroundHits[i];
+                }
+                // Choose better ground if two colliders are similar
+                if (MMath.Approximately(m_GroundHits[i].point.y, groundUpperHit.point.y))
+                {
+                    groundUpperHit = m_GroundHits[i].normal.y > groundUpperHit.normal.y ? m_GroundHits[i] : groundUpperHit;
+                }
+                if (MMath.Approximately(m_GroundHits[i].point.y, groundLowerHit.point.y))
+                {
+                    groundLowerHit = m_GroundHits[i].normal.y > groundLowerHit.normal.y ? m_GroundHits[i] : groundLowerHit;
+                }
             }
-            if (groundHitResult.distance == float.PositiveInfinity)
+            // No valid ground found
+            if (groundLowerHit.collider == null)
                 return false;
 
-            bool preciseHit = groundHitResult.collider.Raycast(new Ray(groundHitResult.point + Vector3.up * 0.01f + Vector3.Cross(Vector3.Cross(groundHitResult.normal, Vector3.up), groundHitResult.normal) * 0.01f, Vector3.down), out preciseGroundHitResult, 0.05f);
-            return preciseHit;
+            if (DebugGroundDetection)
+            {
+                DebugHelper.DrawWireCapsule(detectionRay.origin, detectionRay.GetPoint(distance), radius, Color.grey);
+                DebugHelper.DrawWireCapsule(detectionRay.origin, detectionRay.GetPoint(groundLowerHit.distance), radius, Color.red);
+            }
+
+            // TODO these precise hit raycasts should propably be global and not only hit the ground collider
+            if (groundLowerHit.collider)
+            {
+                Physics.Raycast(new Ray(groundLowerHit.point + Vector3.up * 0.001f + Vector3.Cross(Vector3.Cross(groundLowerHit.normal, Vector3.up), groundLowerHit.normal) * 0.001f, Vector3.down), out preciseGroundLowerHit, 0.002f, layerMask, QueryTriggerInteraction.Ignore);
+                if (groundLowerHit.point == groundUpperHit.point && groundLowerHit.normal == groundUpperHit.normal && groundLowerHit.collider == groundUpperHit.collider)
+                    preciseGroundUpperHit = preciseGroundLowerHit;
+                else
+                    Physics.Raycast(new Ray(groundUpperHit.point + Vector3.up * 0.001f + Vector3.Cross(Vector3.Cross(groundUpperHit.normal, Vector3.up), groundUpperHit.normal) * 0.001f, Vector3.down), out preciseGroundUpperHit, 0.002f, layerMask, QueryTriggerInteraction.Ignore);
+            }
+
+            return true;
         }
         private bool LedgeDetection()
         {
@@ -752,7 +894,7 @@ namespace Manatea.AdventureRoots
                 Vector3 p1 = FeetPos + Vector3.up * LedgeDetectionStart + direction;
                 Vector3 p2 = FeetPos + Vector3.up * LedgeDetectionEnd + direction;
 
-                hitCount = Physics.SphereCastNonAlloc(p1, radius, (p2 - p1).normalized, m_GroundHits, (p2 - p1).magnitude, layerMask);
+                hitCount = Physics.SphereCastNonAlloc(p1, radius, (p2 - p1).normalized, m_GroundHits, (p2 - p1).magnitude, layerMask, QueryTriggerInteraction.Ignore);
                 if (DebugLedgeDetection)
                 {
                     DebugHelper.DrawWireCapsule(p1, p2, LedgeDetectionRadius, Color.black * 0.5f);
@@ -781,7 +923,7 @@ namespace Manatea.AdventureRoots
                     bool hasPreciseLedge = hit.collider.Raycast(new Ray(hit.point + Vector3.up * 0.01f + Vector3.Cross(Vector3.Cross(hit.normal, Vector3.up), hit.normal) * 0.01f, Vector3.down), out RaycastHit preciseHit, 0.05f);
                     if (!hasPreciseLedge)
                         continue;
-                    if (!IsSlopeWalkable(preciseHit.normal))
+                    if (!IsRaycastHitWalkable(preciseHit))
                         continue;
                     
                     if (DebugLedgeDetection)
@@ -793,7 +935,7 @@ namespace Manatea.AdventureRoots
                     // Test if this could be the ground we are currently standing on
                     Plane ledgeGroundPlane = new Plane(preciseHit.normal, preciseHit.point);
                     float feetDistance = MMath.Abs(ledgeGroundPlane.GetDistanceToPoint(FeetPos));
-                    Plane feetGroundPlane = new Plane(m_PreciseGroundHitResult.normal, m_PreciseGroundHitResult.point);
+                    Plane feetGroundPlane = new Plane(m_PreciseGroundLowerHit.normal, m_PreciseGroundLowerHit.point);
                     float contactDistance = MMath.Abs(feetGroundPlane.GetDistanceToPoint(preciseHit.point));
                     if (feetDistance > 0.3f && contactDistance > 0.4f)
                     {
@@ -858,7 +1000,7 @@ namespace Manatea.AdventureRoots
                     float radius = MMath.Lerp(GroundMagnetismRadiusStart, GroundMagnetismRadiusEnd, i / (float)GroundMagnetismTrejectoryIterations);
                     radius *= j;
                     Vector3 pp1 = p1 + (p1 - p2).normalized * radius * 1.25f;
-                    int hitCount = Physics.SphereCastNonAlloc(pp1, radius, (p2 - pp1).normalized, m_GroundHits, (p2 - pp1).magnitude, layerMask);
+                    int hitCount = Physics.SphereCastNonAlloc(pp1, radius, (p2 - pp1).normalized, m_GroundHits, (p2 - pp1).magnitude, layerMask, QueryTriggerInteraction.Ignore);
 
                     if (DebugGroundMagnetism)
                     {
@@ -883,7 +1025,7 @@ namespace Manatea.AdventureRoots
                             continue;
                         if (Vector3.Dot(m_GroundHits[k].point - FeetPos, Rigidbody.velocity) < 0)
                             continue;
-                        if (!IsSlopeWalkable(m_GroundHits[k].normal))
+                        if (!IsRaycastHitWalkable(m_GroundHits[k]))
                             continue;
 
                         // TODO correctly transform the 3D contact point so that the closest distance can be calculated
@@ -891,7 +1033,7 @@ namespace Manatea.AdventureRoots
                         Vector2 point2D = new Vector2(pointFeetSpace.XZ().magnitude, pointFeetSpace.y);
                         Vector2 sampledPoint = GetClosestPointOnParabola(trajectoryParams.a, trajectoryParams.b, point2D);
                         Vector3 pointOnTrajectory = FeetPos + Rigidbody.velocity.FlattenY().normalized * sampledPoint.x + Vector3.up * sampledPoint.y;
-                        float distanceHeuristic = Vector3.Distance(m_GroundHits[k].point, pointOnTrajectory) + Vector3.Distance(m_GroundHits[k].point, FeetPos);
+                        float distanceHeuristic = Vector3.Distance(m_GroundHits[k].point, pointOnTrajectory) * 2.5f + Vector3.Distance(m_GroundHits[k].point, FeetPos);
                         if (DebugGroundMagnetism)
                         {
                             Debug.DrawLine(m_GroundHits[k].point, pointOnTrajectory, Color.black);
@@ -921,18 +1063,22 @@ namespace Manatea.AdventureRoots
         {
             int layerMask = LayerMaskExtensions.CalculatePhysicsLayerMask(gameObject.layer);
 
-            bool groundFound = false;
-
-            float radius = CalculateFootprintRadius();
+            float radius = CalculateFootprintRadius() - SkinThickness * 0.5f;
             float height = CalculateBodyHeight();
-            Vector3 top = FeetPos + Rigidbody.rotation * Vector3.forward * radius * 2 + Vector3.up * (VaultingMaxHeight + height);
-            int hitCount = Physics.SphereCastNonAlloc(top, radius, Vector3.down, m_GroundHits, VaultingMaxHeight + height - radius, layerMask);
+            // TODO the top should start further up to account for ledges with ramps on top. These dont get picked up right now as the raycast starts inside those ramps
+            Vector3 top = FeetPos + Rigidbody.rotation * Vector3.forward * VaultingDetectionDistance + Vector3.up * (VaultingMaxHeight + radius);
+            Vector3 bottom = FeetPos + Rigidbody.rotation * Vector3.forward * VaultingDetectionDistance + Vector3.up * radius;
+            if (Vector3.Dot(top - bottom, Vector3.down) > 0)
+            {
+                vaultingHit = new RaycastHit();
+                return false;
+            }
+            int hitCount = Physics.SphereCastNonAlloc(top, radius, Vector3.down, m_GroundHits, (top - bottom).magnitude, layerMask, QueryTriggerInteraction.Ignore);
 
             if (DebugVaulting)
             {
-                DebugHelper.DrawWireCapsule(top, top + Vector3.down * (VaultingMaxHeight + height - radius), radius, Color.grey);
+                DebugHelper.DrawWireCapsule(top, bottom, radius, new Color(0.5f, 0.5f, 0.5f, 0.5f));
             }
-
 
             List<RaycastHit> validHits = new List<RaycastHit>();
             for (int i = 0; i < hitCount; i++)
@@ -947,33 +1093,42 @@ namespace Manatea.AdventureRoots
                     continue;
                 if (m_GroundHits[i].normal.y <= 0)
                     continue;
-                if (!IsSlopeWalkable(m_GroundHits[i].normal))
+                if (!IsRaycastHitWalkable(m_GroundHits[i]))
                     continue;
 
                 validHits.Add(m_GroundHits[i]);
             }
             validHits.Sort((a, b) => b.distance.CompareTo(a.distance));
 
-
             for (int i = 0; i < validHits.Count; i++)
             {
-                DebugHelper.DrawWireSphere(top + Vector3.down * validHits[i].distance, radius, Color.Lerp(Color.green, Color.red, i / (float)validHits.Count));
-                float distA = validHits[i].distance;
-                float distB = i < validHits.Count - 1 ? validHits[i + 1].distance : 0;
-                if (distA - distB >= height)
-                {
-                   DebugHelper.DrawWireCapsule(top + Vector3.down * distA, top + Vector3.down * (distA - height), radius, Color.green);
+                Vector3 targetA = top + Vector3.down * (validHits[i].distance - 0.05f);
+                DebugHelper.DrawWireSphere(validHits[i].point, 0.05f, Color.red);
+                DebugHelper.DrawWireSphere(top, 0.05f, Color.blue);
+                DebugHelper.DrawWireSphere(targetA, 0.05f, Color.green);
 
+                Collider[] overlaps = new Collider[8];
+                hitCount = Physics.OverlapCapsuleNonAlloc(targetA, targetA + Vector3.up * (height - radius * 2), radius, overlaps, layerMask, QueryTriggerInteraction.Ignore);
+                bool validVolume = true;
+                for (int j = 0; j < hitCount; j++)
+                {
+                    // Discard self collisions
+                    if (overlaps[j].transform == Rigidbody.transform)
+                        continue;
+                    if (overlaps[j].transform.IsChildOf(Rigidbody.transform))
+                        continue;
+                    validVolume = false;
+                }
+                if (validVolume)
+                {
+                    vaultingHit = validHits[i];
+                    DebugHelper.DrawWireCapsule(targetA, targetA + Vector3.up * (height - radius * 2), radius, Color.green);
+                    return true;
                 }
             }
 
-            //if (DebugVaulting)
-            //{
-            //    DebugHelper.DrawWireCapsule(top, top + Vector3.down * vaultingHit.distance, radius, groundFound ? Color.green : Color.red);
-            //}
-
             vaultingHit = new RaycastHit();
-            return true;
+            return false;
         }
 
         private IEnumerator CO_Jump(Vector3 velocity, int iterations)
