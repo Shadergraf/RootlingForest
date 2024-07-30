@@ -74,51 +74,6 @@ namespace Manatea.AdventureRoots
         [SerializeField]
         private float m_VaultingForce;
 
-        [Header("Ledge Detection")]
-        [FormerlySerializedAs("EnableLedgeDetection")] 
-        [SerializeField]
-        private bool m_EnableLedgeDetection = false;
-        [FormerlySerializedAs("LedgeDetectionStart")]
-        [SerializeField]
-        private float m_LedgeDetectionStart = 0.2f;
-        [FormerlySerializedAs("LedgeDetectionEnd")]
-        [SerializeField]
-        private float m_LedgeDetectionEnd = -0.2f;
-        [FormerlySerializedAs("LedgeDetectionDistance")] 
-        [SerializeField]
-        private float m_LedgeDetectionDistance = 0.2f;
-        [FormerlySerializedAs("LedgeDetectionRadius")] 
-        [SerializeField]
-        private float m_LedgeDetectionRadius = 0.4f;
-
-        [FormerlySerializedAs("LedgeBalancingForce")]
-        [SerializeField]
-        private float m_LedgeBalancingForce = 50;
-        [FormerlySerializedAs("LedgeMoveMultiplier")]
-        [SerializeField]
-        private float m_LedgeMoveMultiplier = 0.75f;
-
-        [FormerlySerializedAs("LedgeStableBalancingForce")] 
-        [SerializeField]
-        private float m_LedgeStableBalancingForce = 150;
-        [FormerlySerializedAs("LedgeStableMoveMultiplier")] 
-        [SerializeField]
-        private float m_LedgeStableMoveMultiplier = 0.5f;
-
-        [FormerlySerializedAs("LedgeBalancingWobbleTime")] 
-        [SerializeField]
-        private float m_LedgeBalancingWobbleTime = 0.8f;
-        [FormerlySerializedAs("LedgeBalancingWobbleAmount")] 
-        [SerializeField]
-        private float m_LedgeBalancingWobbleAmount = 0.45f;
-
-        [FormerlySerializedAs("m_StabilizationForce")] 
-        [SerializeField]
-        private float m_StabilizationForce = 50;
-        [FormerlySerializedAs("m_StabilizationForcePoles")] 
-        [SerializeField]
-        private float m_StabilizationForcePoles = 50;
-
         [Header("Collision Detection")]
         [FormerlySerializedAs("Collider")] 
         [SerializeField]
@@ -137,9 +92,6 @@ namespace Manatea.AdventureRoots
         [FormerlySerializedAs("m_RotationRateAttribute")]
         [SerializeField]
         private GameplayAttribute m_RotationRateAttribute;
-        [FormerlySerializedAs("m_LedgeBalancingAttribute")] 
-        [SerializeField]
-        private GameplayAttribute m_LedgeBalancingAttribute;
         [FormerlySerializedAs("m_NoStableGroundTag")]
         [SerializeField]
         private GameplayTag m_NoStableGroundTag;
@@ -151,26 +103,24 @@ namespace Manatea.AdventureRoots
         [FormerlySerializedAs("DebugGroundDetection")] 
         [SerializeField]
         private bool m_DebugGroundDetection = false;
-        [FormerlySerializedAs("DebugLedgeDetection")] 
-        [SerializeField]
-        private bool m_DebugLedgeDetection = false;
-        [FormerlySerializedAs("LogLedgeDetection")] 
+        [FormerlySerializedAs("LogLedgeDetection")]
         [SerializeField]
         private bool m_LogLedgeDetection = false;
         [FormerlySerializedAs("DebugVaulting")]
         [SerializeField]
         private bool m_DebugVaulting = false;
 
-        private List<ICharacterMover> m_Movers = new List<ICharacterMover>();
-
         // Public
         public Rigidbody Rigidbody => m_RigidBody;
-        public Vector3 ScheduledMove => m_ScheduledMove;
-        public Vector3 MoveSpeedMult => m_ScheduledMove;
+        public GameplayAttributeOwner AttributeOwner => m_AttributeOwner;
+        public GameplayTagOwner TagOwner => m_TagOwner;
+        public Vector3 ScheduledMove => Sim.m_ScheduledMove;
+        public Vector3 MoveSpeedMult => Sim.m_ScheduledMove;
         public RaycastHit GroundLowerHit => m_SimulationState.m_GroundLowerHit;
         public RaycastHit PreciseGroundLowerHit => m_SimulationState.m_PreciseGroundLowerHit;
         public RaycastHit GroundUpperHit => m_SimulationState.m_GroundUpperHit;
         public RaycastHit PreciseGroundUpperHit => m_SimulationState.m_PreciseGroundUpperHit;
+
 
         private Rigidbody m_RigidBody;
         private GameplayAttributeOwner m_AttributeOwner;
@@ -180,10 +130,7 @@ namespace Manatea.AdventureRoots
         private MovementSimulationState m_SimulationState;
         private MovementSimulationState Sim => m_SimulationState;
 
-        // Input
-        private Vector3 m_ScheduledMove;
-        private Vector3 m_ScheduledLookDir;
-        private bool m_ScheduledJump;
+        private List<ICharacterMover> m_Movers = new List<ICharacterMover>();
 
         // Constants
         /// <summary>
@@ -199,18 +146,6 @@ namespace Manatea.AdventureRoots
 
         private bool m_VaultingActive;
         private float m_VaultingTimer;
-
-        // Ledge Detection
-        // TODO increase iterations and decrease samples to deffer ledge sampling over multiple frames
-        private const int c_LedgeDetectionSamples = 8;
-        private const int c_LedgeDetectionIterations = 2;
-        private const int c_TotalLedgeDetectionSamples = c_LedgeDetectionSamples * c_LedgeDetectionIterations;
-        private LedgeSample[] m_LedgeSamples = new LedgeSample[c_LedgeDetectionSamples * c_LedgeDetectionIterations];
-        private int m_LedgeDetectionFrame = -1;
-        Vector3 m_CurrentLedgeAverageDir;
-        float m_CurrentLedgeNoise;
-        float m_CurrentLedgeAmount;
-        LedgeType m_CurrentLedgeType;
 
         float m_CachedMoveSpeedMult = 1;
         float m_CachedRotRateMult = 1;
@@ -230,11 +165,6 @@ namespace Manatea.AdventureRoots
             public Vector3 EndPosition;
             public RaycastHit Hit;
         }
-        private struct GroundMagnetismSample
-        {
-            public Vector3 ClosestPointOnTrajectory;
-            public RaycastHit Hit;
-        }
         public enum LedgeType
         {
             Pole,
@@ -245,27 +175,36 @@ namespace Manatea.AdventureRoots
         public class MovementSimulationState
         {
             public readonly CharacterMovement Movement;
-            public readonly Rigidbody Rigidbody;
+
+            // Input
+            public Vector3 m_ScheduledMove;
+            public Vector3 m_ScheduledLookDir;
+            public bool m_ScheduledJump;
+            public Vector3 m_TargetLookDir;
+
             public bool m_IsStableGrounded;
             public bool m_IsSliding;
-            public float m_ForceAirborneTimer;
-            public float m_AirborneTimer;
-            public Vector3 m_TargetLookDir;
-            public float m_JumpTimer;
-            public float m_GroundTimer;
-            public float m_SmoothMoveMagnitude;
             public bool m_HasJumped;
             public bool m_IsStepping;
+
+            public float m_ForceAirborneTimer;
+            public float m_AirborneTimer;
+            public float m_JumpTimer;
+            public float m_GroundTimer;
+
+            public Vector3 m_ContactMove;
+
+            public float m_SmoothMoveMagnitude;
             public PhysicMaterial m_PhysicsMaterial;
+
             public RaycastHit m_GroundLowerHit;
             public RaycastHit m_PreciseGroundLowerHit;
             public RaycastHit m_GroundUpperHit;
             public RaycastHit m_PreciseGroundUpperHit;
 
-            public MovementSimulationState(CharacterMovement movement, Rigidbody rigid)
+            public MovementSimulationState(CharacterMovement movement)
             {
                 Movement = movement;
-                Rigidbody = rigid;
             }
         }
 
@@ -276,7 +215,7 @@ namespace Manatea.AdventureRoots
             m_AttributeOwner = GetComponent<GameplayAttributeOwner>();
             m_TagOwner = GetComponent<GameplayTagOwner>();
 
-            m_SimulationState = new MovementSimulationState(this, m_RigidBody);
+            m_SimulationState = new MovementSimulationState(this);
 
             m_SimulationState.m_PhysicsMaterial = new PhysicMaterial();
             m_SimulationState.m_PhysicsMaterial.frictionCombine = PhysicMaterialCombine.Minimum;
@@ -285,7 +224,7 @@ namespace Manatea.AdventureRoots
 
         private void OnEnable()
         {
-            m_ScheduledLookDir = transform.forward;
+            Sim.m_ScheduledLookDir = transform.forward;
         }
 
         public void RegisterMover(ICharacterMover mover)
@@ -299,26 +238,26 @@ namespace Manatea.AdventureRoots
 
         public void Move(Vector3 moveVector, bool rotateTowardsMove = true)
         {
-            m_ScheduledMove = moveVector;
-            if (rotateTowardsMove && m_ScheduledMove != Vector3.zero)
+            Sim.m_ScheduledMove = moveVector;
+            if (rotateTowardsMove && Sim.m_ScheduledMove != Vector3.zero)
             {
-                m_ScheduledLookDir = m_ScheduledMove.normalized;
+                Sim.m_ScheduledLookDir = Sim.m_ScheduledMove.normalized;
             }
         }
         public void SetTargetRotation(Vector3 targetRotation)
         {
             if (targetRotation != Vector3.zero)
             {
-                m_ScheduledLookDir = targetRotation.FlattenY().normalized;
+                Sim.m_ScheduledLookDir = targetRotation.FlattenY().normalized;
             }
         }
         public void Jump()
         {
-            m_ScheduledJump = true;
+            Sim.m_ScheduledJump = true;
         }
         public void ReleaseJump()
         {
-            m_ScheduledJump = false;
+            Sim.m_ScheduledJump = false;
         }
 
         private void FixedUpdate()
@@ -368,7 +307,7 @@ namespace Manatea.AdventureRoots
             {
                 Sim.m_JumpTimer += dt;
             }
-            Sim.m_SmoothMoveMagnitude = MMath.Damp(Sim.m_SmoothMoveMagnitude, m_ScheduledMove.magnitude, 1, Time.fixedDeltaTime * 2);
+            Sim.m_SmoothMoveMagnitude = MMath.Damp(Sim.m_SmoothMoveMagnitude, Sim.m_ScheduledMove.magnitude, 1, Time.fixedDeltaTime * 2);
 
             // Ground detection
             bool groundDetected = DetectGround(out Sim.m_GroundLowerHit, out Sim.m_PreciseGroundLowerHit, out Sim.m_GroundUpperHit, out Sim.m_PreciseGroundUpperHit);
@@ -396,11 +335,12 @@ namespace Manatea.AdventureRoots
             }
 
 
-            Vector3 contactMove = m_ScheduledMove;
+            Sim.m_ContactMove = Sim.m_ScheduledMove;
+
             // The direction we want to move in
             if (m_DebugLocomotion)
             {
-                Debug.DrawLine(transform.position, transform.position + m_ScheduledMove, Color.blue, dt, false);
+                Debug.DrawLine(transform.position, transform.position + Sim.m_ScheduledMove, Color.blue, dt, false);
                 if (groundDetected)
                     Debug.DrawLine(Sim.m_PreciseGroundLowerHit.point, Sim.m_PreciseGroundLowerHit.point + Sim.m_PreciseGroundLowerHit.normal, Color.black, dt, false);
 
@@ -412,16 +352,16 @@ namespace Manatea.AdventureRoots
 
 
             // Jump
-            if (m_ScheduledJump && !Sim.m_HasJumped && Sim.m_AirborneTimer < 0.1f)
+            if (Sim.m_ScheduledJump && !Sim.m_HasJumped && Sim.m_AirborneTimer < 0.1f)
             {
-                m_ScheduledJump = false;
+                Sim.m_ScheduledJump = false;
                 Sim.m_ForceAirborneTimer = 0.05f;
 
-                if (contactMove != Vector3.zero)
+                if (Sim.m_ContactMove != Vector3.zero)
                 {
                     Vector3 initialDir = m_RigidBody.velocity;
-                    Vector3 targetDir = contactMove.FlattenY().WithMagnitude(initialDir.FlattenY().magnitude) + Vector3.up * initialDir.y;
-                    m_RigidBody.velocity = Vector3.Slerp(initialDir, targetDir, contactMove.magnitude * m_JumpMoveAlignment);
+                    Vector3 targetDir = Sim.m_ContactMove.FlattenY().WithMagnitude(initialDir.FlattenY().magnitude) + Vector3.up * initialDir.y;
+                    m_RigidBody.velocity = Vector3.Slerp(initialDir, targetDir, Sim.m_ContactMove.magnitude * m_JumpMoveAlignment);
                 }
 
                 Vector3 jumpDir = -Physics.gravity.normalized;
@@ -445,7 +385,7 @@ namespace Manatea.AdventureRoots
                     Vector3 vaultingDir = (vaultingHit.point - FeetPos).FlattenY().normalized;
                     if (!m_VaultingActive)
                     {
-                        if (Vector3.Dot(m_ScheduledMove.normalized, vaultingDir) > 0.4 && Rigidbody.velocity.FlattenY().magnitude < 1 && Sim.m_IsStableGrounded)
+                        if (Vector3.Dot(Sim.m_ScheduledMove.normalized, vaultingDir) > 0.4 && Rigidbody.velocity.FlattenY().magnitude < 1 && Sim.m_IsStableGrounded)
                         {
                             m_VaultingTimer += Time.fixedDeltaTime;
                         }
@@ -469,7 +409,7 @@ namespace Manatea.AdventureRoots
                             vaultingForce *= m_VaultingForce;
                             Rigidbody.AddForce(vaultingForce, ForceMode.VelocityChange);
                         }
-                        contactMove = vaultingDir;
+                        Sim.m_ContactMove = vaultingDir;
 
                         if (MMath.Abs(vaultingHit.point.y - FeetPos.y) < CalculateFootprintRadius() * 0.005f
                             || m_VaultingTimer > m_VaultingMaxTime
@@ -487,164 +427,6 @@ namespace Manatea.AdventureRoots
 
             #endregion
 
-            #region Ledge Detection
-
-            if (m_EnableLedgeDetection)
-            {
-                bool ledgeFound = LedgeDetection();
-                if (ledgeFound && !m_ScheduledJump && Sim.m_IsStableGrounded)
-                {
-                    #region Analyze Ledge Features
-
-                    // Average ledge direction
-                    m_CurrentLedgeAverageDir = FeetPos;
-                    for (int i = 0; i < m_LedgeSamples.Length; i++)
-                    {
-                        Vector3 delta = m_LedgeSamples[i].Direction;
-                        delta *= (m_LedgeSamples[i].IsLedge ? 1 : -1);
-                        delta /= m_LedgeSamples.Length;
-                        if (m_DebugLedgeDetection)
-                        {
-                            Debug.DrawLine(m_CurrentLedgeAverageDir, m_CurrentLedgeAverageDir + delta, m_LedgeSamples[i].IsLedge ? Color.red : Color.green);
-                        }
-                        m_CurrentLedgeAverageDir += delta;
-                    }
-                    m_CurrentLedgeAverageDir -= FeetPos;
-
-                    if (m_DebugLedgeDetection)
-                    {
-                        DebugHelper.DrawWireSphere(m_CurrentLedgeAverageDir, 0.2f, Color.blue);
-                    }
-
-                    // Ledge noise level
-                    m_CurrentLedgeNoise = 0;
-                    for (int i = 0; i < m_LedgeSamples.Length; i++)
-                    {
-                        if (m_LedgeSamples[i].IsLedge ^ m_LedgeSamples[MMath.Mod(i + 1, m_LedgeSamples.Length)].IsLedge)
-                        {
-                            m_CurrentLedgeNoise++;
-                        }
-                    }
-                    m_CurrentLedgeNoise /= m_LedgeSamples.Length;
-
-                    // Ledge amount
-                    m_CurrentLedgeAmount = 0;
-                    for (int i = 0; i < m_LedgeSamples.Length; i++)
-                    {
-                        if (m_LedgeSamples[i].IsLedge)
-                        {
-                            m_CurrentLedgeAmount++;
-                        }
-                    }
-                    m_CurrentLedgeAmount /= m_LedgeSamples.Length;
-
-                    if (m_LogLedgeDetection)
-                    {
-                        Debug.Log("Noise level: " + m_CurrentLedgeNoise);
-                        Debug.Log("Ledge amount: " + m_CurrentLedgeAmount);
-                    }
-
-                    m_CurrentLedgeType = LedgeType.Pole;
-                    if (m_CurrentLedgeNoise <= 0.2 && m_CurrentLedgeAmount >= 0.75)
-                    {
-                        m_CurrentLedgeType = LedgeType.Pole;
-                    }
-                    else if (m_CurrentLedgeNoise <= 0.2 && m_CurrentLedgeAmount < 0.75)
-                    {
-                        m_CurrentLedgeType = LedgeType.Cliff;
-                    }
-                    else if (m_CurrentLedgeNoise > 0.2 && m_CurrentLedgeNoise <= 0.55 && m_CurrentLedgeAmount > 0.25)
-                    {
-                        m_CurrentLedgeType = LedgeType.BalancingBeam;
-                    }
-                    else
-                    {
-                        m_CurrentLedgeType = LedgeType.UnevenTerrain;
-                    }
-                    if (m_LogLedgeDetection)
-                    {
-                        Debug.Log("Current Ledge Type: " + m_CurrentLedgeType);
-                    }
-
-                    #endregion
-
-
-                    Vector3 ledgeDir = Sim.m_GroundLowerHit.point - FeetPos;
-                    Vector3 ledgeDirProjected = ledgeDir.FlattenY();
-
-                    Vector3 ledgeForce = ledgeDirProjected;
-
-                    // Balancing wiggle
-                    if (m_ScheduledMove != Vector3.zero && m_CurrentLedgeType == LedgeType.BalancingBeam)
-                    {
-                        Vector3 imbalance = Vector3.Cross(m_ScheduledMove.normalized, Vector3.up);
-                        imbalance *= Mathf.PerlinNoise1D(Time.time * m_ScheduledMove.magnitude * m_LedgeBalancingWobbleTime) * 2 - 1;
-                        imbalance *= m_ScheduledMove.magnitude;
-                        imbalance *= m_LedgeBalancingWobbleAmount;
-                        imbalance *= MMath.RemapClamped(0.3f, 0.75f, 2, 1, Sim.m_GroundTimer);
-                        contactMove += imbalance * m_ScheduledMove.magnitude;
-                    }
-
-                    // Disable ledge force if walking down a cliff
-                    float intentionalOverride = 0;
-                    if (m_CurrentLedgeType == LedgeType.Cliff && m_ScheduledMove != Vector3.zero)
-                    {
-                        intentionalOverride = MMath.RemapClamped(-0.15f, -0.35f, 1, 0, Vector3.Dot(m_CurrentLedgeAverageDir.normalized, m_ScheduledMove.normalized));
-                        intentionalOverride *= MMath.RemapClamped(0.2f, 0.5f, 0, 1, Sim.m_SmoothMoveMagnitude);
-                    }
-
-                    // TODO remove this and put it in a dedicated ability that allows the player to balance better by using their hands
-                    // Stabilize when holding mouse
-                    if (m_CurrentLedgeType != LedgeType.Cliff && (Input.GetMouseButton(0) || (UnityEngine.InputSystem.Gamepad.current != null && UnityEngine.InputSystem.Gamepad.current.buttonWest.ReadValue() > 0)))
-                    {
-                        ledgeForce *= m_LedgeStableBalancingForce;
-                        contactMove *= m_LedgeStableMoveMultiplier;
-                    }
-                    else
-                    {
-                        if (m_CurrentLedgeType == LedgeType.Cliff)
-                        {
-                            ledgeForce *= MMath.Lerp(m_LedgeBalancingForce, 1, intentionalOverride);
-                            contactMove *= MMath.RemapClamped(0.3f, 0.5f, 1, MMath.Lerp(m_LedgeMoveMultiplier, 1, intentionalOverride), m_CurrentLedgeAmount);
-                        }
-                        else
-                        {
-                            ledgeForce *= MMath.Lerp(m_LedgeBalancingForce, 1, intentionalOverride);
-                            contactMove *= MMath.Lerp(m_LedgeMoveMultiplier, 1, intentionalOverride);
-                        }
-                    }
-
-                    // Allow player to recover once landed
-                    contactMove *= MMath.RemapClamped(0, 0.3f, 0.5f, 1, Sim.m_GroundTimer);
-
-                    // Balance attribute
-                    if (m_AttributeOwner && m_AttributeOwner.TryGetAttributeEvaluatedValue(m_LedgeBalancingAttribute, out float att_balance))
-                    {
-                        ledgeForce *= att_balance;
-                    }
-
-                    // Stabilize player when not moving
-                    Vector3 stabilizationForce = Vector3.ProjectOnPlane(Sim.m_PreciseGroundLowerHit.normal, Sim.m_GroundLowerHit.normal);
-                    stabilizationForce = stabilizationForce.FlattenY().normalized + stabilizationForce.y * Vector3.up;
-                    if (m_CurrentLedgeType == LedgeType.Pole)
-                    {
-                        stabilizationForce *= m_StabilizationForcePoles;
-                    }
-                    else
-                    {
-                        stabilizationForce *= m_StabilizationForce;
-                    }
-                    float stabilizationForceMult = MMath.Clamp01(1 - m_ScheduledMove.magnitude);
-                    stabilizationForceMult += MMath.RemapClamped(0, 0.2f, 2, 0, Sim.m_GroundTimer);
-                    ledgeForce += stabilizationForce * stabilizationForceMult;
-
-                    m_RigidBody.AddForceAtPosition(ledgeForce, FeetPos, ForceMode.Acceleration);
-                }
-            }
-
-            #endregion
-
-
             for (int i = 0; i < m_Movers.Count; i++)
             {
                 m_Movers[i].PreMovement(Sim);
@@ -653,8 +435,8 @@ namespace Manatea.AdventureRoots
 
             // Contact Movement
             // movement that results from ground or surface contact
-            contactMove *= m_CachedMoveSpeedMult;
-            if (contactMove != Vector3.zero)
+            Sim.m_ContactMove *= m_CachedMoveSpeedMult;
+            if (Sim.m_ContactMove != Vector3.zero)
             {
                 if (Sim.m_IsStableGrounded)
                 {
@@ -665,9 +447,9 @@ namespace Manatea.AdventureRoots
                         Vector3 wallNormal = Vector3.ProjectOnPlane(Sim.m_GroundUpperHit.normal, Physics.gravity.normalized).normalized;
                         if (m_DebugGroundDetection)
                             Debug.DrawLine(Sim.m_GroundUpperHit.point + Vector3.one, Sim.m_GroundUpperHit.point + Vector3.one + wallNormal, Color.blue, dt, false);
-                        if (Vector3.Dot(wallNormal, contactMove) > 0)
+                        if (Vector3.Dot(wallNormal, Sim.m_ContactMove) > 0)
                         {
-                            contactMove = Vector3.ProjectOnPlane(contactMove, wallNormal).normalized * contactMove.magnitude;
+                            Sim.m_ContactMove = Vector3.ProjectOnPlane(Sim.m_ContactMove, wallNormal).normalized * Sim.m_ContactMove.magnitude;
                         }
                     }
                     else
@@ -676,16 +458,16 @@ namespace Manatea.AdventureRoots
                         if (!IsRaycastHitWalkable(Sim.m_PreciseGroundUpperHit))
                         {
                             Vector3 wallNormal = Vector3.ProjectOnPlane(Sim.m_PreciseGroundUpperHit.normal, Physics.gravity.normalized).normalized;
-                            if (Vector3.Dot(wallNormal, contactMove) < 0)
+                            if (Vector3.Dot(wallNormal, Sim.m_ContactMove) < 0)
                             {
                                 if (Sim.m_PreciseGroundUpperHit.collider.attachedRigidbody)
                                 {
                                     // TODO push collider
-                                    Vector3 pushForce = Vector3.Project(contactMove, wallNormal);
+                                    Vector3 pushForce = Vector3.Project(Sim.m_ContactMove, wallNormal);
                                     Sim.m_PreciseGroundUpperHit.collider.attachedRigidbody.AddForce(pushForce.normalized * m_PushForce, ForceMode.Force);
                                 }
 
-                                contactMove = Vector3.ProjectOnPlane(contactMove, wallNormal) + Vector3.Project(contactMove, wallNormal) * 0.3f;
+                                Sim.m_ContactMove = Vector3.ProjectOnPlane(Sim.m_ContactMove, wallNormal) + Vector3.Project(Sim.m_ContactMove, wallNormal) * 0.3f;
                             }
                         }
 
@@ -696,17 +478,17 @@ namespace Manatea.AdventureRoots
                         {
                             groundNormal = Sim.m_GroundUpperHit.normal;
                         }
-                        contactMove += -Physics.gravity * dt * (1 + Vector3.Dot(contactMove, -groundNormal)) * 0.5f;
-                        contactMove = Vector3.ProjectOnPlane(contactMove, groundNormal);
+                        Sim.m_ContactMove += -Physics.gravity * dt * (1 + Vector3.Dot(Sim.m_ContactMove, -groundNormal)) * 0.5f;
+                        Sim.m_ContactMove = Vector3.ProjectOnPlane(Sim.m_ContactMove, groundNormal);
                     }
 
-                    m_RigidBody.AddForceAtPosition(contactMove * m_GroundMoveForce, FeetPos, ForceMode.Acceleration);
+                    m_RigidBody.AddForceAtPosition(Sim.m_ContactMove * m_GroundMoveForce, FeetPos, ForceMode.Acceleration);
                 }
                 // Air movement
                 else
                 {
-                    float airSpeedMult = MMath.InverseLerpClamped(0.707f, 0f, Vector3.Dot(m_RigidBody.velocity.normalized, contactMove.normalized));
-                    m_RigidBody.AddForceAtPosition(contactMove * m_AirMoveForce * airSpeedMult, FeetPos, ForceMode.Acceleration);
+                    float airSpeedMult = MMath.InverseLerpClamped(0.707f, 0f, Vector3.Dot(m_RigidBody.velocity.normalized, Sim.m_ContactMove.normalized));
+                    m_RigidBody.AddForceAtPosition(Sim.m_ContactMove * m_AirMoveForce * airSpeedMult, FeetPos, ForceMode.Acceleration);
                 }
 
                 // Push at feet
@@ -714,7 +496,7 @@ namespace Manatea.AdventureRoots
                 {
                     if (m_GroundColliders[i].attachedRigidbody)
                     {
-                        m_GroundColliders[i].attachedRigidbody.AddForceAtPosition(-m_ScheduledMove * m_PushForce, FeetPos, ForceMode.Force);
+                        m_GroundColliders[i].attachedRigidbody.AddForceAtPosition(-Sim.m_ScheduledMove * m_PushForce, FeetPos, ForceMode.Force);
                     }
                 }
 
@@ -728,7 +510,7 @@ namespace Manatea.AdventureRoots
                 {
                     targetRotationRate *= m_AirRotationRate;
                 }
-                Sim.m_TargetLookDir = Vector3.RotateTowards(Sim.m_TargetLookDir, m_ScheduledLookDir, targetRotationRate * MMath.Deg2Rad * Time.fixedDeltaTime, 1);
+                Sim.m_TargetLookDir = Vector3.RotateTowards(Sim.m_TargetLookDir, Sim.m_ScheduledLookDir, targetRotationRate * MMath.Deg2Rad * Time.fixedDeltaTime, 1);
                 float targetRotationTorque = MMath.DeltaAngle((m_RigidBody.rotation.eulerAngles.y + 90) * MMath.Deg2Rad, MMath.Atan2(Sim.m_TargetLookDir.z, -Sim.m_TargetLookDir.x)) * MMath.Rad2Deg;
                 targetRotationTorque *= m_CachedRotRateMult;
                 if (Sim.m_IsStableGrounded && !Sim.m_IsSliding)
@@ -781,14 +563,14 @@ namespace Manatea.AdventureRoots
                 //m_RigidBody.AddTorque(accTorque, ForceMode.Force);
             }
 
-            float frictionTarget = MMath.LerpClamped(m_StationaryFriction, m_MovementFriction, contactMove.magnitude); ;
+            float frictionTarget = MMath.LerpClamped(m_StationaryFriction, m_MovementFriction, Sim.m_ContactMove.magnitude); ;
             if (!Sim.m_IsStableGrounded || Sim.m_IsSliding)
                 frictionTarget = 0;
             Sim.m_PhysicsMaterial.staticFriction = frictionTarget;
             Sim.m_PhysicsMaterial.dynamicFriction = frictionTarget;
 
             if (m_DebugLocomotion)
-                Debug.DrawLine(transform.position, transform.position + contactMove, Color.green, dt, false);
+                Debug.DrawLine(transform.position, transform.position + Sim.m_ContactMove, Color.green, dt, false);
         }
 
 
@@ -973,103 +755,6 @@ namespace Manatea.AdventureRoots
 
             return true;
         }
-        private bool LedgeDetection()
-        {
-            float radius = m_LedgeDetectionRadius;
-            int layerMask = LayerMaskExtensions.CalculatePhysicsLayerMask(gameObject.layer);
-
-            m_LedgeDetectionFrame++;
-            int frame = m_LedgeDetectionFrame % c_LedgeDetectionIterations;
-
-            int ledgeCount = 0;
-            int hitCount;
-
-            for (int i = 0; i < c_LedgeDetectionSamples; i++)
-            {
-                int ledgeId = i * c_LedgeDetectionIterations + frame;
-
-                Vector3 direction = Quaternion.Euler(0, ledgeId / (float)c_TotalLedgeDetectionSamples * -360, 0) * Vector3.right;
-                direction *= m_LedgeDetectionDistance;
-                Vector3 p1 = FeetPos + Vector3.up * m_LedgeDetectionStart + direction;
-                Vector3 p2 = FeetPos + Vector3.up * m_LedgeDetectionEnd + direction;
-
-                hitCount = Physics.SphereCastNonAlloc(p1, radius, (p2 - p1).normalized, m_GroundHits, (p2 - p1).magnitude, layerMask, QueryTriggerInteraction.Ignore);
-                if (m_DebugLedgeDetection)
-                {
-                    DebugHelper.DrawWireCapsule(p1, p2, m_LedgeDetectionRadius, Color.black * 0.5f);
-                }
-
-                RaycastHit groundHitResult = new RaycastHit();
-                groundHitResult.distance = float.PositiveInfinity;
-                bool groundFound = false;
-                for (int j =  0; j < hitCount; j++)
-                {
-                    var hit = m_GroundHits[j];
-
-                    // Discard overlaps
-                    if (hit.distance == 0)
-                        continue;
-                    // Discard collisions that are further away
-                    if (hit.distance > groundHitResult.distance)
-                        continue;
-                    // Discard self collisions
-                    if (hit.collider.transform == Rigidbody.transform)
-                        continue;
-                    if (hit.collider.transform.IsChildOf(Rigidbody.transform))
-                        continue;
-
-                    // Precise raycast
-                    bool hasPreciseLedge = hit.collider.Raycast(new Ray(hit.point + Vector3.up * 0.01f + Vector3.Cross(Vector3.Cross(hit.normal, Vector3.up), hit.normal) * 0.01f, Vector3.down), out RaycastHit preciseHit, 0.05f);
-                    if (!hasPreciseLedge)
-                        continue;
-                    if (!IsRaycastHitWalkable(preciseHit))
-                        continue;
-                    
-                    if (m_DebugLedgeDetection)
-                    {
-                        Debug.DrawLine(preciseHit.point, preciseHit.point + preciseHit.normal * 0.1f, Color.cyan);
-                        DebugHelper.DrawWireCapsule(p1, p1 + (p2 - p1).normalized * hit.distance, m_LedgeDetectionRadius, Color.green);
-                    }
-                    
-                    // Test if this could be the ground we are currently standing on
-                    Plane ledgeGroundPlane = new Plane(preciseHit.normal, preciseHit.point);
-                    float feetDistance = MMath.Abs(ledgeGroundPlane.GetDistanceToPoint(FeetPos));
-                    Plane feetGroundPlane = new Plane(Sim.m_PreciseGroundLowerHit.normal, Sim.m_PreciseGroundLowerHit.point);
-                    float contactDistance = MMath.Abs(feetGroundPlane.GetDistanceToPoint(preciseHit.point));
-                    if (feetDistance > 0.3f && contactDistance > 0.4f)
-                    {
-                        if (m_LogLedgeDetection)
-                        {
-                            Debug.Log(feetDistance + " - " + contactDistance);
-                        }
-                        continue;
-                    }
-
-                    groundHitResult = hit;
-                    groundFound = true;
-                }
-                if (m_DebugLedgeDetection && !groundFound)
-                    DebugHelper.DrawWireCapsule(p1, p2, m_LedgeDetectionRadius, Color.red);
-
-                m_LedgeSamples[ledgeId].IsLedge = !groundFound;
-                m_LedgeSamples[ledgeId].Direction = direction;
-                m_LedgeSamples[ledgeId].StartPosition = p1;
-                m_LedgeSamples[ledgeId].EndPosition = p2;
-                m_LedgeSamples[ledgeId].Hit = groundHitResult;
-
-                if (!groundFound)
-                {
-                    ledgeCount++;
-                }
-            }
-
-            return ledgeCount > 0;
-        }
-        private int DirectionToLedgeId(Vector3 direction)
-        {
-            return MMath.Mod(MMath.RoundToInt(MMath.DirToAng(direction.XZ()) / MMath.TAU * c_LedgeDetectionSamples), c_LedgeDetectionSamples);
-        }
-
 
         private bool DetectVaulting(out RaycastHit vaultingHit)
         {

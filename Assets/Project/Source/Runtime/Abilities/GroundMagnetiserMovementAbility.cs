@@ -4,7 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BalancingMovementAbility : MonoBehaviour, ICharacterMover
+public class GroundMagnetiserMovementAbility : MonoBehaviour, ICharacterMover
 {
     [SerializeField]
     private CharacterMovement m_CharacterMovement;
@@ -13,8 +13,6 @@ public class BalancingMovementAbility : MonoBehaviour, ICharacterMover
     private float m_GroundMagnetismRadiusStart = 0.5f;
     [SerializeField]
     private float m_GroundMagnetismRadiusEnd = 1.5f;
-    [SerializeField]
-    private float m_GroundMagnetismDepth = 0.5f;
     [SerializeField]
     private float m_GroundMagnetismForce = 50;
     [SerializeField]
@@ -51,17 +49,17 @@ public class BalancingMovementAbility : MonoBehaviour, ICharacterMover
         if (groundMagnetFound && !sim.m_IsStableGrounded)
         {
             // Add enough force to transform the current trajectory into one that hits the ground magnetism point
-            if (Ballistics.CalculateInitialVelocity(sim.Movement.FeetPos, groundMagnet.Hit.point, sim.Rigidbody.velocity.magnitude, Physics.gravity, out Vector3 velA, out Vector3 velB))
+            if (Ballistics.CalculateInitialVelocity(sim.Movement.FeetPos, groundMagnet.Hit.point, sim.Movement.Rigidbody.velocity.magnitude, Physics.gravity, out Vector3 velA, out Vector3 velB))
             {
                 Vector3 targetVel = velA;
-                if (Vector3.Distance(velB, sim.Rigidbody.velocity) < Vector3.Distance(velA, sim.Rigidbody.velocity))
+                if (Vector3.Distance(velB, sim.Movement.Rigidbody.velocity) < Vector3.Distance(velA, sim.Movement.Rigidbody.velocity))
                 {
                     targetVel = velB;
                 }
-                targetVel = targetVel - sim.Rigidbody.velocity;
+                targetVel = targetVel - sim.Movement.Rigidbody.velocity;
                 targetVel *= m_GroundMagnetismForce;
                 targetVel *= MMath.Sqrt(MMath.InverseLerp(0, 0.3f, sim.m_AirborneTimer));
-                sim.Rigidbody.AddForce(targetVel, ForceMode.Force);
+                sim.Movement.Rigidbody.AddForce(targetVel, ForceMode.Force);
             }
         }
     }
@@ -73,7 +71,7 @@ public class BalancingMovementAbility : MonoBehaviour, ICharacterMover
 
 
         // Trajectory tests
-        Vector2 vel2D = new Vector2(sim.Rigidbody.velocity.XZ().magnitude, sim.Rigidbody.velocity.y);
+        Vector2 vel2D = new Vector2(sim.Movement.Rigidbody.velocity.XZ().magnitude, sim.Movement.Rigidbody.velocity.y);
         (float a, float b) trajectoryParams = CalculateParabola(vel2D, Physics.gravity.y);
 
         bool groundFound = false;
@@ -87,8 +85,8 @@ public class BalancingMovementAbility : MonoBehaviour, ICharacterMover
             float px2 = (i + 1) * m_GroundMagnetismStepSize;
             float py1 = Parabola(trajectoryParams.a, trajectoryParams.b, px1);
             float py2 = Parabola(trajectoryParams.a, trajectoryParams.b, px2);
-            Vector3 p1 = sim.Movement.FeetPos + sim.Rigidbody.velocity.FlattenY().normalized * px1 + Vector3.up * py1;
-            Vector3 p2 = sim.Movement.FeetPos + sim.Rigidbody.velocity.FlattenY().normalized * px2 + Vector3.up * py2;
+            Vector3 p1 = sim.Movement.FeetPos + sim.Movement.Rigidbody.velocity.FlattenY().normalized * px1 + Vector3.up * py1;
+            Vector3 p2 = sim.Movement.FeetPos + sim.Movement.Rigidbody.velocity.FlattenY().normalized * px2 + Vector3.up * py2;
 
             for (int j = 0; j < 2; j++)
             {
@@ -110,15 +108,15 @@ public class BalancingMovementAbility : MonoBehaviour, ICharacterMover
                     if (m_GroundHits[k].distance == 0)
                         continue;
                     // Discard self collisions
-                    if (m_GroundHits[k].collider.transform == sim.Rigidbody.transform)
+                    if (m_GroundHits[k].collider.transform == sim.Movement.Rigidbody.transform)
                         continue;
-                    if (m_GroundHits[k].collider.transform.IsChildOf(sim.Rigidbody.transform))
+                    if (m_GroundHits[k].collider.transform.IsChildOf(sim.Movement.Rigidbody.transform))
                         continue;
                     if (m_GroundHits[k].normal.y <= 0)
                         continue;
                     if (m_GroundHits[k].point.y > sim.Movement.FeetPos.y)
                         continue;
-                    if (Vector3.Dot(m_GroundHits[k].point - sim.Movement.FeetPos, sim.Rigidbody.velocity) < 0)
+                    if (Vector3.Dot(m_GroundHits[k].point - sim.Movement.FeetPos, sim.Movement.Rigidbody.velocity) < 0)
                         continue;
                     if (!sim.Movement.IsRaycastHitWalkable(m_GroundHits[k]))
                         continue;
@@ -127,7 +125,7 @@ public class BalancingMovementAbility : MonoBehaviour, ICharacterMover
                     Vector3 pointFeetSpace = m_GroundHits[k].point - sim.Movement.FeetPos;
                     Vector2 point2D = new Vector2(pointFeetSpace.XZ().magnitude, pointFeetSpace.y);
                     Vector2 sampledPoint = GetClosestPointOnParabola(trajectoryParams.a, trajectoryParams.b, point2D);
-                    Vector3 pointOnTrajectory = sim.Movement.FeetPos + sim.Rigidbody.velocity.FlattenY().normalized * sampledPoint.x + Vector3.up * sampledPoint.y;
+                    Vector3 pointOnTrajectory = sim.Movement.FeetPos + sim.Movement.Rigidbody.velocity.FlattenY().normalized * sampledPoint.x + Vector3.up * sampledPoint.y;
                     float distanceHeuristic = Vector3.Distance(m_GroundHits[k].point, pointOnTrajectory) * 2.5f + Vector3.Distance(m_GroundHits[k].point, sim.Movement.FeetPos);
                     if (m_Debug)
                     {
