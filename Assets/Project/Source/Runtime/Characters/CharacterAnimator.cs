@@ -41,6 +41,11 @@ public class CharacterAnimator : MonoBehaviour
     }
     private void UpdateAnimator()
     {
+        if (m_Animator.isActiveAndEnabled)
+        {
+            return;
+        }
+
         m_Animator.SetFloat(m_MoveSpeedParam, m_Anim_MoveSpeed);
     }
 }

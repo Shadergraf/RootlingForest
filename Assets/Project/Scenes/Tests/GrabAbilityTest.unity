@@ -5487,6 +5487,38 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 340e0397012baf144be53e6055cfd595, type: 3}
+--- !u!1 &549475965
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 549475966}
+  m_Layer: 6
+  m_Name: Abilities
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &549475966
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 549475965}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 1702056681}
+  m_Father: {fileID: 2041363605}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &549709704
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -19815,6 +19847,58 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: dd1e965738b07d147b361c7c475349d0, type: 3}
+--- !u!1 &1702056680
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1702056681}
+  - component: {fileID: 1702056682}
+  m_Layer: 6
+  m_Name: GroundMagnetiser
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1702056681
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1702056680}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 549475966}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1702056682
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1702056680}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 73d9e2c0ebbbb314698c8cf0d1078188, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_CharacterMovement: {fileID: 2041363600}
+  m_GroundMagnetismRadiusStart: 0.5
+  m_GroundMagnetismRadiusEnd: 1.5
+  m_GroundMagnetismDepth: 3
+  m_GroundMagnetismForce: 3
+  m_GroundMagnetismTrejectoryIterations: 4
+  m_GroundMagnetismStepSize: 0.5
+  m_Debug: 0
 --- !u!1001 &1713730203
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -21421,6 +21505,11 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 3632849275683933407, guid: 35230e21af0e24546a36f9042ecbc849,
+        type: 3}
+      propertyPath: m_EnableGroundMagnetism
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5729036173562700150, guid: 35230e21af0e24546a36f9042ecbc849,
         type: 3}
       propertyPath: m_Name
@@ -21478,7 +21567,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
-    m_AddedGameObjects: []
+    m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: 6271113013905870057, guid: 35230e21af0e24546a36f9042ecbc849,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 549475966}
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 35230e21af0e24546a36f9042ecbc849, type: 3}
 --- !u!1 &1898592310
@@ -22978,6 +23071,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5266fe543a7f7d64388b4cde3b2c86bf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!4 &2041363605 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 6271113013905870057, guid: 35230e21af0e24546a36f9042ecbc849,
+    type: 3}
+  m_PrefabInstance: {fileID: 1888829259}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &2046207824 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 453456130524686359, guid: dd1e965738b07d147b361c7c475349d0,
