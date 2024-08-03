@@ -42,10 +42,10 @@ MonoBehaviour:
   m_PostBlurSettings:
     Enabled: 1
     Iterations: 1
-    Spread: 0.221
+    Spread: 0.338
   m_CompositeSettings:
     Blend: 0.9
-    SharpenSpread: 0.255
+    SharpenSpread: 0.299
 --- !u!114 &-1196312425421185438
 MonoBehaviour:
   m_ObjectHideFlags: 0
