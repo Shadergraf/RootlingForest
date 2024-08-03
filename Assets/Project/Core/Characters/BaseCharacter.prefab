@@ -89,48 +89,17 @@ MonoBehaviour:
   m_PushForce: 1
   m_JumpForce: 9
   m_JumpMoveAlignment: 0.75
-  m_EnableVaulting: 1
-  m_VaultingDetectionDistance: 0.45
-  m_VaultingMaxHeight: 0.52
-  m_VaultingMaxTime: 1
-  m_VaultingForce: 3
-  m_EnableGroundMagnetism: 1
-  m_GroundMagnetismRadiusStart: 0.5
-  m_GroundMagnetismRadiusEnd: 1.5
-  m_GroundMagnetismDepth: 3
-  m_GroundMagnetismForce: 3
-  m_GroundMagnetismTrejectoryIterations: 4
-  m_GroundMagnetismStepSize: 0.5
-  m_EnableLedgeDetection: 1
-  m_LedgeDetectionStart: 0.5
-  m_LedgeDetectionEnd: 0
-  m_LedgeDetectionDistance: 0.75
-  m_LedgeDetectionRadius: 0.75
-  m_LedgeBalancingForce: 50
-  m_LedgeMoveMultiplier: 0.6
-  m_LedgeStableBalancingForce: 150
-  m_LedgeStableMoveMultiplier: 0.4
-  m_LedgeBalancingWobbleTime: 0.8
-  m_LedgeBalancingWobbleAmount: 0.55
-  m_StabilizationForce: 35
-  m_StabilizationForcePoles: 60
   m_Collider: {fileID: 0}
-  m_SkinThickness: 0.001
   m_GroundDetectionDistance: 0.15
   m_MaxSlopeAngle: 46
   m_MoveSpeedAttribute: {fileID: 11400000, guid: b08ce0e4b3536694bbf575ddf6619fa5,
     type: 2}
   m_RotationRateAttribute: {fileID: 11400000, guid: 13efa8a8c038c3a47ae5293010294aa4,
     type: 2}
-  m_LedgeBalancingAttribute: {fileID: 0}
   m_NoStableGroundTag: {fileID: 11400000, guid: 942d62db9bc34ae499e56a855290abc6,
     type: 2}
   m_DebugLocomotion: 0
   m_DebugGroundDetection: 0
-  m_DebugLedgeDetection: 0
-  m_LogLedgeDetection: 0
-  m_DebugGroundMagnetism: 0
-  m_DebugVaulting: 0
 --- !u!114 &5171198309114388193
 MonoBehaviour:
   m_ObjectHideFlags: 0

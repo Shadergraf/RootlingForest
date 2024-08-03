@@ -9,6 +9,7 @@ public class GroundMagnetiserMovementAbility : MonoBehaviour, ICharacterMover
     [SerializeField]
     private CharacterMovement m_CharacterMovement;
 
+    [Space]
     [SerializeField]
     private float m_GroundMagnetismRadiusStart = 0.5f;
     [SerializeField]
@@ -19,6 +20,8 @@ public class GroundMagnetiserMovementAbility : MonoBehaviour, ICharacterMover
     private int m_GroundMagnetismTrejectoryIterations = 4;
     [SerializeField]
     private float m_GroundMagnetismStepSize = 0.5f;
+
+    [Space]
     [SerializeField]
     private bool m_Debug;
 

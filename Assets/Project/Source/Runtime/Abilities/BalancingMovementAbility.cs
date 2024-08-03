@@ -12,6 +12,7 @@ public class BalancingMovementAbility : MonoBehaviour, ICharacterMover
     [SerializeField]
     private CharacterMovement m_CharacterMovement;
 
+    [Space]
     [SerializeField]
     private float m_LedgeDetectionStart = 0.2f;
     [SerializeField]
@@ -44,6 +45,7 @@ public class BalancingMovementAbility : MonoBehaviour, ICharacterMover
     [SerializeField]
     private GameplayAttribute m_LedgeBalancingAttribute;
 
+    [Space]
     [SerializeField]
     private bool m_Debug;
     [SerializeField]

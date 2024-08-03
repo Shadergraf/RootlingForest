@@ -57,23 +57,6 @@ namespace Manatea.AdventureRoots
         [SerializeField]
         private float m_JumpMoveAlignment = 0.75f;
 
-        [Header("Vaulting")]
-        [FormerlySerializedAs("EnableVaulting")] 
-        [SerializeField]
-        private bool m_EnableVaulting = false;
-        [FormerlySerializedAs("VaultingDetectionDistance")] 
-        [SerializeField]
-        private float m_VaultingDetectionDistance;
-        [FormerlySerializedAs("VaultingMaxHeight")]
-        [SerializeField]
-        private float m_VaultingMaxHeight;
-        [FormerlySerializedAs("VaultingMaxTime")]
-        [SerializeField]
-        private float m_VaultingMaxTime;
-        [FormerlySerializedAs("VaultingForce")] 
-        [SerializeField]
-        private float m_VaultingForce;
-
         [Header("Collision Detection")]
         [FormerlySerializedAs("Collider")] 
         [SerializeField]
@@ -103,12 +86,6 @@ namespace Manatea.AdventureRoots
         [FormerlySerializedAs("DebugGroundDetection")] 
         [SerializeField]
         private bool m_DebugGroundDetection = false;
-        [FormerlySerializedAs("LogLedgeDetection")]
-        [SerializeField]
-        private bool m_LogLedgeDetection = false;
-        [FormerlySerializedAs("DebugVaulting")]
-        [SerializeField]
-        private bool m_DebugVaulting = false;
 
         // Public
         public Rigidbody Rigidbody => m_RigidBody;
@@ -136,11 +113,11 @@ namespace Manatea.AdventureRoots
         /// <summary>
         /// The gap to use when testing as the characters collision
         /// </summary>
-        private const float SKIN_THICKNESS = 0.001f;
+        public const float SKIN_THICKNESS = 0.001f;
         /// <summary>
         /// The minimum time after a jump we are guaranteed to be airborne
         /// </summary>
-        private const float MIN_JUMP_TIME = 0.2f;
+        public const float MIN_JUMP_TIME = 0.2f;
 
         // Simulation
 
@@ -374,59 +351,6 @@ namespace Manatea.AdventureRoots
             }
 
 
-
-            #region Vaulting
-
-            if (m_EnableVaulting)
-            {
-                bool vaultingValid = DetectVaulting(out RaycastHit vaultingHit);
-                if (vaultingValid)
-                {
-                    Vector3 vaultingDir = (vaultingHit.point - FeetPos).FlattenY().normalized;
-                    if (!m_VaultingActive)
-                    {
-                        if (Vector3.Dot(Sim.m_ScheduledMove.normalized, vaultingDir) > 0.4 && Rigidbody.velocity.FlattenY().magnitude < 1 && Sim.m_IsStableGrounded)
-                        {
-                            m_VaultingTimer += Time.fixedDeltaTime;
-                        }
-                        else
-                        {
-                            m_VaultingTimer = 0;
-                        }
-                        if (m_VaultingTimer > 0.1)
-                        {
-                            m_VaultingActive = true;
-                            m_VaultingTimer = 0;
-                        }
-                    }
-
-                    if (m_VaultingActive)
-                    {
-                        m_VaultingTimer += Time.fixedDeltaTime;
-                        if (Rigidbody.velocity.y < 0.5f)
-                        {
-                            Vector3 vaultingForce = Vector3.up;
-                            vaultingForce *= m_VaultingForce;
-                            Rigidbody.AddForce(vaultingForce, ForceMode.VelocityChange);
-                        }
-                        Sim.m_ContactMove = vaultingDir;
-
-                        if (MMath.Abs(vaultingHit.point.y - FeetPos.y) < CalculateFootprintRadius() * 0.005f
-                            || m_VaultingTimer > m_VaultingMaxTime
-                            || (m_VaultingTimer > 0.2 && Sim.m_IsStableGrounded))
-                        {
-                            m_VaultingActive = false;
-                        }
-                    }
-                }
-            }
-            else
-            {
-                m_VaultingActive = false;
-            }
-
-            #endregion
-
             for (int i = 0; i < m_Movers.Count; i++)
             {
                 m_Movers[i].PreMovement(Sim);
@@ -608,7 +532,7 @@ namespace Manatea.AdventureRoots
             return m_CachedWalkableColliders[collider];
         }
 
-        private float CalculateBodyHeight()
+        public float CalculateBodyHeight()
         {
             float height = 0;
             if (m_Collider is CapsuleCollider)
@@ -625,7 +549,7 @@ namespace Manatea.AdventureRoots
                 Debug.Assert(false, "Collider type is not supported!", gameObject);
             return height;
         }
-        private float CalculateFootprintRadius()
+        public float CalculateFootprintRadius()
         {
             float radius = 0;
             if (m_Collider is CapsuleCollider)
@@ -756,77 +680,6 @@ namespace Manatea.AdventureRoots
             return true;
         }
 
-        private bool DetectVaulting(out RaycastHit vaultingHit)
-        {
-            int layerMask = LayerMaskExtensions.CalculatePhysicsLayerMask(gameObject.layer);
-
-            float radius = CalculateFootprintRadius() - SKIN_THICKNESS * 0.5f;
-            float height = CalculateBodyHeight();
-            // TODO the top should start further up to account for ledges with ramps on top. These dont get picked up right now as the raycast starts inside those ramps
-            Vector3 top = FeetPos + Rigidbody.rotation * Vector3.forward * m_VaultingDetectionDistance + Vector3.up * (m_VaultingMaxHeight + radius);
-            Vector3 bottom = FeetPos + Rigidbody.rotation * Vector3.forward * m_VaultingDetectionDistance + Vector3.up * radius;
-            if (Vector3.Dot(top - bottom, Vector3.down) > 0)
-            {
-                vaultingHit = new RaycastHit();
-                return false;
-            }
-            int hitCount = Physics.SphereCastNonAlloc(top, radius, Vector3.down, m_GroundHits, (top - bottom).magnitude, layerMask, QueryTriggerInteraction.Ignore);
-
-            if (m_DebugVaulting)
-            {
-                DebugHelper.DrawWireCapsule(top, bottom, radius, new Color(0.5f, 0.5f, 0.5f, 0.5f));
-            }
-
-            List<RaycastHit> validHits = new List<RaycastHit>();
-            for (int i = 0; i < hitCount; i++)
-            {
-                // Discard overlaps
-                if (m_GroundHits[i].distance == 0)
-                    continue;
-                // Discard self collisions
-                if (m_GroundHits[i].collider.transform == Rigidbody.transform)
-                    continue;
-                if (m_GroundHits[i].collider.transform.IsChildOf(Rigidbody.transform))
-                    continue;
-                if (m_GroundHits[i].normal.y <= 0)
-                    continue;
-                if (!IsRaycastHitWalkable(m_GroundHits[i]))
-                    continue;
-
-                validHits.Add(m_GroundHits[i]);
-            }
-            validHits.Sort((a, b) => b.distance.CompareTo(a.distance));
-
-            for (int i = 0; i < validHits.Count; i++)
-            {
-                Vector3 targetA = top + Vector3.down * (validHits[i].distance - 0.05f);
-                DebugHelper.DrawWireSphere(validHits[i].point, 0.05f, Color.red);
-                DebugHelper.DrawWireSphere(top, 0.05f, Color.blue);
-                DebugHelper.DrawWireSphere(targetA, 0.05f, Color.green);
-
-                Collider[] overlaps = new Collider[8];
-                hitCount = Physics.OverlapCapsuleNonAlloc(targetA, targetA + Vector3.up * (height - radius * 2), radius, overlaps, layerMask, QueryTriggerInteraction.Ignore);
-                bool validVolume = true;
-                for (int j = 0; j < hitCount; j++)
-                {
-                    // Discard self collisions
-                    if (overlaps[j].transform == Rigidbody.transform)
-                        continue;
-                    if (overlaps[j].transform.IsChildOf(Rigidbody.transform))
-                        continue;
-                    validVolume = false;
-                }
-                if (validVolume)
-                {
-                    vaultingHit = validHits[i];
-                    DebugHelper.DrawWireCapsule(targetA, targetA + Vector3.up * (height - radius * 2), radius, Color.green);
-                    return true;
-                }
-            }
-
-            vaultingHit = new RaycastHit();
-            return false;
-        }
 
         private IEnumerator CO_Jump(Vector3 velocity, int iterations)
         {
