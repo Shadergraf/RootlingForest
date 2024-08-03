@@ -131,9 +131,12 @@ public class VaultingMovementAbility : MonoBehaviour, ICharacterMover
         for (int i = 0; i < validHits.Count; i++)
         {
             Vector3 targetA = top + Vector3.down * (validHits[i].distance - 0.05f);
-            DebugHelper.DrawWireSphere(validHits[i].point, 0.05f, Color.red);
-            DebugHelper.DrawWireSphere(top, 0.05f, Color.blue);
-            DebugHelper.DrawWireSphere(targetA, 0.05f, Color.green);
+            if (m_Debug)
+            {
+                DebugHelper.DrawWireSphere(validHits[i].point, 0.05f, Color.red);
+                DebugHelper.DrawWireSphere(top, 0.05f, Color.blue);
+                DebugHelper.DrawWireSphere(targetA, 0.05f, Color.green);
+            }
 
             Collider[] overlaps = new Collider[8];
             hitCount = Physics.OverlapCapsuleNonAlloc(targetA, targetA + Vector3.up * (height - radius * 2), radius, overlaps, layerMask, QueryTriggerInteraction.Ignore);
@@ -150,7 +153,10 @@ public class VaultingMovementAbility : MonoBehaviour, ICharacterMover
             if (validVolume)
             {
                 vaultingHit = validHits[i];
-                DebugHelper.DrawWireCapsule(targetA, targetA + Vector3.up * (height - radius * 2), radius, Color.green);
+                if (m_Debug)
+                {
+                    DebugHelper.DrawWireCapsule(targetA, targetA + Vector3.up * (height - radius * 2), radius, Color.green);
+                }
                 return true;
             }
         }
