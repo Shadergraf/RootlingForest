@@ -7,7 +7,7 @@ using UnityEngine;
 using UnityEngine.Serialization;
 using static Manatea.AdventureRoots.CharacterMovement;
 
-public class BalancingMovementAbility : MonoBehaviour, ICharacterMover
+public class BalanceMovementAbility : MonoBehaviour, ICharacterMover
 {
     [SerializeField]
     private CharacterMovement m_CharacterMovement;
@@ -23,9 +23,10 @@ public class BalancingMovementAbility : MonoBehaviour, ICharacterMover
     private float m_LedgeDetectionRadius = 0.4f;
 
     [SerializeField]
-    private float m_LedgeBalancingForce = 50;
+    [FormerlySerializedAs("m_LedgeBalancingForce")]
+    private float m_BalancingForce = 50;
     [SerializeField]
-    private float m_LedgeMoveMultiplier = 0.75f;
+    private float m_BalancingMoveMultiplier = 0.75f;
 
     [SerializeField]
     private float m_LedgeStableBalancingForce = 150;
@@ -96,7 +97,7 @@ public class BalancingMovementAbility : MonoBehaviour, ICharacterMover
     public void PreMovement(MovementSimulationState sim)
     {
         bool ledgeFound = LedgeDetection(sim);
-        if (ledgeFound && !sim.m_ScheduledJump && sim.m_IsStableGrounded)
+        if (ledgeFound && sim.m_IsStableGrounded)   // TODO && !sim.m_ScheduledJump 
         {
             #region Analyze Ledge Features
 
@@ -208,13 +209,13 @@ public class BalancingMovementAbility : MonoBehaviour, ICharacterMover
             {
                 if (m_CurrentLedgeType == LedgeType.Cliff)
                 {
-                    ledgeForce *= MMath.Lerp(m_LedgeBalancingForce, 1, intentionalOverride);
-                    sim.m_ContactMove *= MMath.RemapClamped(0.3f, 0.5f, 1, MMath.Lerp(m_LedgeMoveMultiplier, 1, intentionalOverride), m_CurrentLedgeAmount);
+                    ledgeForce *= MMath.Lerp(m_BalancingForce, 1, intentionalOverride);
+                    sim.m_ContactMove *= MMath.RemapClamped(0.3f, 0.5f, 1, MMath.Lerp(m_BalancingMoveMultiplier, 1, intentionalOverride), m_CurrentLedgeAmount);
                 }
                 else
                 {
-                    ledgeForce *= MMath.Lerp(m_LedgeBalancingForce, 1, intentionalOverride);
-                    sim.m_ContactMove *= MMath.Lerp(m_LedgeMoveMultiplier, 1, intentionalOverride);
+                    ledgeForce *= MMath.Lerp(m_BalancingForce, 1, intentionalOverride);
+                    sim.m_ContactMove *= MMath.Lerp(m_BalancingMoveMultiplier, 1, intentionalOverride);
                 }
             }
 

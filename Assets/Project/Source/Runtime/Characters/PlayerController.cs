@@ -7,6 +7,7 @@ namespace Manatea
 {
     public class PlayerController : CharacterController
     {
+        public JumpMovementAbility m_JumpAbility;
         public float DashForce;
         public PullAbility PullAbility;
         public CapsuleCollider TriggerCollider;
@@ -143,11 +144,11 @@ namespace Manatea
         {
             if (ctx.started)
             {
-                CharacterMovement.Jump();
+                m_JumpAbility.Jump();
             }
             if (ctx.canceled)
             {
-                CharacterMovement.ReleaseJump();
+                m_JumpAbility.ReleaseJump();
             }
         }
         private void GrabAction(InputAction.CallbackContext ctx)

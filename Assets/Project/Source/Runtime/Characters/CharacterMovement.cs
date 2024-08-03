@@ -49,14 +49,6 @@ namespace Manatea.AdventureRoots
         [SerializeField]
         private float m_PushForce = 1;
 
-        [Header("Jump")]
-        [FormerlySerializedAs("JumpForce")] 
-        [SerializeField]
-        private float m_JumpForce = 5;
-        [FormerlySerializedAs("JumpMoveAlignment")] 
-        [SerializeField]
-        private float m_JumpMoveAlignment = 0.75f;
-
         [Header("Collision Detection")]
         [FormerlySerializedAs("Collider")] 
         [SerializeField]
@@ -88,7 +80,7 @@ namespace Manatea.AdventureRoots
         private bool m_DebugGroundDetection = false;
 
         // Public
-        public Rigidbody Rigidbody => m_RigidBody;
+        public Rigidbody Rigidbody => m_Rigidbody;
         public GameplayAttributeOwner AttributeOwner => m_AttributeOwner;
         public GameplayTagOwner TagOwner => m_TagOwner;
         public Vector3 ScheduledMove => Sim.m_ScheduledMove;
@@ -99,7 +91,7 @@ namespace Manatea.AdventureRoots
         public RaycastHit PreciseGroundUpperHit => m_SimulationState.m_PreciseGroundUpperHit;
 
 
-        private Rigidbody m_RigidBody;
+        private Rigidbody m_Rigidbody;
         private GameplayAttributeOwner m_AttributeOwner;
         private GameplayTagOwner m_TagOwner;
 
@@ -114,10 +106,6 @@ namespace Manatea.AdventureRoots
         /// The gap to use when testing as the characters collision
         /// </summary>
         public const float SKIN_THICKNESS = 0.001f;
-        /// <summary>
-        /// The minimum time after a jump we are guaranteed to be airborne
-        /// </summary>
-        public const float MIN_JUMP_TIME = 0.2f;
 
         // Simulation
 
@@ -156,17 +144,14 @@ namespace Manatea.AdventureRoots
             // Input
             public Vector3 m_ScheduledMove;
             public Vector3 m_ScheduledLookDir;
-            public bool m_ScheduledJump;
             public Vector3 m_TargetLookDir;
 
             public bool m_IsStableGrounded;
             public bool m_IsSliding;
-            public bool m_HasJumped;
             public bool m_IsStepping;
 
             public float m_ForceAirborneTimer;
             public float m_AirborneTimer;
-            public float m_JumpTimer;
             public float m_GroundTimer;
 
             public Vector3 m_ContactMove;
@@ -188,7 +173,7 @@ namespace Manatea.AdventureRoots
 
         private void Awake()
         {
-            m_RigidBody = GetComponent<Rigidbody>();
+            m_Rigidbody = GetComponent<Rigidbody>();
             m_AttributeOwner = GetComponent<GameplayAttributeOwner>();
             m_TagOwner = GetComponent<GameplayTagOwner>();
 
@@ -228,19 +213,11 @@ namespace Manatea.AdventureRoots
                 Sim.m_ScheduledLookDir = targetRotation.FlattenY().normalized;
             }
         }
-        public void Jump()
-        {
-            Sim.m_ScheduledJump = true;
-        }
-        public void ReleaseJump()
-        {
-            Sim.m_ScheduledJump = false;
-        }
 
         private void FixedUpdate()
         {
             Debug.Assert(m_Collider, "No collider setup!", gameObject);
-            Debug.Assert(m_RigidBody, "No rigidbody attached!", gameObject);
+            Debug.Assert(m_Rigidbody, "No rigidbody attached!", gameObject);
 
             PrePhysics();
             UpdatePhysics(Time.fixedDeltaTime);
@@ -280,10 +257,6 @@ namespace Manatea.AdventureRoots
                 Sim.m_GroundTimer = 0;
                 Sim.m_AirborneTimer += dt;
             }
-            if (Sim.m_HasJumped)
-            {
-                Sim.m_JumpTimer += dt;
-            }
             Sim.m_SmoothMoveMagnitude = MMath.Damp(Sim.m_SmoothMoveMagnitude, Sim.m_ScheduledMove.magnitude, 1, Time.fixedDeltaTime * 2);
 
             // Ground detection
@@ -298,17 +271,6 @@ namespace Manatea.AdventureRoots
                 Sim.m_IsStepping = true;
                 Sim.m_IsStableGrounded = true;
                 Sim.m_IsSliding = false;
-            }
-            // Guarantee airborne when jumping just occured
-            if (Sim.m_HasJumped && Sim.m_JumpTimer <= MIN_JUMP_TIME)
-            {
-                Sim.m_IsStableGrounded = false;
-                Sim.m_IsSliding = false;
-            }
-            if (Sim.m_IsStableGrounded)
-            {
-                Sim.m_HasJumped = false;
-                Sim.m_JumpTimer = 0;
             }
 
 
@@ -325,29 +287,6 @@ namespace Manatea.AdventureRoots
                 {
                     DebugHelper.DrawWireCircle(FeetPos + Vector3.up * m_StepHeight, CalculateFootprintRadius() * 1.2f, Vector3.up, Color.grey);
                 }
-            }
-
-
-            // Jump
-            if (Sim.m_ScheduledJump && !Sim.m_HasJumped && Sim.m_AirborneTimer < 0.1f)
-            {
-                Sim.m_ScheduledJump = false;
-                Sim.m_ForceAirborneTimer = 0.05f;
-
-                if (Sim.m_ContactMove != Vector3.zero)
-                {
-                    Vector3 initialDir = m_RigidBody.velocity;
-                    Vector3 targetDir = Sim.m_ContactMove.FlattenY().WithMagnitude(initialDir.FlattenY().magnitude) + Vector3.up * initialDir.y;
-                    m_RigidBody.velocity = Vector3.Slerp(initialDir, targetDir, Sim.m_ContactMove.magnitude * m_JumpMoveAlignment);
-                }
-
-                Vector3 jumpDir = -Physics.gravity.normalized;
-                // TODO add a sliding jump here that is perpendicular to the slide normal
-                m_RigidBody.velocity = Vector3.ProjectOnPlane(m_RigidBody.velocity, jumpDir);
-                Vector3 jumpForce = jumpDir * m_JumpForce;
-                StartCoroutine(CO_Jump(jumpForce, 3));
-
-                Sim.m_HasJumped = true;
             }
 
 
@@ -406,13 +345,13 @@ namespace Manatea.AdventureRoots
                         Sim.m_ContactMove = Vector3.ProjectOnPlane(Sim.m_ContactMove, groundNormal);
                     }
 
-                    m_RigidBody.AddForceAtPosition(Sim.m_ContactMove * m_GroundMoveForce, FeetPos, ForceMode.Acceleration);
+                    m_Rigidbody.AddForceAtPosition(Sim.m_ContactMove * m_GroundMoveForce, FeetPos, ForceMode.Acceleration);
                 }
                 // Air movement
                 else
                 {
-                    float airSpeedMult = MMath.InverseLerpClamped(0.707f, 0f, Vector3.Dot(m_RigidBody.velocity.normalized, Sim.m_ContactMove.normalized));
-                    m_RigidBody.AddForceAtPosition(Sim.m_ContactMove * m_AirMoveForce * airSpeedMult, FeetPos, ForceMode.Acceleration);
+                    float airSpeedMult = MMath.InverseLerpClamped(0.707f, 0f, Vector3.Dot(m_Rigidbody.velocity.normalized, Sim.m_ContactMove.normalized));
+                    m_Rigidbody.AddForceAtPosition(Sim.m_ContactMove * m_AirMoveForce * airSpeedMult, FeetPos, ForceMode.Acceleration);
                 }
 
                 // Push at feet
@@ -435,7 +374,7 @@ namespace Manatea.AdventureRoots
                     targetRotationRate *= m_AirRotationRate;
                 }
                 Sim.m_TargetLookDir = Vector3.RotateTowards(Sim.m_TargetLookDir, Sim.m_ScheduledLookDir, targetRotationRate * MMath.Deg2Rad * Time.fixedDeltaTime, 1);
-                float targetRotationTorque = MMath.DeltaAngle((m_RigidBody.rotation.eulerAngles.y + 90) * MMath.Deg2Rad, MMath.Atan2(Sim.m_TargetLookDir.z, -Sim.m_TargetLookDir.x)) * MMath.Rad2Deg;
+                float targetRotationTorque = MMath.DeltaAngle((m_Rigidbody.rotation.eulerAngles.y + 90) * MMath.Deg2Rad, MMath.Atan2(Sim.m_TargetLookDir.z, -Sim.m_TargetLookDir.x)) * MMath.Rad2Deg;
                 targetRotationTorque *= m_CachedRotRateMult;
                 if (Sim.m_IsStableGrounded && !Sim.m_IsSliding)
                 {
@@ -450,7 +389,7 @@ namespace Manatea.AdventureRoots
                 //rotMult *= MMath.RemapClamped(1, 3, 0.01f, 1f, MMath.Abs(m_RigidBody.angularVelocity.y));
                 //rotMult *= MMath.RemapClamped(2, 4, 0.05f, 1f, m_RigidBody.velocity.magnitude);
                 //Debug.Log(rotMult);
-                m_RigidBody.AddTorque(0, targetRotationTorque, 0, ForceMode.Force);
+                m_Rigidbody.AddTorque(0, targetRotationTorque, 0, ForceMode.Force);
             }
 
 
@@ -474,12 +413,12 @@ namespace Manatea.AdventureRoots
                  * In other words: Correctly walking up slopes is only possible because of the dampening applied here.
                  * That is weird and should not be the case, so walking up slopes needs a fix!
                 */
-                float lerpFactor = MMath.InverseLerpClamped(4f, 6f, MMath.Abs(m_RigidBody.velocity.y));
+                float lerpFactor = MMath.InverseLerpClamped(4f, 6f, MMath.Abs(m_Rigidbody.velocity.y));
 
                 float feetLinearResistance = Mathf.Clamp01(1 - m_FeetLinearResistance * dt);
-                m_RigidBody.velocity = Vector3.Scale(m_RigidBody.velocity, Vector3.Lerp(Vector3.one * feetLinearResistance, new Vector3(feetLinearResistance, 1, feetLinearResistance), lerpFactor));
+                m_Rigidbody.velocity = Vector3.Scale(m_Rigidbody.velocity, Vector3.Lerp(Vector3.one * feetLinearResistance, new Vector3(feetLinearResistance, 1, feetLinearResistance), lerpFactor));
                 
-                m_RigidBody.angularVelocity *= Mathf.Clamp01(1 - m_FeetAngularResistance * dt);
+                m_Rigidbody.angularVelocity *= Mathf.Clamp01(1 - m_FeetAngularResistance * dt);
 
                 //Vector3 accVel = (m_RigidBody.GetAccumulatedForce() * Mathf.Clamp01(1 - FeetLinearResistance * dt)) - m_RigidBody.GetAccumulatedForce();
                 //m_RigidBody.AddForceAtPosition(accVel, feetPos, ForceMode.Force);
@@ -680,28 +619,6 @@ namespace Manatea.AdventureRoots
             return true;
         }
 
-
-        private IEnumerator CO_Jump(Vector3 velocity, int iterations)
-        {
-            for (int i = 0; i < iterations; i++)
-            {
-                m_RigidBody.AddForce(velocity / iterations, ForceMode.Impulse);
-
-                for (int j = 0; j < m_GroundColliderCount; j++)
-                {
-                    if (m_GroundColliders[j] && m_GroundColliders[j].attachedRigidbody)
-                    {
-                        // TODO very extreme jumping push to objects. Can be tested by jumping off certain items
-                        if (m_GroundColliders[j].attachedRigidbody && !m_GroundColliders[j].attachedRigidbody.isKinematic)
-                        {
-                            m_GroundColliders[j].attachedRigidbody.AddForceAtPosition(-velocity / iterations, FeetPos, ForceMode.VelocityChange);
-                        }
-                    }
-                }
-
-                yield return new WaitForFixedUpdate();
-            }
-        }
 
     }
 

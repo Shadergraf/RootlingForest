@@ -3,23 +3,29 @@ using Manatea.AdventureRoots;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
-public class GroundMagnetiserMovementAbility : MonoBehaviour, ICharacterMover
+public class TrajectoryAdjustmentMovementAbility : MonoBehaviour, ICharacterMover
 {
     [SerializeField]
     private CharacterMovement m_CharacterMovement;
 
     [Space]
+    [FormerlySerializedAs("m_GroundMagnetismRadiusStart")]
     [SerializeField]
-    private float m_GroundMagnetismRadiusStart = 0.5f;
+    private float m_TraceRadiusStart = 0.5f;
     [SerializeField]
-    private float m_GroundMagnetismRadiusEnd = 1.5f;
+    [FormerlySerializedAs("m_GroundMagnetismRadiusEnd")]
+    private float m_TraceRadiusEnd = 1.5f;
     [SerializeField]
-    private float m_GroundMagnetismForce = 50;
+    [FormerlySerializedAs("m_GroundMagnetismForce")]
+    private float m_AdjustmentForce = 50;
     [SerializeField]
-    private int m_GroundMagnetismTrejectoryIterations = 4;
+    [FormerlySerializedAs("m_GroundMagnetismTrejectoryIterations")]
+    private int m_TrejectoryIterations = 4;
     [SerializeField]
-    private float m_GroundMagnetismStepSize = 0.5f;
+    [FormerlySerializedAs("m_GroundMagnetismStepSize")]
+    private float m_TrajectoryStepSize = 0.5f;
 
     [Space]
     [SerializeField]
@@ -60,7 +66,7 @@ public class GroundMagnetiserMovementAbility : MonoBehaviour, ICharacterMover
                     targetVel = velB;
                 }
                 targetVel = targetVel - sim.Movement.Rigidbody.velocity;
-                targetVel *= m_GroundMagnetismForce;
+                targetVel *= m_AdjustmentForce;
                 targetVel *= MMath.Sqrt(MMath.InverseLerp(0, 0.3f, sim.m_AirborneTimer));
                 sim.Movement.Rigidbody.AddForce(targetVel, ForceMode.Force);
             }
@@ -81,10 +87,10 @@ public class GroundMagnetiserMovementAbility : MonoBehaviour, ICharacterMover
         groundMagnet.Hit.distance = float.PositiveInfinity;
         groundMagnet.Hit.point = Vector3.positiveInfinity;
         float closestDistance = float.PositiveInfinity;
-        for (int i = 0; i <= m_GroundMagnetismTrejectoryIterations; i++)
+        for (int i = 0; i <= m_TrejectoryIterations; i++)
         {
-            float px1 = i * m_GroundMagnetismStepSize;
-            float px2 = (i + 1) * m_GroundMagnetismStepSize;
+            float px1 = i * m_TrajectoryStepSize;
+            float px2 = (i + 1) * m_TrajectoryStepSize;
             float py1 = Ballistics.Parabola(trajectoryParams.a, trajectoryParams.b, px1);
             float py2 = Ballistics.Parabola(trajectoryParams.a, trajectoryParams.b, px2);
             Vector3 p1 = sim.Movement.FeetPos + sim.Movement.Rigidbody.velocity.FlattenY().normalized * px1 + Vector3.up * py1;
@@ -92,7 +98,7 @@ public class GroundMagnetiserMovementAbility : MonoBehaviour, ICharacterMover
 
             for (int j = 0; j < 2; j++)
             {
-                float radius = MMath.Lerp(m_GroundMagnetismRadiusStart, m_GroundMagnetismRadiusEnd, i / (float)m_GroundMagnetismTrejectoryIterations);
+                float radius = MMath.Lerp(m_TraceRadiusStart, m_TraceRadiusEnd, i / (float)m_TrejectoryIterations);
                 radius *= j;
                 Vector3 pp1 = p1 + (p1 - p2).normalized * radius * 1.25f;
                 int hitCount = Physics.SphereCastNonAlloc(pp1, radius, (p2 - pp1).normalized, m_GroundHits, (p2 - pp1).magnitude, layerMask, QueryTriggerInteraction.Ignore);

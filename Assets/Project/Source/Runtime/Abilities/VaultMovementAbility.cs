@@ -7,7 +7,7 @@ using UnityEngine;
 using UnityEngine.Serialization;
 using static Manatea.AdventureRoots.CharacterMovement;
 
-public class VaultingMovementAbility : MonoBehaviour, ICharacterMover
+public class VaultMovementAbility : MonoBehaviour, ICharacterMover
 {
     [SerializeField]
     private CharacterMovement m_CharacterMovement;
