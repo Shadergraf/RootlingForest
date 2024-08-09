@@ -55,7 +55,7 @@ public class TrajectoryAdjustmentMovementAbility : MonoBehaviour, ICharacterMove
     public void PreMovement(CharacterMovement.MovementSimulationState sim)
     {
         bool groundMagnetFound = DetectGroundMagnetism(sim, out GroundMagnetismSample groundMagnet);
-        if (groundMagnetFound && !sim.m_IsStableGrounded)
+        if (groundMagnetFound && !sim.IsStableGrounded)
         {
             // Add enough force to transform the current trajectory into one that hits the ground magnetism point
             if (Ballistics.CalculateInitialVelocity(sim.Movement.FeetPos, groundMagnet.Hit.point, sim.Movement.Rigidbody.velocity.magnitude, Physics.gravity, out Vector3 velA, out Vector3 velB))
@@ -67,7 +67,7 @@ public class TrajectoryAdjustmentMovementAbility : MonoBehaviour, ICharacterMove
                 }
                 targetVel = targetVel - sim.Movement.Rigidbody.velocity;
                 targetVel *= m_AdjustmentForce;
-                targetVel *= MMath.Sqrt(MMath.InverseLerp(0, 0.3f, sim.m_AirborneTimer));
+                targetVel *= MMath.Sqrt(MMath.InverseLerp(0, 0.3f, sim.AirborneTimer));
                 sim.Movement.Rigidbody.AddForce(targetVel, ForceMode.Force);
             }
         }

@@ -61,7 +61,7 @@ PrefabInstance:
     - target: {fileID: 525639019246530379, guid: c791ed75272c7504e85b07a05ce2c0e3,
         type: 3}
       propertyPath: m_Name
-      value: GroundedCarrotNEW
+      value: GroundedCarrot
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -109,6 +109,7 @@ MonoBehaviour:
   m_PullRigid: {fileID: 1044718818451331980}
   m_Levers:
   - {fileID: 1771148331262195929}
+  m_NeededForce: 110
   m_PullSpeed: 1.6
   m_PullOutForce: 13
   m_PullAxis: {x: 0, y: 1, z: 0}

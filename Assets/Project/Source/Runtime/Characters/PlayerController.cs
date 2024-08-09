@@ -99,8 +99,8 @@ namespace Manatea
             m_Gamepad = InputSystem.GetDevice<Gamepad>();
 
 
-            m_JumpAction.started += JumpAction;
-            m_GrabAction.started += GrabAction;
+            m_JumpAction.performed += JumpAction;
+            m_GrabAction.performed += GrabAction;
         }
         private void OnDisable()
         {
@@ -114,8 +114,8 @@ namespace Manatea
             m_GrabAction.Disable();
             m_ThrowAction.Disable();
 
-            m_JumpAction.started -= JumpAction;
-            m_GrabAction.started -= GrabAction;
+            m_JumpAction.performed -= JumpAction;
+            m_GrabAction.performed -= GrabAction;
         }
 
 
@@ -142,18 +142,19 @@ namespace Manatea
 
         private void JumpAction(InputAction.CallbackContext ctx)
         {
-            if (ctx.started)
+            // TODO add jump buffering if not currently grounded
+            if (ctx.ReadValue<float>() > 0.5f)
             {
                 m_JumpAbility.Jump();
             }
-            if (ctx.canceled)
+            else
             {
                 m_JumpAbility.ReleaseJump();
             }
         }
         private void GrabAction(InputAction.CallbackContext ctx)
         {
-            if (!ctx.started)
+            if (!ctx.performed && ctx.ReadValue<float>() < 0.5f)
             {
                 return;
             }

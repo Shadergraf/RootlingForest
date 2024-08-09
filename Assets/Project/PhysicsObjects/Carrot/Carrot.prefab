@@ -100,6 +100,7 @@ GameObject:
   - component: {fileID: 2045537066653332613}
   - component: {fileID: 2862127728414605877}
   - component: {fileID: 4340559480969607367}
+  - component: {fileID: 2543387271544028023}
   m_Layer: 3
   m_Name: CarrotGreens
   m_TagString: Untagged
@@ -237,13 +238,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_CollisionEnabled: 0
-  m_LocationRule: 3
+  m_LocationRule: 1
   m_RotationRule: 2
   m_RotationLimit: 0
   m_UseOrientations: 0
   m_Orientations: []
   m_UpdateGrabLocation: 1
   m_AllowOverlapAfterDrop: 1
+  m_UseCustomThrow: 0
+  m_ThrowRotation: 0
+  m_UseDropThrow: 0
+  m_DropForce: {x: 0, y: 0, z: 0}
+  m_DropTorque: 0
 --- !u!114 &4340559480969607367
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -260,6 +266,20 @@ MonoBehaviour:
   - m_Attribute: {fileID: 11400000, guid: d62daeae609380a4e93f192aae3830a9, type: 2}
     m_BaseValue: 5
     m_Modifiers: []
+--- !u!114 &2543387271544028023
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2224748421078286313}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 87a03fefa4dbd7348b64c2e534204576, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Tags:
+  - {fileID: 11400000, guid: 942d62db9bc34ae499e56a855290abc6, type: 2}
 --- !u!1 &4489705001517973048
 GameObject:
   m_ObjectHideFlags: 0
@@ -375,7 +395,7 @@ PrefabInstance:
     - target: {fileID: 2820277903825203249, guid: 8262b2170c2f0da4387d50da78b2fc03,
         type: 3}
       propertyPath: m_Name
-      value: BasePhysicsObject_1 Variant
+      value: Carrot
       objectReference: {fileID: 0}
     - target: {fileID: 4741099696618946961, guid: 8262b2170c2f0da4387d50da78b2fc03,
         type: 3}

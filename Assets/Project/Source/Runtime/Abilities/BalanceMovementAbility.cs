@@ -44,6 +44,8 @@ public class BalanceMovementAbility : MonoBehaviour, ICharacterMover
     private float m_StabilizationForcePoles = 50;
 
     [SerializeField]
+    private GameplayAttribute m_MoveSpeedAttribute;
+    [SerializeField]
     private GameplayAttribute m_LedgeBalancingAttribute;
 
     [Space]
@@ -52,6 +54,8 @@ public class BalanceMovementAbility : MonoBehaviour, ICharacterMover
     [SerializeField]
     private bool m_Log;
 
+
+    GameplayAttributeOwner m_AttributeOwner;
 
     // Ledge Detection
     // TODO increase iterations and decrease samples to deffer ledge sampling over multiple frames
@@ -64,6 +68,11 @@ public class BalanceMovementAbility : MonoBehaviour, ICharacterMover
     float m_CurrentLedgeNoise;
     float m_CurrentLedgeAmount;
     LedgeType m_CurrentLedgeType;
+
+    private float m_MovementSpeedMult;
+    private Vector3 m_AdditionalForce;
+
+    private GameplayAttributeModifier m_MovementModifier = new GameplayAttributeModifier() { Type = GameplayAttributeModifierType.Multiplicative };
 
     private RaycastHit[] m_GroundHits = new RaycastHit[32];
 
@@ -84,20 +93,37 @@ public class BalanceMovementAbility : MonoBehaviour, ICharacterMover
         UnevenTerrain,
     }
 
+    private void Awake()
+    {
+        m_AttributeOwner = GetComponentInParent<GameplayAttributeOwner>();
+    }
 
     private void OnEnable()
     {
         m_CharacterMovement.RegisterMover(this);
+
+        if (m_MoveSpeedAttribute && m_AttributeOwner)
+        {
+            m_AttributeOwner.AddAttributeModifier(m_MoveSpeedAttribute, m_MovementModifier);
+        }
     }
     private void OnDisable()
     {
+        if (m_MoveSpeedAttribute && m_AttributeOwner)
+        {
+            m_AttributeOwner.RemoveAttributeModifier(m_MoveSpeedAttribute, m_MovementModifier);
+        }
+
         m_CharacterMovement.UnregisterMover(this);
     }
 
     public void PreMovement(MovementSimulationState sim)
     {
+        float targetMovementSpeedMult = 1;
+        Vector3 targetAdditionalForce = Vector3.zero;
+
         bool ledgeFound = LedgeDetection(sim);
-        if (ledgeFound && sim.m_IsStableGrounded)   // TODO && !sim.m_ScheduledJump 
+        if (ledgeFound && sim.IsStableGrounded)   // TODO && !sim.m_ScheduledJump 
         {
             #region Analyze Ledge Features
 
@@ -174,28 +200,28 @@ public class BalanceMovementAbility : MonoBehaviour, ICharacterMover
             #endregion
 
 
-            Vector3 ledgeDir = sim.m_GroundLowerHit.point - sim.Movement.FeetPos;
+            Vector3 ledgeDir = sim.GroundLowerHit.point - sim.Movement.FeetPos;
             Vector3 ledgeDirProjected = ledgeDir.FlattenY();
 
             Vector3 ledgeForce = ledgeDirProjected;
 
             // Balancing wiggle
-            if (sim.m_ScheduledMove != Vector3.zero && m_CurrentLedgeType == LedgeType.BalancingBeam)
+            if (sim.ScheduledMove != Vector3.zero && m_CurrentLedgeType == LedgeType.BalancingBeam)
             {
-                Vector3 imbalance = Vector3.Cross(sim.m_ScheduledMove.normalized, Vector3.up);
-                imbalance *= Mathf.PerlinNoise1D(Time.time * sim.m_ScheduledMove.magnitude * m_LedgeBalancingWobbleTime) * 2 - 1;
-                imbalance *= sim.m_ScheduledMove.magnitude;
+                Vector3 imbalance = Vector3.Cross(sim.ScheduledMove.normalized, Vector3.up);
+                imbalance *= Mathf.PerlinNoise1D(Time.time * sim.ScheduledMove.magnitude * m_LedgeBalancingWobbleTime) * 2 - 1;
+                imbalance *= sim.ScheduledMove.magnitude;
                 imbalance *= m_LedgeBalancingWobbleAmount;
-                imbalance *= MMath.RemapClamped(0.3f, 0.75f, 2, 1, sim.m_GroundTimer);
-                sim.m_ContactMove += imbalance * sim.m_ScheduledMove.magnitude;
+                imbalance *= MMath.RemapClamped(0.3f, 0.75f, 2, 1, sim.GroundTimer);
+                targetAdditionalForce = imbalance * sim.ScheduledMove.magnitude;
             }
 
             // Disable ledge force if walking down a cliff
             float intentionalOverride = 0;
-            if (m_CurrentLedgeType == LedgeType.Cliff && sim.m_ScheduledMove != Vector3.zero)
+            if (m_CurrentLedgeType == LedgeType.Cliff && sim.ScheduledMove != Vector3.zero)
             {
-                intentionalOverride = MMath.RemapClamped(-0.15f, -0.35f, 1, 0, Vector3.Dot(m_CurrentLedgeAverageDir.normalized, sim.m_ScheduledMove.normalized));
-                intentionalOverride *= MMath.RemapClamped(0.2f, 0.5f, 0, 1, sim.m_SmoothMoveMagnitude);
+                intentionalOverride = MMath.RemapClamped(-0.15f, -0.35f, 1, 0, Vector3.Dot(m_CurrentLedgeAverageDir.normalized, sim.ScheduledMove.normalized));
+                intentionalOverride *= MMath.RemapClamped(0.2f, 0.5f, 0, 1, sim.SmoothMoveMagnitude);
             }
 
             // TODO remove this and put it in a dedicated ability that allows the player to balance better by using their hands
@@ -203,24 +229,24 @@ public class BalanceMovementAbility : MonoBehaviour, ICharacterMover
             if (m_CurrentLedgeType != LedgeType.Cliff && (Input.GetMouseButton(0) || (UnityEngine.InputSystem.Gamepad.current != null && UnityEngine.InputSystem.Gamepad.current.buttonWest.ReadValue() > 0)))
             {
                 ledgeForce *= m_LedgeStableBalancingForce;
-                sim.m_ContactMove *= m_LedgeStableMoveMultiplier;
+                targetMovementSpeedMult *= m_LedgeStableMoveMultiplier;
             }
             else
             {
                 if (m_CurrentLedgeType == LedgeType.Cliff)
                 {
                     ledgeForce *= MMath.Lerp(m_BalancingForce, 1, intentionalOverride);
-                    sim.m_ContactMove *= MMath.RemapClamped(0.3f, 0.5f, 1, MMath.Lerp(m_BalancingMoveMultiplier, 1, intentionalOverride), m_CurrentLedgeAmount);
+                    targetMovementSpeedMult *= MMath.RemapClamped(0.3f, 0.5f, 1, MMath.Lerp(m_BalancingMoveMultiplier, 1, intentionalOverride), m_CurrentLedgeAmount);
                 }
                 else
                 {
                     ledgeForce *= MMath.Lerp(m_BalancingForce, 1, intentionalOverride);
-                    sim.m_ContactMove *= MMath.Lerp(m_BalancingMoveMultiplier, 1, intentionalOverride);
+                    targetMovementSpeedMult *= MMath.Lerp(m_BalancingMoveMultiplier, 1, intentionalOverride);
                 }
             }
 
             // Allow player to recover once landed
-            sim.m_ContactMove *= MMath.RemapClamped(0, 0.3f, 0.5f, 1, sim.m_GroundTimer);
+            targetMovementSpeedMult *= MMath.RemapClamped(0, 0.3f, 0.5f, 1, sim.GroundTimer);
 
             // Balance attribute
             if (sim.Movement.AttributeOwner && sim.Movement.AttributeOwner.TryGetAttributeEvaluatedValue(m_LedgeBalancingAttribute, out float att_balance))
@@ -229,7 +255,7 @@ public class BalanceMovementAbility : MonoBehaviour, ICharacterMover
             }
 
             // Stabilize player when not moving
-            Vector3 stabilizationForce = Vector3.ProjectOnPlane(sim.m_PreciseGroundLowerHit.normal, sim.m_GroundLowerHit.normal);
+            Vector3 stabilizationForce = Vector3.ProjectOnPlane(sim.PreciseGroundLowerHit.normal, sim.GroundLowerHit.normal);
             stabilizationForce = stabilizationForce.FlattenY().normalized + stabilizationForce.y * Vector3.up;
             if (m_CurrentLedgeType == LedgeType.Pole)
             {
@@ -239,12 +265,22 @@ public class BalanceMovementAbility : MonoBehaviour, ICharacterMover
             {
                 stabilizationForce *= m_StabilizationForce;
             }
-            float stabilizationForceMult = MMath.Clamp01(1 - sim.m_ScheduledMove.magnitude);
-            stabilizationForceMult += MMath.RemapClamped(0, 0.2f, 2, 0, sim.m_GroundTimer);
+            float stabilizationForceMult = MMath.Clamp01(1 - sim.ScheduledMove.magnitude);
+            stabilizationForceMult += MMath.RemapClamped(0, 0.2f, 2, 0, sim.GroundTimer);
             ledgeForce += stabilizationForce * stabilizationForceMult;
 
             sim.Movement.Rigidbody.AddForceAtPosition(ledgeForce, sim.Movement.FeetPos, ForceMode.Acceleration);
         }
+
+        m_AdditionalForce = MMath.Damp(m_AdditionalForce, targetAdditionalForce, 5, Time.fixedDeltaTime);
+        m_MovementSpeedMult = MMath.Damp(m_MovementSpeedMult, targetMovementSpeedMult, 5, Time.fixedDeltaTime);
+
+        if (m_MoveSpeedAttribute && m_AttributeOwner)
+        {
+            m_MovementModifier.Value = m_MovementSpeedMult;
+        }
+
+        sim.ContactMove += m_AdditionalForce;
     }
 
     private int DirectionToLedgeId(Vector3 direction)
@@ -313,7 +349,7 @@ public class BalanceMovementAbility : MonoBehaviour, ICharacterMover
                 // Test if this could be the ground we are currently standing on
                 Plane ledgeGroundPlane = new Plane(preciseHit.normal, preciseHit.point);
                 float feetDistance = MMath.Abs(ledgeGroundPlane.GetDistanceToPoint(sim.Movement.FeetPos));
-                Plane feetGroundPlane = new Plane(sim.Movement.PreciseGroundLowerHit.normal, sim.m_PreciseGroundLowerHit.point);
+                Plane feetGroundPlane = new Plane(sim.Movement.PreciseGroundLowerHit.normal, sim.PreciseGroundLowerHit.point);
                 float contactDistance = MMath.Abs(feetGroundPlane.GetDistanceToPoint(preciseHit.point));
                 if (feetDistance > 0.3f && contactDistance > 0.4f)
                 {

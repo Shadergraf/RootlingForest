@@ -131,7 +131,7 @@ public class PullAbility : MonoBehaviour
 
         m_GrabState = GrabState.Initializing;
 
-        TryGetComponent(out m_Attributes);
+        m_Attributes = GetComponentInParent<GameplayAttributeOwner>();
 
 
         // HACK solves an issue with "enableCollision" property of the joint
@@ -169,7 +169,7 @@ public class PullAbility : MonoBehaviour
 
 
 
-        m_Joint = gameObject.AddComponent<ConfigurableJoint>();
+        m_Joint = Self.gameObject.AddComponent<ConfigurableJoint>();
         m_Joint.connectedBody = Target;
         m_Joint.autoConfigureConnectedAnchor = false;
         //m_Joint.enableCollision = EnableCollision;
@@ -412,7 +412,9 @@ public class PullAbility : MonoBehaviour
 
         m_GrabTimer += Time.fixedDeltaTime;
 
-        m_SmoothPullingForce = Vector3.Lerp(m_SmoothPullingForce, m_Joint.currentForce, Time.fixedDeltaTime * 15);
+        m_SmoothPullingForce = MMath.Damp(m_SmoothPullingForce, m_Joint.currentForce, 10, Time.fixedDeltaTime);
+        Debug.DrawLine(transform.position + Vector3.up, transform.position + Vector3.up + m_Joint.currentForce * 0.01f, Color.red);
+        Debug.DrawLine(transform.position + Vector3.up, transform.position + Vector3.up + m_SmoothPullingForce * 0.01f, Color.green);
         //Debug.DrawLine(m_Joint.transform.TransformPoint(m_Joint.anchor), m_Joint.transform.TransformPoint(m_Joint.anchor) + m_SmoothPullingForce * 0.2f, Color.red, Time.fixedDeltaTime);
 
         switch (CurrentGrabState)
@@ -506,7 +508,7 @@ public class PullAbility : MonoBehaviour
             // TODO only weld bodies this way if the target rotation has been reached!
             // TODO suuuper hacky but allows us to lock the rotation and have the current orientation persist
             // We want to fuse the hands and the object (by locking the joint instead of limiting it) to have them simulated more robustly
-            Component copiedJoint = m_Joint.CopyComponent(gameObject);
+            Component copiedJoint = m_Joint.CopyComponent(Self.gameObject);
             Destroy(m_Joint);
             m_Joint = copiedJoint as ConfigurableJoint;
 
@@ -695,9 +697,13 @@ public class PullAbility : MonoBehaviour
         rotMult = MMath.Lerp(rotMult, OverburdenedRotationMult, m_HeavyLoad);
 
         // Pulling load
-        m_PullingLoad = MMath.InverseLerpClamped(30, 70, m_SmoothPullingForce.magnitude) * MMath.Pow(MMath.InverseLerpClamped(0.9f, 1, Vector3.Dot(forwardDir, m_SmoothPullingForce)), 2);
+        float totalPullingForce = MMath.InverseLerpClamped(30, 70, m_SmoothPullingForce.magnitude);
+        float linearPullingForce = MMath.Pow(MMath.InverseLerpClamped(0.9f, 1, Vector3.Dot(forwardDir, m_SmoothPullingForce)), 2) * 0 + 1;
+        m_PullingLoad = totalPullingForce * linearPullingForce;
         moveMult = MMath.Lerp(moveMult, MMath.RemapClamped(0.5f, 0, 1, 1.5f, Self.velocity.magnitude), m_PullingLoad);
         rotMult = MMath.Lerp(rotMult, 0, m_PullingLoad);
+
+        // TODO rotMult for pulling load is wrong!
 
         // Lerp to final grab walk/rotation modifiers
         if (m_Attributes)

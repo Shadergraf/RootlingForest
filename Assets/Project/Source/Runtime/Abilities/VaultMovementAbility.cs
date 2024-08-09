@@ -51,7 +51,7 @@ public class VaultMovementAbility : MonoBehaviour, ICharacterMover
             Vector3 vaultingDir = (vaultingHit.point - sim.Movement.FeetPos).FlattenY().normalized;
             if (!m_VaultingActive)
             {
-                if (Vector3.Dot(sim.m_ScheduledMove.normalized, vaultingDir) > 0.4 && sim.Movement.Rigidbody.velocity.FlattenY().magnitude < 1 && sim.m_IsStableGrounded)
+                if (Vector3.Dot(sim.ScheduledMove.normalized, vaultingDir) > 0.4 && sim.Movement.Rigidbody.velocity.FlattenY().magnitude < 1 && sim.IsStableGrounded)
                 {
                     m_VaultingTimer += Time.fixedDeltaTime;
                 }
@@ -75,11 +75,11 @@ public class VaultMovementAbility : MonoBehaviour, ICharacterMover
                     vaultingForce *= m_VaultingForce;
                     sim.Movement.Rigidbody.AddForce(vaultingForce, ForceMode.VelocityChange);
                 }
-                sim.m_ContactMove = vaultingDir;
+                sim.ContactMove = vaultingDir;
 
                 if (MMath.Abs(vaultingHit.point.y - sim.Movement.FeetPos.y) < sim.Movement.CalculateFootprintRadius() * 0.005f
                     || m_VaultingTimer > m_VaultingMaxTime
-                    || (m_VaultingTimer > 0.2 && sim.m_IsStableGrounded))
+                    || (m_VaultingTimer > 0.2 && sim.IsStableGrounded))
                 {
                     m_VaultingActive = false;
                 }

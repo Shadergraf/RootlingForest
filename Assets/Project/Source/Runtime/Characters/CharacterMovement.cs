@@ -83,12 +83,12 @@ namespace Manatea.AdventureRoots
         public Rigidbody Rigidbody => m_Rigidbody;
         public GameplayAttributeOwner AttributeOwner => m_AttributeOwner;
         public GameplayTagOwner TagOwner => m_TagOwner;
-        public Vector3 ScheduledMove => Sim.m_ScheduledMove;
-        public Vector3 MoveSpeedMult => Sim.m_ScheduledMove;
-        public RaycastHit GroundLowerHit => m_SimulationState.m_GroundLowerHit;
-        public RaycastHit PreciseGroundLowerHit => m_SimulationState.m_PreciseGroundLowerHit;
-        public RaycastHit GroundUpperHit => m_SimulationState.m_GroundUpperHit;
-        public RaycastHit PreciseGroundUpperHit => m_SimulationState.m_PreciseGroundUpperHit;
+        public Vector3 ScheduledMove => m_Sim.ScheduledMove;
+        public Vector3 MoveSpeedMult => m_Sim.ScheduledMove;
+        public RaycastHit GroundLowerHit => m_Sim.GroundLowerHit;
+        public RaycastHit PreciseGroundLowerHit => m_Sim.PreciseGroundLowerHit;
+        public RaycastHit GroundUpperHit => m_Sim.GroundUpperHit;
+        public RaycastHit PreciseGroundUpperHit => m_Sim.PreciseGroundUpperHit;
 
 
         private Rigidbody m_Rigidbody;
@@ -96,9 +96,7 @@ namespace Manatea.AdventureRoots
         private GameplayTagOwner m_TagOwner;
 
         // Simulation
-        private MovementSimulationState m_SimulationState;
-        private MovementSimulationState Sim => m_SimulationState;
-
+        private MovementSimulationState m_Sim;
         private List<ICharacterMover> m_Movers = new List<ICharacterMover>();
 
         // Constants
@@ -107,13 +105,8 @@ namespace Manatea.AdventureRoots
         /// </summary>
         public const float SKIN_THICKNESS = 0.001f;
 
-        // Simulation
-
-        private bool m_VaultingActive;
-        private float m_VaultingTimer;
-
-        float m_CachedMoveSpeedMult = 1;
-        float m_CachedRotRateMult = 1;
+        private float m_CachedMoveSpeedMult = 1;
+        private float m_CachedRotRateMult = 1;
         private Dictionary<Collider, bool> m_CachedWalkableColliders = new Dictionary<Collider, bool>();
 
         /// <summary>
@@ -122,47 +115,37 @@ namespace Manatea.AdventureRoots
         public Vector3 FeetPos => m_Collider.ClosestPoint(transform.position + Physics.gravity * 10000);
 
 
-        private struct LedgeSample
-        {
-            public bool IsLedge;
-            public Vector3 Direction;
-            public Vector3 StartPosition;
-            public Vector3 EndPosition;
-            public RaycastHit Hit;
-        }
-        public enum LedgeType
-        {
-            Pole,
-            Cliff,
-            BalancingBeam,
-            UnevenTerrain,
-        }
         public class MovementSimulationState
         {
             public readonly CharacterMovement Movement;
 
             // Input
-            public Vector3 m_ScheduledMove;
-            public Vector3 m_ScheduledLookDir;
-            public Vector3 m_TargetLookDir;
+            public Vector3 ScheduledMove;
+            public Vector3 ScheduledLookDir;
+            public Vector3 TargetLookDir;
 
-            public bool m_IsStableGrounded;
-            public bool m_IsSliding;
-            public bool m_IsStepping;
+            public bool IsStableGrounded;
+            public bool IsSliding;
+            public bool IsStepping;
 
-            public float m_ForceAirborneTimer;
-            public float m_AirborneTimer;
-            public float m_GroundTimer;
+            public float AirborneTimer;
+            public float GroundTimer;
 
-            public Vector3 m_ContactMove;
+            public Vector3 ContactMove;
 
-            public float m_SmoothMoveMagnitude;
-            public PhysicMaterial m_PhysicsMaterial;
+            public float SmoothMoveMagnitude;
+            public PhysicMaterial PhysicsMaterial;
 
-            public RaycastHit m_GroundLowerHit;
-            public RaycastHit m_PreciseGroundLowerHit;
-            public RaycastHit m_GroundUpperHit;
-            public RaycastHit m_PreciseGroundUpperHit;
+            public RaycastHit GroundLowerHit;
+            public RaycastHit PreciseGroundLowerHit;
+            public RaycastHit GroundUpperHit;
+            public RaycastHit PreciseGroundUpperHit;
+
+            public int GroundColliderCount = 0;
+            public Collider[] GroundColliders = new Collider[32];
+
+            public RaycastHit[] GroundHits = new RaycastHit[32];
+
 
             public MovementSimulationState(CharacterMovement movement)
             {
@@ -177,16 +160,16 @@ namespace Manatea.AdventureRoots
             m_AttributeOwner = GetComponent<GameplayAttributeOwner>();
             m_TagOwner = GetComponent<GameplayTagOwner>();
 
-            m_SimulationState = new MovementSimulationState(this);
+            m_Sim = new MovementSimulationState(this);
 
-            m_SimulationState.m_PhysicsMaterial = new PhysicMaterial();
-            m_SimulationState.m_PhysicsMaterial.frictionCombine = PhysicMaterialCombine.Minimum;
-            m_Collider.material = m_SimulationState.m_PhysicsMaterial;
+            m_Sim.PhysicsMaterial = new PhysicMaterial();
+            m_Sim.PhysicsMaterial.frictionCombine = PhysicMaterialCombine.Minimum;
+            m_Collider.material = m_Sim.PhysicsMaterial;
         }
 
         private void OnEnable()
         {
-            Sim.m_ScheduledLookDir = transform.forward;
+            m_Sim.ScheduledLookDir = transform.forward;
         }
 
         public void RegisterMover(ICharacterMover mover)
@@ -200,17 +183,17 @@ namespace Manatea.AdventureRoots
 
         public void Move(Vector3 moveVector, bool rotateTowardsMove = true)
         {
-            Sim.m_ScheduledMove = moveVector;
-            if (rotateTowardsMove && Sim.m_ScheduledMove != Vector3.zero)
+            m_Sim.ScheduledMove = moveVector;
+            if (rotateTowardsMove && m_Sim.ScheduledMove != Vector3.zero)
             {
-                Sim.m_ScheduledLookDir = Sim.m_ScheduledMove.normalized;
+                m_Sim.ScheduledLookDir = m_Sim.ScheduledMove.normalized;
             }
         }
         public void SetTargetRotation(Vector3 targetRotation)
         {
             if (targetRotation != Vector3.zero)
             {
-                Sim.m_ScheduledLookDir = targetRotation.FlattenY().normalized;
+                m_Sim.ScheduledLookDir = targetRotation.FlattenY().normalized;
             }
         }
 
@@ -245,43 +228,46 @@ namespace Manatea.AdventureRoots
                 }
             }
 
-            // Update timers
-            Sim.m_ForceAirborneTimer = MMath.Max(Sim.m_ForceAirborneTimer - dt, 0);
-            if (Sim.m_IsStableGrounded)
+            // Ground detection
+            bool groundDetected = DetectGround(out m_Sim.GroundLowerHit, out m_Sim.PreciseGroundLowerHit, out m_Sim.GroundUpperHit, out m_Sim.PreciseGroundUpperHit);
+            m_Sim.IsStableGrounded = groundDetected;
+            m_Sim.IsSliding = m_Sim.IsStableGrounded && !IsRaycastHitWalkable(m_Sim.PreciseGroundLowerHit);     // TODO  && !m_VaultingActive
+            m_Sim.IsStableGrounded &= !m_Sim.IsSliding;
+            // Stepping
+            if (IsObjectWalkable(m_Sim.PreciseGroundUpperHit.collider) && groundDetected && Vector3.Dot(m_Sim.PreciseGroundUpperHit.normal, m_Sim.GroundLowerHit.normal) < 0.9f && Vector3.Project(m_Sim.PreciseGroundUpperHit.point - FeetPos, transform.up).magnitude < m_StepHeight)     // TODO  && !m_VaultingActive
             {
-                Sim.m_GroundTimer += dt;
-                Sim.m_AirborneTimer = 0;
+                m_Sim.IsStepping = true;
+                m_Sim.IsStableGrounded = true;
+                m_Sim.IsSliding = false;
+            }
+            // ModifyState
+            for (int i = 0; i < m_Movers.Count; i++)
+                m_Movers[i].ModifyState(m_Sim);
+
+            // Update timers
+            if (m_Sim.IsStableGrounded)
+            {
+                m_Sim.GroundTimer += dt;
+                m_Sim.AirborneTimer = 0;
             }
             else
             {
-                Sim.m_GroundTimer = 0;
-                Sim.m_AirborneTimer += dt;
+                m_Sim.GroundTimer = 0;
+                m_Sim.AirborneTimer += dt;
             }
-            Sim.m_SmoothMoveMagnitude = MMath.Damp(Sim.m_SmoothMoveMagnitude, Sim.m_ScheduledMove.magnitude, 1, Time.fixedDeltaTime * 2);
+            m_Sim.SmoothMoveMagnitude = MMath.Damp(m_Sim.SmoothMoveMagnitude, m_Sim.ScheduledMove.magnitude, 1, Time.fixedDeltaTime * 2);
+            // UpdateTimers
+            for (int i = 0; i < m_Movers.Count; i++)
+                m_Movers[i].UpdateTimers(m_Sim);
 
-            // Ground detection
-            bool groundDetected = DetectGround(out Sim.m_GroundLowerHit, out Sim.m_PreciseGroundLowerHit, out Sim.m_GroundUpperHit, out Sim.m_PreciseGroundUpperHit);
-            Sim.m_IsStableGrounded = groundDetected;
-            Sim.m_IsStableGrounded &= Sim.m_ForceAirborneTimer <= 0;
-            Sim.m_IsSliding = Sim.m_IsStableGrounded && !IsRaycastHitWalkable(Sim.m_PreciseGroundLowerHit) && !m_VaultingActive;
-            Sim.m_IsStableGrounded &= !Sim.m_IsSliding;
-            // Stepping
-            if (IsObjectWalkable(Sim.m_PreciseGroundUpperHit.collider) && groundDetected && !m_VaultingActive && Vector3.Dot(Sim.m_PreciseGroundUpperHit.normal, Sim.m_GroundLowerHit.normal) < 0.9f && Vector3.Project(Sim.m_PreciseGroundUpperHit.point - FeetPos, transform.up).magnitude < m_StepHeight)
-            {
-                Sim.m_IsStepping = true;
-                Sim.m_IsStableGrounded = true;
-                Sim.m_IsSliding = false;
-            }
-
-
-            Sim.m_ContactMove = Sim.m_ScheduledMove;
+            m_Sim.ContactMove = m_Sim.ScheduledMove;
 
             // The direction we want to move in
             if (m_DebugLocomotion)
             {
-                Debug.DrawLine(transform.position, transform.position + Sim.m_ScheduledMove, Color.blue, dt, false);
+                Debug.DrawLine(transform.position, transform.position + m_Sim.ScheduledMove, Color.blue, dt, false);
                 if (groundDetected)
-                    Debug.DrawLine(Sim.m_PreciseGroundLowerHit.point, Sim.m_PreciseGroundLowerHit.point + Sim.m_PreciseGroundLowerHit.normal, Color.black, dt, false);
+                    Debug.DrawLine(m_Sim.PreciseGroundLowerHit.point, m_Sim.PreciseGroundLowerHit.point + m_Sim.PreciseGroundLowerHit.normal, Color.black, dt, false);
 
                 if (m_StepHeight > 0)
                 {
@@ -290,82 +276,81 @@ namespace Manatea.AdventureRoots
             }
 
 
+            // PreMovement
             for (int i = 0; i < m_Movers.Count; i++)
-            {
-                m_Movers[i].PreMovement(Sim);
-            }
+                m_Movers[i].PreMovement(m_Sim);
 
 
             // Contact Movement
             // movement that results from ground or surface contact
-            Sim.m_ContactMove *= m_CachedMoveSpeedMult;
-            if (Sim.m_ContactMove != Vector3.zero)
+            m_Sim.ContactMove *= m_CachedMoveSpeedMult;
+            if (m_Sim.ContactMove != Vector3.zero)
             {
-                if (Sim.m_IsStableGrounded)
+                if (m_Sim.IsStableGrounded)
                 {
                     // Wall movement
-                    if (Sim.m_IsSliding)
+                    if (m_Sim.IsSliding)
                     {
                         // TODO only do this if we are moving TOWARDS the wall, not if we are moving away from it
-                        Vector3 wallNormal = Vector3.ProjectOnPlane(Sim.m_GroundUpperHit.normal, Physics.gravity.normalized).normalized;
+                        Vector3 wallNormal = Vector3.ProjectOnPlane(m_Sim.GroundUpperHit.normal, Physics.gravity.normalized).normalized;
                         if (m_DebugGroundDetection)
-                            Debug.DrawLine(Sim.m_GroundUpperHit.point + Vector3.one, Sim.m_GroundUpperHit.point + Vector3.one + wallNormal, Color.blue, dt, false);
-                        if (Vector3.Dot(wallNormal, Sim.m_ContactMove) > 0)
+                            Debug.DrawLine(m_Sim.GroundUpperHit.point + Vector3.one, m_Sim.GroundUpperHit.point + Vector3.one + wallNormal, Color.blue, dt, false);
+                        if (Vector3.Dot(wallNormal, m_Sim.ContactMove) > 0)
                         {
-                            Sim.m_ContactMove = Vector3.ProjectOnPlane(Sim.m_ContactMove, wallNormal).normalized * Sim.m_ContactMove.magnitude;
+                            m_Sim.ContactMove = Vector3.ProjectOnPlane(m_Sim.ContactMove, wallNormal).normalized * m_Sim.ContactMove.magnitude;
                         }
                     }
                     else
                     {
                         // Treat upperGroundHit as wall if it were unwalkable
-                        if (!IsRaycastHitWalkable(Sim.m_PreciseGroundUpperHit))
+                        if (!IsRaycastHitWalkable(m_Sim.PreciseGroundUpperHit))
                         {
-                            Vector3 wallNormal = Vector3.ProjectOnPlane(Sim.m_PreciseGroundUpperHit.normal, Physics.gravity.normalized).normalized;
-                            if (Vector3.Dot(wallNormal, Sim.m_ContactMove) < 0)
+                            Vector3 wallNormal = Vector3.ProjectOnPlane(m_Sim.PreciseGroundUpperHit.normal, Physics.gravity.normalized).normalized;
+                            if (Vector3.Dot(wallNormal, m_Sim.ContactMove) < 0)
                             {
-                                if (Sim.m_PreciseGroundUpperHit.collider.attachedRigidbody)
+                                if (m_Sim.PreciseGroundUpperHit.collider.attachedRigidbody)
                                 {
                                     // TODO push collider
-                                    Vector3 pushForce = Vector3.Project(Sim.m_ContactMove, wallNormal);
-                                    Sim.m_PreciseGroundUpperHit.collider.attachedRigidbody.AddForce(pushForce.normalized * m_PushForce, ForceMode.Force);
+                                    Vector3 pushForce = Vector3.Project(m_Sim.ContactMove, wallNormal);
+                                    m_Sim.PreciseGroundUpperHit.collider.attachedRigidbody.AddForce(pushForce.normalized * m_PushForce, ForceMode.Force);
                                 }
 
-                                Sim.m_ContactMove = Vector3.ProjectOnPlane(Sim.m_ContactMove, wallNormal) + Vector3.Project(Sim.m_ContactMove, wallNormal) * 0.3f;
+                                m_Sim.ContactMove = Vector3.ProjectOnPlane(m_Sim.ContactMove, wallNormal) + Vector3.Project(m_Sim.ContactMove, wallNormal) * 0.3f;
                             }
                         }
 
                         // When we walk perpendicular to a slope we do not expect to move down, we expect the height not to change
                         // So here we cancel out the gravity factor to reduce this effect
-                        Vector3 groundNormal = Sim.m_PreciseGroundLowerHit.normal;
-                        if (Sim.m_IsStepping)
+                        Vector3 groundNormal = m_Sim.PreciseGroundLowerHit.normal;
+                        if (m_Sim.IsStepping)
                         {
-                            groundNormal = Sim.m_GroundUpperHit.normal;
+                            groundNormal = m_Sim.GroundUpperHit.normal;
                         }
-                        Sim.m_ContactMove += -Physics.gravity * dt * (1 + Vector3.Dot(Sim.m_ContactMove, -groundNormal)) * 0.5f;
-                        Sim.m_ContactMove = Vector3.ProjectOnPlane(Sim.m_ContactMove, groundNormal);
+                        m_Sim.ContactMove += -Physics.gravity * dt * (1 + Vector3.Dot(m_Sim.ContactMove, -groundNormal)) * 0.5f;
+                        m_Sim.ContactMove = Vector3.ProjectOnPlane(m_Sim.ContactMove, groundNormal);
                     }
 
-                    m_Rigidbody.AddForceAtPosition(Sim.m_ContactMove * m_GroundMoveForce, FeetPos, ForceMode.Acceleration);
+                    m_Rigidbody.AddForceAtPosition(m_Sim.ContactMove * m_GroundMoveForce, FeetPos, ForceMode.Acceleration);
                 }
                 // Air movement
                 else
                 {
-                    float airSpeedMult = MMath.InverseLerpClamped(0.707f, 0f, Vector3.Dot(m_Rigidbody.velocity.normalized, Sim.m_ContactMove.normalized));
-                    m_Rigidbody.AddForceAtPosition(Sim.m_ContactMove * m_AirMoveForce * airSpeedMult, FeetPos, ForceMode.Acceleration);
+                    float airSpeedMult = MMath.InverseLerpClamped(0.707f, 0f, Vector3.Dot(m_Rigidbody.velocity.normalized, m_Sim.ContactMove.normalized));
+                    m_Rigidbody.AddForceAtPosition(m_Sim.ContactMove * m_AirMoveForce * airSpeedMult, FeetPos, ForceMode.Acceleration);
                 }
 
                 // Push at feet
-                for (int i = 0; i < m_GroundColliderCount; i++)
+                for (int i = 0; i < m_Sim.GroundColliderCount; i++)
                 {
-                    if (m_GroundColliders[i].attachedRigidbody)
+                    if (m_Sim.GroundColliders[i].attachedRigidbody)
                     {
-                        m_GroundColliders[i].attachedRigidbody.AddForceAtPosition(-Sim.m_ScheduledMove * m_PushForce, FeetPos, ForceMode.Force);
+                        m_Sim.GroundColliders[i].attachedRigidbody.AddForceAtPosition(-m_Sim.ScheduledMove * m_PushForce, FeetPos, ForceMode.Force);
                     }
                 }
 
                 // TODO adding 90 deg to the character rotation works out, it might be a hack tho and is not tested in every scenario, could break
                 float targetRotationRate = 1;
-                if (Sim.m_IsStableGrounded && !Sim.m_IsSliding)
+                if (m_Sim.IsStableGrounded && !m_Sim.IsSliding)
                 {
                     targetRotationRate *= m_GroundRotationRate;
                 }
@@ -373,10 +358,14 @@ namespace Manatea.AdventureRoots
                 {
                     targetRotationRate *= m_AirRotationRate;
                 }
-                Sim.m_TargetLookDir = Vector3.RotateTowards(Sim.m_TargetLookDir, Sim.m_ScheduledLookDir, targetRotationRate * MMath.Deg2Rad * Time.fixedDeltaTime, 1);
-                float targetRotationTorque = MMath.DeltaAngle((m_Rigidbody.rotation.eulerAngles.y + 90) * MMath.Deg2Rad, MMath.Atan2(Sim.m_TargetLookDir.z, -Sim.m_TargetLookDir.x)) * MMath.Rad2Deg;
+                m_Sim.TargetLookDir = Vector3.RotateTowards(m_Sim.TargetLookDir, m_Sim.ScheduledLookDir, targetRotationRate * MMath.Deg2Rad * Time.fixedDeltaTime, 1);
+                float targetRotationTorque = MMath.DeltaAngle((m_Rigidbody.rotation.eulerAngles.y + 90) * MMath.Deg2Rad, MMath.Atan2(m_Sim.TargetLookDir.z, -m_Sim.TargetLookDir.x)) * MMath.Rad2Deg;
+                if (!MMath.IsZero(Rigidbody.velocity))
+                {
+                    targetRotationTorque *= MMath.RemapClamped(-0.5f, 0, 0.1f, 1, Vector3.Dot(m_Sim.ContactMove.normalized, Rigidbody.velocity.normalized));
+                }
                 targetRotationTorque *= m_CachedRotRateMult;
-                if (Sim.m_IsStableGrounded && !Sim.m_IsSliding)
+                if (m_Sim.IsStableGrounded && !m_Sim.IsSliding)
                 {
                     targetRotationTorque *= m_GroundRotationForce;
                 }
@@ -405,7 +394,7 @@ namespace Manatea.AdventureRoots
             //m_RotationRelaxation = MMath.Clamp(m_RotationRelaxation, 0, 1);
 
             // Feet drag
-            if (Sim.m_IsStableGrounded && !Sim.m_IsSliding)
+            if (m_Sim.IsStableGrounded && !m_Sim.IsSliding)
             {
                 /* TODO find better approach for this...
                  * When applying an upwards force to a character the feet dampening kicks in and limits the upwards motion
@@ -417,23 +406,23 @@ namespace Manatea.AdventureRoots
 
                 float feetLinearResistance = Mathf.Clamp01(1 - m_FeetLinearResistance * dt);
                 m_Rigidbody.velocity = Vector3.Scale(m_Rigidbody.velocity, Vector3.Lerp(Vector3.one * feetLinearResistance, new Vector3(feetLinearResistance, 1, feetLinearResistance), lerpFactor));
-                
-                m_Rigidbody.angularVelocity *= Mathf.Clamp01(1 - m_FeetAngularResistance * dt);
 
+                float rotationDragMult = MMath.Clamp01(m_CachedRotRateMult);
+                m_Rigidbody.angularVelocity *= MMath.Clamp01(1 - m_FeetAngularResistance * rotationDragMult * dt);
                 //Vector3 accVel = (m_RigidBody.GetAccumulatedForce() * Mathf.Clamp01(1 - FeetLinearResistance * dt)) - m_RigidBody.GetAccumulatedForce();
                 //m_RigidBody.AddForceAtPosition(accVel, feetPos, ForceMode.Force);
                 //Vector3 accTorque = m_RigidBody.GetAccumulatedTorque() - (m_RigidBody.GetAccumulatedTorque() * Mathf.Clamp01(1 - FeetAngularResistance * dt));
                 //m_RigidBody.AddTorque(accTorque, ForceMode.Force);
             }
 
-            float frictionTarget = MMath.LerpClamped(m_StationaryFriction, m_MovementFriction, Sim.m_ContactMove.magnitude); ;
-            if (!Sim.m_IsStableGrounded || Sim.m_IsSliding)
+            float frictionTarget = MMath.LerpClamped(m_StationaryFriction, m_MovementFriction, m_Sim.ContactMove.magnitude); ;
+            if (!m_Sim.IsStableGrounded || m_Sim.IsSliding)
                 frictionTarget = 0;
-            Sim.m_PhysicsMaterial.staticFriction = frictionTarget;
-            Sim.m_PhysicsMaterial.dynamicFriction = frictionTarget;
+            m_Sim.PhysicsMaterial.staticFriction = frictionTarget;
+            m_Sim.PhysicsMaterial.dynamicFriction = frictionTarget;
 
             if (m_DebugLocomotion)
-                Debug.DrawLine(transform.position, transform.position + Sim.m_ContactMove, Color.green, dt, false);
+                Debug.DrawLine(transform.position, transform.position + m_Sim.ContactMove, Color.green, dt, false);
         }
 
 
@@ -515,10 +504,6 @@ namespace Manatea.AdventureRoots
         }
 
 
-        private int m_GroundColliderCount = 0;
-        private Collider[] m_GroundColliders = new Collider[32];
-
-        private RaycastHit[] m_GroundHits = new RaycastHit[32];
         private bool DetectGround(out RaycastHit groundLowerHit, out RaycastHit preciseGroundLowerHit, out RaycastHit groundUpperHit, out RaycastHit preciseGroundUpperHit)
         {
             groundLowerHit = new RaycastHit();
@@ -543,7 +528,7 @@ namespace Manatea.AdventureRoots
                 detectionRay.origin = transform.TransformPoint(capsuleCollider.center) - transform.TransformDirection(Vector2.up) * capsuleHalfHeightWithoutHemisphereScaled;
                 detectionRay.direction = Vector3.down;
                 radius = scaledRadius - SKIN_THICKNESS;
-                hits = Physics.SphereCastNonAlloc(detectionRay, radius, m_GroundHits, distance, layerMask, QueryTriggerInteraction.Ignore);
+                hits = Physics.SphereCastNonAlloc(detectionRay, radius, m_Sim.GroundHits, distance, layerMask, QueryTriggerInteraction.Ignore);
             }
             else if (m_Collider is SphereCollider)
             {
@@ -552,7 +537,7 @@ namespace Manatea.AdventureRoots
                 detectionRay.direction = Vector3.down;
                 float scaledRadius = sphereCollider.radius * MMath.Max(transform.localScale);
                 radius = scaledRadius - SKIN_THICKNESS;
-                hits = Physics.SphereCastNonAlloc(detectionRay, radius, m_GroundHits, distance, layerMask, QueryTriggerInteraction.Ignore);
+                hits = Physics.SphereCastNonAlloc(detectionRay, radius, m_Sim.GroundHits, distance, layerMask, QueryTriggerInteraction.Ignore);
 
             }
             else
@@ -563,37 +548,39 @@ namespace Manatea.AdventureRoots
             
             groundLowerHit.point = new Vector3(0, float.PositiveInfinity, 0);
             groundUpperHit.point = new Vector3(0, float.NegativeInfinity, 0);
-            m_GroundColliderCount = 0;
+            m_Sim.GroundColliderCount = 0;
             for (int i = 0; i < hits; i++)
             {
                 // Discard overlaps
-                if (m_GroundHits[i].distance == 0)
+                if (m_Sim.GroundHits[i].distance == 0)
                     continue;
                 // Discard self collisions
-                if (m_GroundHits[i].collider.transform == Rigidbody.transform)
+                if (m_Sim.GroundHits[i].collider.transform == Rigidbody.transform)
                     continue;
-                if (m_GroundHits[i].collider.transform.IsChildOf(Rigidbody.transform))
+                //if (m_Sim.GroundHits[i].rigidbody && (!m_Sim.GroundHits[i].rigidbody.isKinematic || m_Sim.GroundHits[i].rigidbody.mass < 1))    // TODO dont hardcode mass here
+                //    continue;
+                if (m_Sim.GroundHits[i].collider.transform.IsChildOf(Rigidbody.transform))
                     continue;
 
-                m_GroundColliders[m_GroundColliderCount] = m_GroundHits[i].collider;
-                m_GroundColliderCount++;
+                m_Sim.GroundColliders[m_Sim.GroundColliderCount] = m_Sim.GroundHits[i].collider;
+                m_Sim.GroundColliderCount++;
 
-                if (m_GroundHits[i].point.y < groundLowerHit.point.y)
+                if (m_Sim.GroundHits[i].point.y < groundLowerHit.point.y)
                 {
-                    groundLowerHit = m_GroundHits[i];
+                    groundLowerHit = m_Sim.GroundHits[i];
                 }
-                if (m_GroundHits[i].point.y > groundUpperHit.point.y)
+                if (m_Sim.GroundHits[i].point.y > groundUpperHit.point.y)
                 {
-                    groundUpperHit = m_GroundHits[i];
+                    groundUpperHit = m_Sim.GroundHits[i];
                 }
                 // Choose better ground if two colliders are similar
-                if (MMath.Approximately(m_GroundHits[i].point.y, groundUpperHit.point.y))
+                if (MMath.Approximately(m_Sim.GroundHits[i].point.y, groundUpperHit.point.y))
                 {
-                    groundUpperHit = m_GroundHits[i].normal.y > groundUpperHit.normal.y ? m_GroundHits[i] : groundUpperHit;
+                    groundUpperHit = m_Sim.GroundHits[i].normal.y > groundUpperHit.normal.y ? m_Sim.GroundHits[i] : groundUpperHit;
                 }
-                if (MMath.Approximately(m_GroundHits[i].point.y, groundLowerHit.point.y))
+                if (MMath.Approximately(m_Sim.GroundHits[i].point.y, groundLowerHit.point.y))
                 {
-                    groundLowerHit = m_GroundHits[i].normal.y > groundLowerHit.normal.y ? m_GroundHits[i] : groundLowerHit;
+                    groundLowerHit = m_Sim.GroundHits[i].normal.y > groundLowerHit.normal.y ? m_Sim.GroundHits[i] : groundLowerHit;
                 }
             }
             // No valid ground found
@@ -625,6 +612,8 @@ namespace Manatea.AdventureRoots
 
     public interface ICharacterMover
     {
+        public void UpdateTimers(CharacterMovement.MovementSimulationState sim) { }
         public void PreMovement(CharacterMovement.MovementSimulationState sim) { }
+        public void ModifyState(CharacterMovement.MovementSimulationState sim) { }
     }
 }
