@@ -1,0 +1,19 @@
+{
+    "name": "Manatea.SceneManagement.Editor",
+    "rootNamespace": "",
+    "references": [
+        "GUID:c4c5c3fdb6059484c83a4fab3e7454a3",
+        "GUID:2d9ea859582b7f14484bab62f9219615"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

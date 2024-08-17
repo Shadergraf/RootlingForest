@@ -1,8 +1,4 @@
-﻿using UnityEditor;
-using UnityEditor.Experimental.SceneManagement;
-using UnityEditor.SceneManagement;
-
-namespace UnityEngine
+﻿namespace UnityEngine
 {
     public static class ComponentExtensions
     {
