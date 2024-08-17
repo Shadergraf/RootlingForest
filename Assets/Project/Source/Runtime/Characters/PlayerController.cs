@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-namespace Manatea
+namespace Manatea.RootlingForest
 {
     public class PlayerController : CharacterController
     {

@@ -2,10 +2,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class SpringForce : MonoBehaviour
+namespace Manatea.RootlingForest
 {
-    void FixedUpdate()
+    public class SpringForce : MonoBehaviour
     {
-        
+        void FixedUpdate()
+        {
+
+        }
     }
 }

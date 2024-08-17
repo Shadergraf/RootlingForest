@@ -4,85 +4,88 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Splines;
 
-public class RopeGenerator : MonoBehaviour
+namespace Manatea.RootlingForest
 {
-    [SerializeField]
-    private float m_Spacing = 0.1f;
-    [SerializeField]
-    private GameObject m_Prefab;
-    [SerializeField]
-    private SplineContainer m_SplineContainer;
-    [SerializeField]
-    private float m_T;
-
-    List<Rigidbody> rbs = new List<Rigidbody>();
-
-    private void Awake()
+    public class RopeGenerator : MonoBehaviour
     {
-        for (int j = 0; j < m_SplineContainer.Splines.Count; j++)
+        [SerializeField]
+        private float m_Spacing = 0.1f;
+        [SerializeField]
+        private GameObject m_Prefab;
+        [SerializeField]
+        private SplineContainer m_SplineContainer;
+        [SerializeField]
+        private float m_T;
+
+        List<Rigidbody> rbs = new List<Rigidbody>();
+
+        private void Awake()
         {
-            Spline spline = m_SplineContainer.Splines[j];
-            float length = spline.GetLength();
-            int segments = MMath.CeilToInt(length / m_Spacing);
+            for (int j = 0; j < m_SplineContainer.Splines.Count; j++)
+            {
+                Spline spline = m_SplineContainer.Splines[j];
+                float length = spline.GetLength();
+                int segments = MMath.CeilToInt(length / m_Spacing);
 
-            Joint firstJoint = null;
-            Joint lastJoint = null;
-            for (int t = 0; t <= segments; t++)
-            {
-                Vector3 position = transform.TransformPoint(spline.EvaluatePosition(t / (float)segments));
-                Vector3 tangent = transform.TransformDirection(spline.EvaluateTangent(t / (float)segments));
+                Joint firstJoint = null;
+                Joint lastJoint = null;
+                for (int t = 0; t <= segments; t++)
+                {
+                    Vector3 position = transform.TransformPoint(spline.EvaluatePosition(t / (float)segments));
+                    Vector3 tangent = transform.TransformDirection(spline.EvaluateTangent(t / (float)segments));
 
-                Joint cachedJoint = lastJoint;
-                lastJoint = Instantiate(m_Prefab, position, Quaternion.LookRotation(tangent, Vector3.up)).GetComponent<Joint>();
-                Rigidbody rb = lastJoint.GetComponent<Rigidbody>();
-                rbs.Add(rb);
-                if (t == 0)
-                {
-                    firstJoint = lastJoint;
+                    Joint cachedJoint = lastJoint;
+                    lastJoint = Instantiate(m_Prefab, position, Quaternion.LookRotation(tangent, Vector3.up)).GetComponent<Joint>();
+                    Rigidbody rb = lastJoint.GetComponent<Rigidbody>();
+                    rbs.Add(rb);
+                    if (t == 0)
+                    {
+                        firstJoint = lastJoint;
+                    }
+                    if (cachedJoint != null && lastJoint != null)
+                    {
+                        cachedJoint.connectedBody = lastJoint.GetComponent<Rigidbody>();
+                    }
+                    lastJoint.GetComponent<Rigidbody>().detectCollisions = true;
                 }
-                if (cachedJoint != null && lastJoint != null)
+                if (spline.Closed)
                 {
-                    cachedJoint.connectedBody = lastJoint.GetComponent<Rigidbody>();
+                    lastJoint.connectedBody = firstJoint.GetComponent<Rigidbody>();
                 }
-                lastJoint.GetComponent<Rigidbody>().detectCollisions = true;
+                else
+                {
+                    Destroy(lastJoint);
+                }
             }
-            if (spline.Closed)
+
+            //Joint lastJoint = null;
+            //for (int i = 0; i < m_Elements; i++)
+            //{
+            //    Joint cachedJoint = lastJoint;
+            //    lastJoint = Instantiate(m_Prefab, transform.position + transform.forward * i * m_Spacing, transform.rotation).GetComponent<Joint>();
+            //    Rigidbody rb = lastJoint.GetComponent<Rigidbody>();
+            //    rbs.Add(rb);
+            //    if (cachedJoint != null && lastJoint != null)
+            //    {
+            //        cachedJoint.connectedBody = lastJoint.GetComponent<Rigidbody>();
+            //    }
+            //    lastJoint.GetComponent<Rigidbody>().detectCollisions = true;
+            //}
+            //Destroy(lastJoint);
+        }
+
+        private IEnumerator Start()
+        {
+            yield return new WaitForSeconds(.1f);
+
+            for (int i = 0; i < rbs.Count; i++)
             {
-                lastJoint.connectedBody = firstJoint.GetComponent<Rigidbody>();
-            }
-            else
-            {
-                Destroy(lastJoint);
+                rbs[i].isKinematic = false;
             }
         }
 
-        //Joint lastJoint = null;
-        //for (int i = 0; i < m_Elements; i++)
-        //{
-        //    Joint cachedJoint = lastJoint;
-        //    lastJoint = Instantiate(m_Prefab, transform.position + transform.forward * i * m_Spacing, transform.rotation).GetComponent<Joint>();
-        //    Rigidbody rb = lastJoint.GetComponent<Rigidbody>();
-        //    rbs.Add(rb);
-        //    if (cachedJoint != null && lastJoint != null)
-        //    {
-        //        cachedJoint.connectedBody = lastJoint.GetComponent<Rigidbody>();
-        //    }
-        //    lastJoint.GetComponent<Rigidbody>().detectCollisions = true;
-        //}
-        //Destroy(lastJoint);
-    }
-
-    private IEnumerator Start()
-    {
-        yield return new WaitForSeconds(.1f);
-
-        for (int i = 0; i < rbs.Count; i++)
+        private void Update()
         {
-            rbs[i].isKinematic = false;
         }
-    }
-
-    private void Update()
-    {
     }
 }

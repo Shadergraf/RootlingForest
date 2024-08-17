@@ -6,9 +6,8 @@ using System.Collections.Specialized;
 using UnityEngine;
 using UnityEngine.Serialization;
 
-namespace Manatea.AdventureRoots
+namespace Manatea.RootlingForest
 {
-
     [RequireComponent(typeof(Rigidbody))]
     public class CharacterMovement : MonoBehaviour
     {
