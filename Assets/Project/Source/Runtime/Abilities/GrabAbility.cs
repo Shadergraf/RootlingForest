@@ -8,7 +8,7 @@ using UnityEngine.Serialization;
 
 // TODO cleanup this file
 
-public class PullAbility : MonoBehaviour
+public class GrabAbility : MonoBehaviour
 {
     public Rigidbody Self;
     public bool m_UseTargetPosition;

@@ -80,7 +80,7 @@ public class ContactBounce : MonoBehaviour
             StartCoroutine(CO_ApplyVelocityRepeated(rb, targetVelocity, m_Iterations));
             StartCoroutine(CO_TimedBlock(rb, 0.1f));
 
-            if (rb.TryGetComponent(out PullAbility pullAbility) && pullAbility.Target)
+            if (rb.TryGetComponent(out GrabAbility pullAbility) && pullAbility.Target)
             {
                 StartCoroutine(CO_ApplyVelocityRepeated(pullAbility.Target, targetVelocity, m_Iterations));
                 StartCoroutine(CO_TimedBlock(pullAbility.Target, 0.1f));

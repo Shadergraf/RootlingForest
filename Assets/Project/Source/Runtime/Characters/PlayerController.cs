@@ -9,8 +9,9 @@ namespace Manatea
     {
         public JumpMovementAbility m_JumpAbility;
         public float DashForce;
-        public PullAbility PullAbility;
+        public GrabAbility PullAbility;
         public CapsuleCollider TriggerCollider;
+        public ClimbAbility m_ClimbAbility;
 
         public InputActionAsset m_InputAsset;
         public int m_Player = -1;
@@ -34,6 +35,11 @@ namespace Manatea
         private InputAction m_JumpAction;
         private InputAction m_GrabAction;
         private InputAction m_ThrowAction;
+
+        private Vector2 m_LastInput;
+
+        private int m_Climbing_ReferenceFrame = 0;  // 1 or -1 depending on when we invert controls when on a wall
+
 
         private void Awake()
         {
@@ -121,13 +127,32 @@ namespace Manatea
 
         private void Update()
         {
-
-            Vector3 inputVector = Vector3.zero;
-
-            inputVector = m_MovementAction.ReadValue<Vector2>().XZtoXYZ();
+            Vector2 rawInput = m_MovementAction.ReadValue<Vector2>();
+            Vector3 inputVector = rawInput.XZtoXYZ();
 
             CharacterMovement.Move((inputVector + m_DebugMoveInput).ClampMagnitude(0, 1));
 
+            if (m_ClimbAbility && m_ClimbAbility.isActiveAndEnabled)
+            {
+                Vector3 wallNormal = m_ClimbAbility.CurrentWallNormal;
+                Vector3 verticalAxis = Vector3.up;
+                Vector3 horizontalAxis = Vector3.Cross(wallNormal, verticalAxis);
+                if (rawInput.x == 0)
+                {
+                    m_Climbing_ReferenceFrame = 0;
+                }
+                if ((rawInput.x == 0 && m_Climbing_ReferenceFrame == 0) || MMath.SignAsInt(m_LastInput.x) != MMath.SignAsInt(rawInput.x))
+                {
+                    m_Climbing_ReferenceFrame = MMath.SignAsInt(Vector3.Dot(horizontalAxis, Vector3.right));
+                }
+                //if (Vector3.Dot(horizontalAxis, inputVector) < 0)
+                //{
+                //    m_Climbing_ReferenceFrame = 1;
+                //}
+                horizontalAxis *= m_Climbing_ReferenceFrame;
+                Vector3 move = rawInput.x * horizontalAxis + rawInput.y * verticalAxis;
+                m_ClimbAbility.Move(move);
+            }
 
             // TODO test if single button grab/throw input feels good
             //if (m_ThrowAction.WasPressedThisFrame())
@@ -137,6 +162,20 @@ namespace Manatea
             //        PullAbility.Throw();
             //    }
             //}
+
+            if (m_ClimbAbility && Mouse.current != null && Mouse.current.rightButton.wasPressedThisFrame)
+            {
+                if (!m_ClimbAbility.enabled)
+                {
+                    m_ClimbAbility.enabled = true;
+                }
+                else
+                {
+                    m_ClimbAbility.enabled = false;
+                }
+            }
+
+            m_LastInput = rawInput;
         }
 
 

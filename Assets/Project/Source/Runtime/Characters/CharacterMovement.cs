@@ -605,8 +605,6 @@ namespace Manatea.AdventureRoots
 
             return true;
         }
-
-
     }
 
 
