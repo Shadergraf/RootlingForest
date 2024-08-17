@@ -1,4 +1,3 @@
-using Manatea;
 using UnityEditor;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -31,7 +30,7 @@ public class KuwaharaRenderPass : ScriptableRenderPass
         CoreUtils.SetKeyword(m_KuwaharaMaterial, k_KeywordDirectional, kuwaharaSettings.Directional);
         m_KuwaharaMaterial.SetInt("_Radius", kuwaharaSettings.Radius);
         m_KuwaharaMaterial.SetFloat("_Spread", kuwaharaSettings.Spread / 500);
-        m_KuwaharaMaterial.SetFloat("_SampleRotation", kuwaharaSettings.SampleRotation * MMath.Deg2Rad);
+        m_KuwaharaMaterial.SetFloat("_SampleRotation", kuwaharaSettings.SampleRotation * Mathf.Deg2Rad);
         m_Downscale = kuwaharaSettings.Downscale;
 
         m_KuwaharaMaterial.SetFloat("_Blend", compositeSettings.Blend);
@@ -53,8 +52,8 @@ public class KuwaharaRenderPass : ScriptableRenderPass
 
         RenderTextureDescriptor kuwaharaDesc = renderingData.cameraData.cameraTargetDescriptor;
         kuwaharaDesc.depthBufferBits = 0;
-        kuwaharaDesc.width = MMath.RoundToInt(kuwaharaDesc.width / MMath.Pow(2, m_Downscale));
-        kuwaharaDesc.height = MMath.RoundToInt(kuwaharaDesc.height / MMath.Pow(2, m_Downscale));
+        kuwaharaDesc.width = Mathf.RoundToInt(kuwaharaDesc.width / Mathf.Pow(2, m_Downscale));
+        kuwaharaDesc.height = Mathf.RoundToInt(kuwaharaDesc.height / Mathf.Pow(2, m_Downscale));
         RenderingUtils.ReAllocateIfNeeded(ref m_KuwaharaRT, kuwaharaDesc, FilterMode.Bilinear, TextureWrapMode.Clamp, name: "_KuwaharaDirectionalTexture");
 
         RenderTextureDescriptor blurDesc = renderingData.cameraData.cameraTargetDescriptor;
