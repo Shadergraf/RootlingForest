@@ -2,8 +2,8 @@ using System;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
-using UnityEngine.Rendering.Universal.Internal;
 
+//TODO add shader via buildsystem
 public class KuwaharaRenderFeature : ScriptableRendererFeature
 {
     public BlurSettings m_PreBlurSettings;

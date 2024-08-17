@@ -1,11 +1,5 @@
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using Manatea;
-using UnityEngine.Events;
-using UnityEditor.PackageManager.UI;
-using UnityEngine.Profiling;
-using Manatea.GameplaySystem;
 
 namespace Manatea.RootlingForest
 {
