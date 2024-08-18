@@ -11,64 +11,136 @@ namespace Manatea.RootlingForest
     // TODO cleanup this file
     public class GrabAbility : MonoBehaviour
     {
-        public Rigidbody Self;
+        [FormerlySerializedAs("Self")]
+        [SerializeField]
+        public Rigidbody m_Self;
+        [SerializeField]
         public bool m_UseTargetPosition;
+        [SerializeField]
         public bool m_UseDrivers;
-        public float StartSpring = 10;
-        public float EndSpring = 500;
-        public float StartDamper = 50;
-        public float EndDamper = 2;
-        public float SnapPositionThreshold = 0.15f;
-        public float SnapRotationThreshold = 10f;
-        public float StartDriveSpring = 10;
-        public float EndDriveSpring = 500;
-        public float StartDriveDamper = 50;
-        public float EndDriveDamper = 2;
-        public float DamperSpeed = 2;
-        public Transform HandTransform;
-        public Vector3 TargetPosition = new Vector3(0, 0, 0);
-        public bool AutoTargetPosition;
-        public float ThrowForce = 5;
-        public float ThrowRotation = 5;
-        public Vector3 ThrowDir = new Vector3(0, 1, 1);
-        public float BreakForce = 10;
-        public float BreakTorque = 10;
-        public float LinearLimit = 0;
-        public bool EnableCollision = true;
-        public Vector3 rotationAngle;
-        public float DriverSpring = 1000;
-        public float DriverDamper = 10;
+        [FormerlySerializedAs("StartSpring")]
+        [SerializeField]
+        public float m_StartSpring = 10;
+        [FormerlySerializedAs("EndSpring")]
+        [SerializeField]
+        public float m_EndSpring = 500;
+        [FormerlySerializedAs("StartDamper")]
+        [SerializeField]
+        public float m_StartDamper = 50;
+        [FormerlySerializedAs("EndDamper")]
+        [SerializeField]
+        public float m_EndDamper = 2;
+        [FormerlySerializedAs("SnapPositionThreshold")]
+        [SerializeField]
+        public float m_SnapPositionThreshold = 0.15f;
+        [FormerlySerializedAs("SnapRotationThreshold")]
+        [SerializeField]
+        public float m_SnapRotationThreshold = 10f;
+        [FormerlySerializedAs("StartDriveSpring")]
+        [SerializeField]
+        public float m_StartDriveSpring = 10;
+        [FormerlySerializedAs("EndDriveSpring")]
+        [SerializeField]
+        public float m_EndDriveSpring = 500;
+        [FormerlySerializedAs("StartDriveDamper")]
+        [SerializeField]
+        public float m_StartDriveDamper = 50;
+        [FormerlySerializedAs("EndDriveDamper")]
+        [SerializeField]
+        public float m_EndDriveDamper = 2;
+        [FormerlySerializedAs("DamperSpeed")]
+        [SerializeField]
+        public float m_DamperSpeed = 2;
+        [FormerlySerializedAs("HandTransform")]
+        [SerializeField]
+        public Transform m_HandTransform;
+        [FormerlySerializedAs("TargetPosition")]
+        [SerializeField]
+        public Vector3 m_TargetPosition = new Vector3(0, 0, 0);
+        [FormerlySerializedAs("AutoTargetPosition")]
+        [SerializeField]
+        public bool m_AutoTargetPosition;
+        [FormerlySerializedAs("ThrowForce")]
+        [SerializeField]
+        public float m_ThrowForce = 5;
+        [FormerlySerializedAs("ThrowRotation")]
+        [SerializeField]
+        public float m_ThrowRotation = 5;
+        [FormerlySerializedAs("ThrowDir")]
+        [SerializeField]
+        public Vector3 m_ThrowDir = new Vector3(0, 1, 1);
+        [FormerlySerializedAs("BreakForce")]
+        [SerializeField]
+        public float m_BreakForce = 10;
+        [FormerlySerializedAs("BreakTorque")]
+        [SerializeField]
+        public float m_BreakTorque = 10;
+        [FormerlySerializedAs("LinearLimit")]
+        [SerializeField]
+        public float m_LinearLimit = 0;
+        [FormerlySerializedAs("EnableCollision")]
+        [SerializeField]
+        public bool m_EnableCollision = true;
+        [FormerlySerializedAs("rotationAngle")]
+        [SerializeField]
+        public Vector3 m_RotationAngle;
+        [FormerlySerializedAs("DriverSpring")]
+        [SerializeField]
+        public float m_DriverSpring = 1000;
+        [FormerlySerializedAs("DriverDamper")]
+        [SerializeField]
+        public float m_DriverDamper = 10;
 
         [FormerlySerializedAs("MinMovementForce")]
-        public float OverburdenedThresholdMin = 10;
+        [FormerlySerializedAs("OverburdenedThresholdMin")]
+        [SerializeField]
+        public float m_OverburdenedThresholdMin = 10;
         [FormerlySerializedAs("MaxMovementForce")]
-        public float OverburdenedThresholdMax = 20;
-        public float OverburdenedMovementMult = 0.5f;
-        public float OverburdenedRotationMult = 0.5f;
+        [FormerlySerializedAs("OverburdenedThresholdMax")]
+        [SerializeField]
+        public float m_OverburdenedThresholdMax = 20;
+        [FormerlySerializedAs("OverburdenedMovementMult")]
+        [SerializeField]
+        public float m_OverburdenedMovementMult = 0.5f;
+        [FormerlySerializedAs("OverburdenedRotationMult")]
+        [SerializeField]
+        public float m_OverburdenedRotationMult = 0.5f;
 
+        [SerializeField]
         public LayerMask m_RaisingExcludeLayers;
+        [SerializeField]
         public LayerMask m_HandExcludeLayers;
 
-        public float GrabTime = 0.25f;
-        public float GrabTimeLeeway = 0.2f;
+        [FormerlySerializedAs("GrabTime")]
+        [SerializeField]
+        public float m_GrabTime = 0.25f;
+        [FormerlySerializedAs("GrabTimeLeeway")]
+        [SerializeField]
+        public float m_GrabTimeLeeway = 0.2f;
 
+        [SerializeField]
         public Collider m_HandBlocker;
 
+        [SerializeField]
         public GameplayAttribute m_WalkSpeedAttribute;
+        [SerializeField]
         public GameplayAttribute m_RotationRateAttribute;
+        [SerializeField]
         public GameplayAttribute m_ForceDetectionMultiplierAttribute;
+        [SerializeField]
         public float m_ForceDetectionMultiplier = 0.3f;
 
+        [SerializeField]
         public UnityEvent m_GrabStarted;
+        [SerializeField]
         public UnityEvent m_GrabEnded;
 
-        public GrabState CurrentGrabState => m_GrabState;
-
+        [SerializeField]
         public bool m_DisableHandVerticalState;
+        [SerializeField]
         public bool m_DisableHandRaise;
 
-
-        private Rigidbody m_Target;
+        public GrabState CurrentGrabState => m_GrabState;
         public Rigidbody Target
         {
             get => m_Target;
@@ -82,6 +154,9 @@ namespace Manatea.RootlingForest
                 m_Target = value;
             }
         }
+
+
+        private Rigidbody m_Target;
 
 
         private GrabState m_GrabState;
@@ -124,7 +199,7 @@ namespace Manatea.RootlingForest
                 enabled = false;
                 return;
             }
-            if (Target == Self || Target.transform.IsChildOf(Self.transform))
+            if (Target == m_Self || Target.transform.IsChildOf(m_Self.transform))
             {
                 enabled = false;
                 return;
@@ -147,8 +222,8 @@ namespace Manatea.RootlingForest
                 GrabOrientation bestOrientationMatch = null;
                 for (int i = 0; i < m_Target_GrabPrefs.Orientations.Length; i++)
                 {
-                    float match = -Quaternion.Angle(HandTransform.rotation, m_Target_GrabPrefs.Orientations[i].transform.rotation);
-                    match -= Vector3.Distance(HandTransform.position, m_Target_GrabPrefs.Orientations[i].transform.position) * 44;
+                    float match = -Quaternion.Angle(m_HandTransform.rotation, m_Target_GrabPrefs.Orientations[i].transform.rotation);
+                    match -= Vector3.Distance(m_HandTransform.position, m_Target_GrabPrefs.Orientations[i].transform.position) * 44;
                     match /= MMath.Max(MMath.Epsilon, m_Target_GrabPrefs.Orientations[i].Weight);
                     if (match < bestMatch)
                     {
@@ -161,7 +236,6 @@ namespace Manatea.RootlingForest
                 if (bestOrientationMatch != null)
                 {
                     targetLocalPosition = Target.transform.InverseTransformPoint(bestOrientationMatch.transform.position);
-                    Debug.Log(targetLocalPosition);
                     startRotation = transform.rotation;
                     Quaternion deltaQuat = startRotation * Quaternion.Inverse(bestOrientationMatch.transform.rotation);
                     targetRotation = deltaQuat * Target.rotation;
@@ -170,34 +244,21 @@ namespace Manatea.RootlingForest
 
 
 
-            m_Joint = Self.gameObject.AddComponent<ConfigurableJoint>();
+            m_Joint = m_Self.gameObject.AddComponent<ConfigurableJoint>();
             m_Joint.connectedBody = Target;
             m_Joint.autoConfigureConnectedAnchor = false;
             //m_Joint.enableCollision = EnableCollision;
-            m_Joint.breakForce = BreakForce;
-            m_Joint.breakTorque = BreakTorque;
+            m_Joint.breakForce = m_BreakForce;
+            m_Joint.breakTorque = m_BreakTorque;
 
-            m_Joint.anchor = transform.InverseTransformPoint(HandTransform.position);
-            if (AutoTargetPosition)
+            m_Joint.anchor = transform.InverseTransformPoint(m_HandTransform.position);
+            if (m_AutoTargetPosition)
             {
                 // TODO ClosestPointOnBounds uses the bounding box instead of the actual collider. This is imprecise
-                // TODO remove this
-                if (Target.TryGetComponent(out PullSettings pullSettings))
-                {
-                    switch (pullSettings.PullLocation)
-                    {
-                        case PullLocation.Center:
-                            m_Joint.connectedAnchor = Vector3.zero;
-                            break;
-                        case PullLocation.Bounds:
-                            m_Joint.connectedAnchor = Target.transform.InverseTransformPoint(Target.ClosestPointOnBounds(HandTransform.position));
-                            break;
-                    }
-                }
             }
             else
             {
-                m_Joint.connectedAnchor = TargetPosition;
+                m_Joint.connectedAnchor = m_TargetPosition;
             }
 
 
@@ -261,8 +322,8 @@ namespace Manatea.RootlingForest
 
             if (!m_UseDrivers)
             {
-                m_Joint.linearLimit = new SoftJointLimit() { limit = LinearLimit, contactDistance = 0.1f };
-                m_Joint.linearLimitSpring = new SoftJointLimitSpring() { spring = StartSpring, damper = StartDamper };
+                m_Joint.linearLimit = new SoftJointLimit() { limit = m_LinearLimit, contactDistance = 0.1f };
+                m_Joint.linearLimitSpring = new SoftJointLimitSpring() { spring = m_StartSpring, damper = m_StartDamper };
             }
             else
             {
@@ -270,8 +331,8 @@ namespace Manatea.RootlingForest
 
                 m_Joint.xDrive = new JointDrive()
                 {
-                    positionSpring = StartSpring,
-                    positionDamper = StartDamper,
+                    positionSpring = m_StartSpring,
+                    positionDamper = m_StartDamper,
                     useAcceleration = true,
                     maximumForce = float.MaxValue,
                 };
@@ -280,8 +341,8 @@ namespace Manatea.RootlingForest
             }
 
             var drive = m_Joint.slerpDrive;
-            drive.positionSpring = DriverSpring;
-            drive.positionDamper = DriverDamper;
+            drive.positionSpring = m_DriverSpring;
+            drive.positionDamper = m_DriverDamper;
             m_Joint.slerpDrive = drive;
 
 
@@ -323,7 +384,7 @@ namespace Manatea.RootlingForest
             Vector3 handPosWorld = m_Joint.transform.TransformPoint(m_Joint.anchor);
             if (m_Target_GrabPrefs.UpdateGrabLocation)
             {
-                handPosWorld += Self.velocity * 0.01f;
+                handPosWorld += m_Self.velocity * 0.01f;
             }
             Vector3 targetHandPos = Target.transform.InverseTransformPoint(Target.ClosestPointOnBounds(handPosWorld));
             switch (m_Target_GrabPrefs.LocationRule)
@@ -451,8 +512,8 @@ namespace Manatea.RootlingForest
             if (!m_UseDrivers)
             {
                 SoftJointLimitSpring linearLimitSpring = m_Joint.linearLimitSpring;
-                linearLimitSpring.spring = MMath.LerpClamped(StartSpring, EndSpring, MMath.Pow(m_GrabTimer / GrabTime, 2));
-                linearLimitSpring.damper = MMath.LerpClamped(StartDamper, EndDamper, MMath.Pow(m_GrabTimer / GrabTime, 2));
+                linearLimitSpring.spring = MMath.LerpClamped(m_StartSpring, m_EndSpring, MMath.Pow(m_GrabTimer / m_GrabTime, 2));
+                linearLimitSpring.damper = MMath.LerpClamped(m_StartDamper, m_EndDamper, MMath.Pow(m_GrabTimer / m_GrabTime, 2));
                 m_Joint.linearLimitSpring = linearLimitSpring;
             }
             else
@@ -461,8 +522,8 @@ namespace Manatea.RootlingForest
 
                 m_Joint.xDrive = new JointDrive()
                 {
-                    positionSpring = MMath.LerpClamped(StartSpring, EndSpring, MMath.Pow(m_GrabTimer / GrabTime, 2)),
-                    positionDamper = MMath.LerpClamped(StartDamper, EndDamper, MMath.Pow(m_GrabTimer / GrabTime, 2)),
+                    positionSpring = MMath.LerpClamped(m_StartSpring, m_EndSpring, MMath.Pow(m_GrabTimer / m_GrabTime, 2)),
+                    positionDamper = MMath.LerpClamped(m_StartDamper, m_EndDamper, MMath.Pow(m_GrabTimer / m_GrabTime, 2)),
                     useAcceleration = true,
                     maximumForce = float.MaxValue,
                 };
@@ -472,7 +533,7 @@ namespace Manatea.RootlingForest
 
 
             // stop grab attempt if too much time passed
-            if (m_GrabTimer > GrabTime + GrabTimeLeeway)
+            if (m_GrabTimer > m_GrabTime + m_GrabTimeLeeway)
             {
                 enabled = false;
                 return;
@@ -492,8 +553,8 @@ namespace Manatea.RootlingForest
 
             // check if target is in correct anchor position and orientation
             Vector3 posDelta = m_Joint.transform.TransformPoint(m_Joint.anchor) - m_Joint.connectedBody.transform.TransformPoint(m_Joint.connectedAnchor);
-            bool anchorsOverlap = posDelta.magnitude < SnapPositionThreshold;
-            bool driveRotationMatches = !m_Target_GrabPrefs.UseOrientations || Quaternion.Angle(transform.rotation, Target.transform.rotation * Quaternion.Inverse(targetRotation) * startRotation) < SnapRotationThreshold;
+            bool anchorsOverlap = posDelta.magnitude < m_SnapPositionThreshold;
+            bool driveRotationMatches = !m_Target_GrabPrefs.UseOrientations || Quaternion.Angle(transform.rotation, Target.transform.rotation * Quaternion.Inverse(targetRotation) * startRotation) < m_SnapRotationThreshold;
             if (anchorsOverlap && driveRotationMatches)
             {
                 // line up grabbed object with it's target position and rotation
@@ -509,7 +570,7 @@ namespace Manatea.RootlingForest
                 // TODO only weld bodies this way if the target rotation has been reached!
                 // TODO suuuper hacky but allows us to lock the rotation and have the current orientation persist
                 // We want to fuse the hands and the object (by locking the joint instead of limiting it) to have them simulated more robustly
-                Component copiedJoint = m_Joint.CopyComponent(Self.gameObject);
+                Component copiedJoint = m_Joint.CopyComponent(m_Self.gameObject);
                 Destroy(m_Joint);
                 m_Joint = copiedJoint as ConfigurableJoint;
 
@@ -576,7 +637,7 @@ namespace Manatea.RootlingForest
             m_RaiseAmount = MMath.Clamp(m_RaiseAmount, 0, 0.4f);
 
 
-            Vector3 handRestPos = transform.InverseTransformPoint(HandTransform.position);
+            Vector3 handRestPos = transform.InverseTransformPoint(m_HandTransform.position);
             Vector3 targetAnchor = m_Joint.anchor;
             targetAnchor += m_SmoothPullingForce * 20.0f;
 
@@ -693,15 +754,15 @@ namespace Manatea.RootlingForest
             float rotMult = 1;
 
             // Heavy load
-            m_HeavyLoad = MMath.InverseLerpClamped(OverburdenedThresholdMin, OverburdenedThresholdMax, m_SmoothPullingForce.magnitude);
-            moveMult = MMath.Lerp(moveMult, OverburdenedMovementMult, m_HeavyLoad);
-            rotMult = MMath.Lerp(rotMult, OverburdenedRotationMult, m_HeavyLoad);
+            m_HeavyLoad = MMath.InverseLerpClamped(m_OverburdenedThresholdMin, m_OverburdenedThresholdMax, m_SmoothPullingForce.magnitude);
+            moveMult = MMath.Lerp(moveMult, m_OverburdenedMovementMult, m_HeavyLoad);
+            rotMult = MMath.Lerp(rotMult, m_OverburdenedRotationMult, m_HeavyLoad);
 
             // Pulling load
             float totalPullingForce = MMath.InverseLerpClamped(30, 70, m_SmoothPullingForce.magnitude);
             float linearPullingForce = MMath.Pow(MMath.InverseLerpClamped(0.9f, 1, Vector3.Dot(forwardDir, m_SmoothPullingForce)), 2) * 0 + 1;
             m_PullingLoad = totalPullingForce * linearPullingForce;
-            moveMult = MMath.Lerp(moveMult, MMath.RemapClamped(0.5f, 0, 1, 1.5f, Self.velocity.magnitude), m_PullingLoad);
+            moveMult = MMath.Lerp(moveMult, MMath.RemapClamped(0.5f, 0, 1, 1.5f, m_Self.velocity.magnitude), m_PullingLoad);
             rotMult = MMath.Lerp(rotMult, 0, m_PullingLoad);
 
             // TODO rotMult for pulling load is wrong!
@@ -726,8 +787,8 @@ namespace Manatea.RootlingForest
         {
             Debug.Assert(enabled, "Ability is not active!", gameObject);
 
-            float throwForce = ThrowForce / MMath.Max(Target.mass, 1);
-            float throwRotation = ThrowRotation;
+            float throwForce = m_ThrowForce / MMath.Max(Target.mass, 1);
+            float throwRotation = m_ThrowRotation;
             if (m_Target_GrabPrefs.UseCustomThrow)
             {
                 throwRotation = m_Target_GrabPrefs.ThrowRotation;
@@ -738,7 +799,7 @@ namespace Manatea.RootlingForest
                 throwForce *= 0.2f;
             }
 
-            ThrowInternal(ThrowDir * throwForce, throwRotation);
+            ThrowInternal(m_ThrowDir * throwForce, throwRotation);
 
             enabled = false;
         }

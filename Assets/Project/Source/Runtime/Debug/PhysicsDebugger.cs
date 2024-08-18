@@ -33,7 +33,6 @@ namespace Manatea.RootlingForest
                         m_GrabObject = currentTestObj.GetComponentInParent<Rigidbody>();
                         if (m_GrabObject != null && !m_GrabObject.isKinematic)
                         {
-                            Debug.Log("Grabbing: " + m_GrabObject.name, m_GrabObject);
                             m_GrabPosLocal = m_GrabObject.transform.InverseTransformPoint(hit.point);
                             m_InitialGrabPosGlobal = hit.point;
                             m_CurrentGrabPosGlobal = m_InitialGrabPosGlobal;

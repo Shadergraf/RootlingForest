@@ -87,8 +87,6 @@ MonoBehaviour:
   m_GroundRotationForce: 8
   m_AirRotationForce: 0.5
   m_PushForce: 1
-  m_JumpForce: 9
-  m_JumpMoveAlignment: 0.75
   m_Collider: {fileID: 0}
   m_GroundDetectionDistance: 0.15
   m_MaxSlopeAngle: 46
@@ -140,7 +138,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fcc896d7e52cbaa4b8cdad7eab44f57c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_CollisionEnabled: 0
+  m_CollisionEnabled: 1
   m_LocationRule: 1
   m_RotationRule: 0
   m_RotationLimit: 0

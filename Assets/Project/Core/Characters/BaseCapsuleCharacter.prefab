@@ -436,11 +436,6 @@ PrefabInstance:
       propertyPath: m_RotationRule
       value: 2
       objectReference: {fileID: 0}
-    - target: {fileID: 30843199278676019, guid: bf0177a3809de3d49ac5dcdb1afa9084,
-        type: 3}
-      propertyPath: m_CollisionEnabled
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 2459274439249617929, guid: bf0177a3809de3d49ac5dcdb1afa9084,
         type: 3}
       propertyPath: m_LocalPosition.x

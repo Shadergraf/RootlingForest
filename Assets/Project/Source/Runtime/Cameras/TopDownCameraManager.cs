@@ -1,14 +1,19 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Manatea.RootlingForest
 {
     [ExecuteInEditMode]
     public class TopDownCameraManager : MonoBehaviour
     {
-        public GameObject Target;
-        public float Speed = 1;
+        [FormerlySerializedAs("Target")]
+        [SerializeField]
+        public GameObject m_Target;
+        [FormerlySerializedAs("Speed")]
+        [SerializeField]
+        public float m_Speed = 1;
 
         private Vector3 m_LastTarget;
 
@@ -17,21 +22,21 @@ namespace Manatea.RootlingForest
         {
             m_LastTarget = transform.position;
 
-            if (Target)
+            if (m_Target)
             {
-                m_LastTarget = Target.transform.position;
+                m_LastTarget = m_Target.transform.position;
             }
             transform.position = m_LastTarget;
         }
 
         private void Update()
         {
-            if (Target)
-                m_LastTarget = Target.transform.position;
+            if (m_Target)
+                m_LastTarget = m_Target.transform.position;
 
-            if (Speed > 0)
+            if (m_Speed > 0)
             {
-                transform.position = MMath.Damp(transform.position, m_LastTarget, Speed, Time.deltaTime);
+                transform.position = MMath.Damp(transform.position, m_LastTarget, m_Speed, Time.deltaTime);
             }
             else
             {
