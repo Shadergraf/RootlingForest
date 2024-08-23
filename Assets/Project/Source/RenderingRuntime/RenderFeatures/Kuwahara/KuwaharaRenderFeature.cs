@@ -2,7 +2,6 @@ using System;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
-using Manatea.BuildPipeline;
 
 //TODO add shader via buildsystem
 public class KuwaharaRenderFeature : ScriptableRendererFeature

@@ -104,13 +104,13 @@ Shader "Hidden/Kuwahara/Kuwahara"
         return output;
     }
     
-    float3 SampleMain(float2 uv)
+    float4 SampleMain(float2 uv)
     {
-        return SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, uv).rgb;
+        return SAMPLE_TEXTURE2D(_MainTex, sampler_MainTex, uv);
     }
-    float3 SampleEffect(float2 uv)
+    float4 SampleEffect(float2 uv)
     {
-        return SAMPLE_TEXTURE2D(_EffectTex, sampler_EffectTex, uv).rgb;
+        return SAMPLE_TEXTURE2D(_EffectTex, sampler_EffectTex, uv);
     }
     float SampleMask(float2 uv)
     {

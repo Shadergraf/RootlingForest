@@ -350,6 +350,37 @@ MonoBehaviour:
         m_PreInfinity: 2
         m_PostInfinity: 2
         m_RotationOrder: 4
+--- !u!114 &-1845152141907346571
+MonoBehaviour:
+  m_ObjectHideFlags: 3
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5d028ff0c5d631640bf1c27577442258, type: 3}
+  m_Name: KuwaharaComponent
+  m_EditorClassIdentifier: 
+  active: 1
+  focusDistance:
+    m_OverrideState: 1
+    m_Value: 10
+  focusStart:
+    m_OverrideState: 1
+    m_Value: 2
+  focusEnd:
+    m_OverrideState: 1
+    m_Value: 5
+  vignetteIntensity:
+    m_OverrideState: 1
+    m_Value: 0
+  vignetteSmoothness:
+    m_OverrideState: 1
+    m_Value: 0.2
+  vignetteRounded:
+    m_OverrideState: 1
+    m_Value: 0
 --- !u!114 &-168207288196035743
 MonoBehaviour:
   m_ObjectHideFlags: 3
@@ -444,6 +475,7 @@ MonoBehaviour:
   - {fileID: -168207288196035743}
   - {fileID: -1909948792790023093}
   - {fileID: 120538904873199281}
+  - {fileID: -1845152141907346571}
 --- !u!114 &18808884076286222
 MonoBehaviour:
   m_ObjectHideFlags: 3
