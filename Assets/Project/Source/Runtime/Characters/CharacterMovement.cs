@@ -553,8 +553,6 @@ namespace Manatea.RootlingForest
                 // Discard self collisions
                 if (m_Sim.GroundHits[i].collider.transform == Rigidbody.transform)
                     continue;
-                //if (m_Sim.GroundHits[i].rigidbody && (!m_Sim.GroundHits[i].rigidbody.isKinematic || m_Sim.GroundHits[i].rigidbody.mass < 1))    // TODO dont hardcode mass here
-                //    continue;
                 if (m_Sim.GroundHits[i].collider.transform.IsChildOf(Rigidbody.transform))
                     continue;
 

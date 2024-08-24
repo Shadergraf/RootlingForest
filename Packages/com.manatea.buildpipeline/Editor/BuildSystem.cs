@@ -339,8 +339,6 @@ namespace Manatea.BuildPipeline
                 case BuildTarget.PS4:
                 case BuildTarget.XboxOne:
                 case BuildTarget.tvOS:
-                case BuildTarget.Lumin:
-                case BuildTarget.Stadia:
                 case BuildTarget.LinuxHeadlessSimulation:
                 case BuildTarget.GameCoreXboxSeries:
                 case BuildTarget.GameCoreXboxOne:
@@ -375,10 +373,6 @@ namespace Manatea.BuildPipeline
                     return BuildTargetGroup.tvOS;
                 case BuildTarget.Switch:
                     return BuildTargetGroup.Switch;
-                case BuildTarget.Lumin:
-                    return BuildTargetGroup.Lumin;
-                case BuildTarget.Stadia:
-                    return BuildTargetGroup.Stadia;
                 case BuildTarget.LinuxHeadlessSimulation:
                     return BuildTargetGroup.LinuxHeadlessSimulation;
                 case BuildTarget.GameCoreXboxSeries:
@@ -420,10 +414,6 @@ namespace Manatea.BuildPipeline
                     throw new NotImplementedException();
                 case BuildTarget.Switch:
                     return "nss";
-                case BuildTarget.Lumin:
-                    throw new NotImplementedException();
-                case BuildTarget.Stadia:
-                    throw new NotImplementedException();
                 case BuildTarget.LinuxHeadlessSimulation:
                     throw new NotImplementedException();
                 case BuildTarget.GameCoreXboxSeries:

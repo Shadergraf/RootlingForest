@@ -824,6 +824,16 @@ PrefabInstance:
       propertyPath: m_Name
       value: ExitGame
       objectReference: {fileID: 0}
+    - target: {fileID: 8273910343251474394, guid: cab4ebca2409edb4e875d7dc1f5487cd,
+        type: 3}
+      propertyPath: m_StringReference.m_TableEntryReference.m_KeyId
+      value: 17047547904
+      objectReference: {fileID: 0}
+    - target: {fileID: 8273910343251474394, guid: cab4ebca2409edb4e875d7dc1f5487cd,
+        type: 3}
+      propertyPath: m_StringReference.m_TableReference.m_TableCollectionName
+      value: GUID:646bd52bcc3ac0042ba5e402210a0186
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -1122,6 +1132,16 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: StartGame
+      objectReference: {fileID: 0}
+    - target: {fileID: 8273910343251474394, guid: cab4ebca2409edb4e875d7dc1f5487cd,
+        type: 3}
+      propertyPath: m_StringReference.m_TableEntryReference.m_KeyId
+      value: 13541109760
+      objectReference: {fileID: 0}
+    - target: {fileID: 8273910343251474394, guid: cab4ebca2409edb4e875d7dc1f5487cd,
+        type: 3}
+      propertyPath: m_StringReference.m_TableReference.m_TableCollectionName
+      value: GUID:646bd52bcc3ac0042ba5e402210a0186
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

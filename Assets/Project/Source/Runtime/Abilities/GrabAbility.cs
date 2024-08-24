@@ -562,6 +562,7 @@ namespace Manatea.RootlingForest
                 m_Joint.connectedBody.position += posDelta;
                 if (m_Target_GrabPrefs.UseOrientations)
                 {
+                    // TODO this causes issues when both rigidbodies (target & source) are rotationally constraint
                     m_Joint.connectedBody.rotation = transform.rotation * Quaternion.Inverse(Quaternion.Inverse(targetRotation) * startRotation);
                 }
                 // publish transform to copy component can use the correct transforms for attachment
