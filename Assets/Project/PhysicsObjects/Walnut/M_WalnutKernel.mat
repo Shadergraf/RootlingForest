@@ -8,9 +8,8 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: M_WalnutKernel
-  m_Shader: {fileID: -6465566751694194690, guid: 785ee27c9e7a1804bb39eb1e2e1979f1,
-    type: 3}
-  m_Parent: {fileID: 2100000, guid: 37484f74a0d6d914a9266ff59cfbc0bb, type: 2}
+  m_Shader: {fileID: 4800000, guid: 09325bd7fe80ee148ad012ce86046e47, type: 3}
+  m_Parent: {fileID: 2100000, guid: b8b6a3e893ffb9845b6d00413418b827, type: 2}
   m_ModifiedSerializedProperties: 2
   m_ValidKeywords: []
   m_InvalidKeywords: []
@@ -25,6 +24,10 @@ Material:
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
+    - _BaseMap:
+        m_Texture: {fileID: 2800000, guid: 66cf8f56ab46763479b825e42b427e67, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _Base_Map:
         m_Texture: {fileID: 2800000, guid: 66cf8f56ab46763479b825e42b427e67, type: 3}
         m_Scale: {x: 1, y: 1}

@@ -21,12 +21,12 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: Glowshroom
-  m_Shader: {fileID: -6465566751694194690, guid: 785ee27c9e7a1804bb39eb1e2e1979f1,
-    type: 3}
-  m_Parent: {fileID: 2100000, guid: 37484f74a0d6d914a9266ff59cfbc0bb, type: 2}
+  m_Shader: {fileID: 4800000, guid: 09325bd7fe80ee148ad012ce86046e47, type: 3}
+  m_Parent: {fileID: 2100000, guid: b8b6a3e893ffb9845b6d00413418b827, type: 2}
   m_ModifiedSerializedProperties: 2
   m_ValidKeywords: []
-  m_InvalidKeywords: []
+  m_InvalidKeywords:
+  - _USEEMISSION_ON
   m_LightmapFlags: 2
   m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
@@ -38,6 +38,10 @@ Material:
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
+    - _BaseMap:
+        m_Texture: {fileID: 2800000, guid: e4fe5c8eb31666541b53690f37313ed1, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _Base_Map:
         m_Texture: {fileID: 2800000, guid: e4fe5c8eb31666541b53690f37313ed1, type: 3}
         m_Scale: {x: 1, y: 1}
@@ -46,10 +50,16 @@ Material:
         m_Texture: {fileID: 2800000, guid: e4fe5c8eb31666541b53690f37313ed1, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
+    - _EmissionMap:
+        m_Texture: {fileID: 2800000, guid: e4fe5c8eb31666541b53690f37313ed1, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
     - _QueueControl: 0
+    - _UseEmission: 1
     m_Colors:
+    - _EmissionColor: {r: 4, g: 4, b: 4, a: 1}
     - _Emission_Tint: {r: 4, g: 4, b: 4, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
