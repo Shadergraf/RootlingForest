@@ -185,7 +185,7 @@ Shader "Hidden/Kuwahara/Kuwahara"
                     offset = float2(offset.x * c - offset.y * s, offset.x * s + offset.y * c);  // rotate sample by angle
 
                     float2 uvpos = uv + offset * pixelSize * spread;
-                    col = SampleMain(uvpos);
+                    col = SampleMain(uvpos).rgb;
 
                     mean[i] += col;
                     sigma[i] += col * col;
@@ -198,20 +198,20 @@ Shader "Hidden/Kuwahara/Kuwahara"
 
         float min = 1;
         [unroll]
-        for (int i = 0; i < 4; i++)
+        for (int j = 0; j < 4; j++)
         {
-            mean[i] /= n;
-            sigma[i] = abs(sigma[i] / n - mean[i] * mean[i]);
-            sigma_f = sigma[i].r + sigma[i].g + sigma[i].b;
+            mean[j] /= n;
+            sigma[j] = abs(sigma[j] / n - mean[j] * mean[j]);
+            sigma_f = sigma[j].r + sigma[j].g + sigma[j].b;
 
             if (sigma_f < min)
             {
                 min = sigma_f;
-                col = mean[i];
+                col = mean[j];
             }
         }
 
-        return lerp(SampleMain(uv), col, _Blend);
+        return lerp(SampleMain(uv).rgb, col, _Blend);
     }
     
     float gaussian(int x, float spread)
@@ -235,7 +235,7 @@ Shader "Hidden/Kuwahara/Kuwahara"
 		{
 			float gauss = gaussian(x, 2);
 			gridSum += gauss;
-			col += gauss * SampleMain(uv + pixelSize * dir * x * spread).xyz;
+			col += gauss * SampleMain(uv + pixelSize * dir * x * spread).rgb;
 		}
 		col /= gridSum;
 

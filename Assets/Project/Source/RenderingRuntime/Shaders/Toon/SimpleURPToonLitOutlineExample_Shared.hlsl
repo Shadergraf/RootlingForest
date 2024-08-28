@@ -363,6 +363,7 @@ half3 ShadeAllLights(ToonSurfaceData surfaceData, ToonLightingData lightingData)
     // Returns the amount of lights affecting the object being renderer.
     // These lights are culled per-object in the forward renderer of URP.
     int additionalLightsCount = GetAdditionalLightsCount();
+    [unroll]
     for (int i = 0; i < additionalLightsCount; ++i)
     {
         // Similar to GetMainLight(), but it takes a for-loop index. This figures out the

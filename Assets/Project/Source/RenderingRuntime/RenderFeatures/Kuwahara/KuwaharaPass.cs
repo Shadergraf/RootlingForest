@@ -81,6 +81,8 @@ public class KuwaharaRenderPass : ScriptableRenderPass
     {
         if (renderingData.cameraData.isSceneViewCamera)
             return;
+        if (renderingData.cameraData.isPreviewCamera)
+            return;
         if (!VolumeManager.instance.stack.isValid)
             return;
         KuwaharaComponent kuwahara = VolumeManager.instance.stack.GetComponent<KuwaharaComponent>();

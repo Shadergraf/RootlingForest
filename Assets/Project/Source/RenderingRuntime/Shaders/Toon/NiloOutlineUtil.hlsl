@@ -29,7 +29,7 @@ float GetOutlineCameraFovAndDistanceFixMultiplier(float positionVS_Z, float dist
         ////////////////////////////////
         
         // map outline distance to thickness multiplier
-        cameraMulFix = pow(abs(positionVS_Z) * GetCameraFOV(), distanceScale);      
+        cameraMulFix = pow(abs(positionVS_Z * GetCameraFOV()), distanceScale);
     }
     else
     {
