@@ -8,7 +8,6 @@ namespace Manatea.RootlingForest
     public class PlayerController : CharacterController
     {
         public JumpMovementAbility m_JumpAbility;
-        public float DashForce;
         public GrabAbility PullAbility;
         public CapsuleCollider TriggerCollider;
         public ClimbAbility m_ClimbAbility;

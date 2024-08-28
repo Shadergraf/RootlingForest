@@ -10,17 +10,17 @@ namespace Manatea.RootlingForest
     public class OverworldLocation : MonoBehaviour
     {
         [SerializeField]
-        private SceneReference m_PersistentScene;
+        private SceneReference m_OverworldScene;
 
 
         void Awake()
         {
-            string persistentScenePath = SceneHelper.GetScenePath(m_PersistentScene);
-            Scene scene = SceneManager.GetSceneByPath(persistentScenePath);
+            string scenePath = SceneHelper.GetScenePath(m_OverworldScene);
+            Scene scene = SceneManager.GetSceneByPath(scenePath);
             if (!scene.IsValid())
             {
-                Debug.Log("PersistentScene not loaded. Attempting to load it now.");
-                SceneManager.LoadScene(persistentScenePath, new LoadSceneParameters(LoadSceneMode.Additive));
+                Debug.Log("OverworldScene not loaded. Attempting to load it now.");
+                SceneManager.LoadScene(scenePath, new LoadSceneParameters(LoadSceneMode.Additive));
             }
         }
         void Start()

@@ -6,6 +6,9 @@ using UnityEngine.InputSystem;
 
 namespace Manatea.RootlingForest
 {
+
+#if DEBUG
+
     public class PhysicsDebugger : MonoBehaviour
     {
         private Rigidbody m_GrabObject;
@@ -108,4 +111,6 @@ namespace Manatea.RootlingForest
             }
         }
     }
+
+#endif
 }
