@@ -146,6 +146,9 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  m_AddTagsUntilPulledOut:
+    m_List:
+    - {fileID: 11400000, guid: 02b7f4254fe77c54b85800c3a27b9ab3, type: 2}
 --- !u!82 &8780525520177623429
 AudioSource:
   m_ObjectHideFlags: 0

@@ -1,4 +1,5 @@
 using Manatea;
+using Manatea.GameplaySystem;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -23,6 +24,8 @@ namespace Manatea.RootlingForest
         private Vector3 m_PullAxis = Vector3.up;
         [SerializeField]
         private UnityEvent m_PulledOut;
+        [SerializeField]
+        private GameplayTagCollection m_AddTagsUntilPulledOut;
 
         private float m_Progress = 1;
 
@@ -31,6 +34,12 @@ namespace Manatea.RootlingForest
         {
             m_PullRigid.isKinematic = true;
             m_PullRigid.detectCollisions = false;
+
+            var tagOwner = GetComponent<GameplayTagOwner>();
+            if (tagOwner)
+            {
+                tagOwner.Tags.AddRange(m_AddTagsUntilPulledOut);
+            }
         }
 
         private void FixedUpdate()
@@ -69,6 +78,12 @@ namespace Manatea.RootlingForest
         {
             m_PullRigid.isKinematic = false;
             m_PullRigid.detectCollisions = false;
+
+            var tagOwner = GetComponent<GameplayTagOwner>();
+            if (tagOwner)
+            {
+                tagOwner.Tags.RemoveRange(m_AddTagsUntilPulledOut);
+            }
 
             Vector3 leverForce = Vector3.zero;
             for (int i = 0; i < m_Levers.Length; i++)

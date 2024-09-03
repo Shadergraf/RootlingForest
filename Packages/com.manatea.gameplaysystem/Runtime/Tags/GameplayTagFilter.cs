@@ -26,7 +26,6 @@ namespace Manatea.GameplaySystem
             (RequireTags == null || RequireTags.Count == 0) &&
             (IgnoreTags == null || IgnoreTags.Count == 0);
 
-
         public object Clone()
         {
             return new GameplayTagFilter()

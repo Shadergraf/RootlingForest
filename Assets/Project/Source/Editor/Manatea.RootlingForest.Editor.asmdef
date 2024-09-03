@@ -1,0 +1,19 @@
+{
+    "name": "Manatea.RootlingForest.Editor",
+    "rootNamespace": "",
+    "references": [
+        "GUID:ed7042dec4e340c47b5006bffc1935ec",
+        "GUID:47b62082426b9fd43977b4d3e3eac737"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

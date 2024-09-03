@@ -1,16 +1,20 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using UnityEditor;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Manatea.GameplaySystem
 {
     [DisallowMultipleComponent]
+    [ExecuteInEditMode]
     public class GameplayTagOwner : MonoBehaviour
     {
         [SerializeField]
-        private List<GameplayTag> m_Tags;
+        [FormerlySerializedAs("m_MyTags")]
+        private GameplayTagCollection m_Tags;
 
-        public ReadOnlyCollection<GameplayTag> Tags => m_Tags.AsReadOnly();
+        public GameplayTagCollection Tags => m_Tags;
     }
 }

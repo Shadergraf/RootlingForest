@@ -2395,6 +2395,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Tags:
   - {fileID: 11400000, guid: 942d62db9bc34ae499e56a855290abc6, type: 2}
+  m_MyTags:
+    m_List:
+    - {fileID: 11400000, guid: 942d62db9bc34ae499e56a855290abc6, type: 2}
 --- !u!1001 &9106173011705223526
 PrefabInstance:
   m_ObjectHideFlags: 0

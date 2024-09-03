@@ -436,6 +436,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: BounceShroom
       objectReference: {fileID: 0}
+    - target: {fileID: 4438036652801548514, guid: 8262b2170c2f0da4387d50da78b2fc03,
+        type: 3}
+      propertyPath: m_Tags.m_List.Array.size
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4741099696618946961, guid: 8262b2170c2f0da4387d50da78b2fc03,
         type: 3}
       propertyPath: m_Attributes.Array.size
@@ -604,6 +609,7 @@ MonoBehaviour:
   m_Force: 15
   m_PreservePerpendicularComponent: 1
   m_OppositeForce: 1
+  m_Iterations: 1
   m_IncludeColliders:
   - {fileID: 6924375413220355806}
 --- !u!4 &6706708962992473984 stripped

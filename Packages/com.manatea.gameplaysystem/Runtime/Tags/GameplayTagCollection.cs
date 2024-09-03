@@ -28,6 +28,20 @@ namespace Manatea.GameplaySystem
                 m_List = tags.ToList();
         }
 
+        public void AddRange(GameplayTagCollection items)
+        {
+            for (int i = 0; i < items.m_List.Count; i++)
+            {
+                Add(items.m_List[i]);
+            }
+        }
+        public void RemoveRange(GameplayTagCollection items)
+        {
+            for (int i = 0; i < items.m_List.Count; i++)
+            {
+                Remove(items.m_List[i]);
+            }
+        }
 
         /// <summary>
         /// Checks if a GameplayTag is explicitly or implicitly present on the entity.
