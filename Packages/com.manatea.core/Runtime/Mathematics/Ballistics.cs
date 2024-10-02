@@ -118,7 +118,8 @@ namespace Manatea
             // Calculate the discriminant
             float discriminant = q * q / 4 + p * p * p / 27;
 
-            float[] roots;
+            float r1 = 0, r2 = 0, r3 = 0;
+            int rCount = 0;
             if (discriminant > 0)
             {
                 // One real root and two complex roots
@@ -126,7 +127,8 @@ namespace Manatea
                 float u = MMath.Cbrt(-q / 2 + sqrtDiscriminant);
                 float v = MMath.Cbrt(-q / 2 - sqrtDiscriminant);
                 float root1 = u + v - B / (3 * A);
-                roots = new float[] { root1 };
+                r1 = root1;
+                rCount = 1;
             }
             else if (discriminant == 0)
             {
@@ -134,7 +136,9 @@ namespace Manatea
                 float u = MMath.Cbrt(-q / 2);
                 float root1 = 2 * u - B / (3 * A);
                 float root2 = -u - B / (3 * A);
-                roots = new float[] { root1, root2 };
+                r1 = root1;
+                r2 = root2;
+                rCount = 2;
             }
             else
             {
@@ -145,18 +149,28 @@ namespace Manatea
                 float root1 = 2 * rhoCbrt * MMath.Cos(theta / 3) - B / (3 * A);
                 float root2 = 2 * rhoCbrt * MMath.Cos((theta + 2 * MMath.PI) / 3) - B / (3 * A);
                 float root3 = 2 * rhoCbrt * MMath.Cos((theta + 4 * MMath.PI) / 3) - B / (3 * A);
-                roots = new float[] { root1, root2, root3 };
+                r1 = root1;
+                r2 = root2;
+                r3 = root3;
+                rCount = 3;
             }
 
             // Only return the closest point
-            float closestX = roots[0];
+            float closestX = r1;
             float closestY = Parabola(a, b, closestX);
-            for (int i = 0; i < roots.Length; i++)
+            for (int i = 0; i < rCount; i++)
             {
-                float py = Parabola(a, b, roots[i]);
-                if (Vector2.Distance(new Vector2(closestX, closestY), point) > Vector2.Distance(new Vector2(roots[i], py), point))
+                float root = 0;
+                switch (i)
                 {
-                    closestX = roots[i];
+                    case 0: root = r1; break;
+                    case 1: root = r2; break;
+                    case 2: root = r3; break;
+                }
+                float py = Parabola(a, b, root);
+                if (Vector2.Distance(new Vector2(closestX, closestY), point) > Vector2.Distance(new Vector2(root, py), point))
+                {
+                    closestX = root;
                     closestY = py;
                 }
             }
