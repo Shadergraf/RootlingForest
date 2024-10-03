@@ -39,6 +39,9 @@ namespace Manatea.RootlingForest
         [SerializeField]
         private bool m_OrientToNormal;
 
+        private Rigidbody[] m_Keys = new Rigidbody[32];
+        private List<Rigidbody> m_KeysToDelete = new List<Rigidbody>(8);
+
 
         private void FixedUpdate()
         {
@@ -71,19 +74,22 @@ namespace Manatea.RootlingForest
                 m_ConnectedCooldown[joint.connectedBody] = m_ReconnectionDelay;
             }
 
-            List<Rigidbody> keysToDelete = new List<Rigidbody>();
-            var keys = m_ConnectedCooldown.Keys.ToArray();
-            foreach (Rigidbody key in keys)
+            m_KeysToDelete.Clear();
+            if (m_Keys.Length <= m_ConnectedCooldown.Count)
+                m_Keys = new Rigidbody[m_Keys.Length * 2];
+            m_ConnectedCooldown.Keys.CopyTo(m_Keys, 0);
+            for (int i = 0; i < m_ConnectedCooldown.Count; i++)
             {
+                var key = m_Keys[i];
                 m_ConnectedCooldown[key] = m_ConnectedCooldown[key] - Time.fixedDeltaTime;
                 if (m_ConnectedCooldown[key] <= 0)
                 {
-                    keysToDelete.Add(key);
+                    m_KeysToDelete.Add(key);
                 }
             }
-            for (int i = 0; i < keysToDelete.Count; i++)
+            for (int i = 0; i < m_KeysToDelete.Count; i++)
             {
-                m_ConnectedCooldown.Remove(keysToDelete[i]);
+                m_ConnectedCooldown.Remove(m_KeysToDelete[i]);
             }
         }
 

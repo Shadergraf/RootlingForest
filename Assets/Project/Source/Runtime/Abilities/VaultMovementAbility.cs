@@ -27,7 +27,9 @@ namespace Manatea.RootlingForest
         private bool m_VaultingActive;
         private float m_VaultingTimer;
 
-        private RaycastHit[] m_GroundHits = new RaycastHit[32];
+        private static RaycastHit[] m_GroundHits = new RaycastHit[32];
+        private static List<RaycastHit> m_ValidHits = new List<RaycastHit>(32);
+        private static Collider[] m_Overlaps = new Collider[8];
 
 
         private void OnEnable()
@@ -105,7 +107,7 @@ namespace Manatea.RootlingForest
                 DebugHelper.DrawWireCapsule(top, bottom, radius, new Color(0.5f, 0.5f, 0.5f, 0.5f));
             }
 
-            List<RaycastHit> validHits = new List<RaycastHit>();
+            m_ValidHits.Clear();
             for (int i = 0; i < hitCount; i++)
             {
                 // Discard overlaps
@@ -121,35 +123,34 @@ namespace Manatea.RootlingForest
                 if (!sim.Movement.IsRaycastHitWalkable(m_GroundHits[i]))
                     continue;
 
-                validHits.Add(m_GroundHits[i]);
+                m_ValidHits.Add(m_GroundHits[i]);
             }
-            validHits.Sort((a, b) => b.distance.CompareTo(a.distance));
+            m_ValidHits.Sort((a, b) => b.distance.CompareTo(a.distance));
 
-            for (int i = 0; i < validHits.Count; i++)
+            for (int i = 0; i < m_ValidHits.Count; i++)
             {
-                Vector3 targetA = top + Vector3.down * (validHits[i].distance - 0.05f);
+                Vector3 targetA = top + Vector3.down * (m_ValidHits[i].distance - 0.05f);
                 if (m_Debug)
                 {
-                    DebugHelper.DrawWireSphere(validHits[i].point, 0.05f, Color.red);
+                    DebugHelper.DrawWireSphere(m_ValidHits[i].point, 0.05f, Color.red);
                     DebugHelper.DrawWireSphere(top, 0.05f, Color.blue);
                     DebugHelper.DrawWireSphere(targetA, 0.05f, Color.green);
                 }
 
-                Collider[] overlaps = new Collider[8];
-                hitCount = Physics.OverlapCapsuleNonAlloc(targetA, targetA + Vector3.up * (height - radius * 2), radius, overlaps, layerMask, QueryTriggerInteraction.Ignore);
+                hitCount = Physics.OverlapCapsuleNonAlloc(targetA, targetA + Vector3.up * (height - radius * 2), radius, m_Overlaps, layerMask, QueryTriggerInteraction.Ignore);
                 bool validVolume = true;
                 for (int j = 0; j < hitCount; j++)
                 {
                     // Discard self collisions
-                    if (overlaps[j].transform == sim.Movement.Rigidbody.transform)
+                    if (m_Overlaps[j].transform == sim.Movement.Rigidbody.transform)
                         continue;
-                    if (overlaps[j].transform.IsChildOf(sim.Movement.Rigidbody.transform))
+                    if (m_Overlaps[j].transform.IsChildOf(sim.Movement.Rigidbody.transform))
                         continue;
                     validVolume = false;
                 }
                 if (validVolume)
                 {
-                    vaultingHit = validHits[i];
+                    vaultingHit = m_ValidHits[i];
                     if (m_Debug)
                     {
                         DebugHelper.DrawWireCapsule(targetA, targetA + Vector3.up * (height - radius * 2), radius, Color.green);
