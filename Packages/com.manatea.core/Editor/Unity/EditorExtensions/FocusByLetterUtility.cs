@@ -9,7 +9,7 @@ using UnityEditor;
 
 namespace Manatea.Unity
 {
-    public static class ProjectViewUtilities
+    internal static class FocusByLetterUtility
     {
         [InitializeOnLoadMethod]
         private static void Init()
@@ -17,12 +17,9 @@ namespace Manatea.Unity
             EditorApplication.projectWindowItemOnGUI += ProjectWindowItemOnGUI;
         }
 
-        private static void ProjectWindowItemOnGUI(string guid, Rect selectionRect)
-        {
-            FocusByLetter(guid);
-        }
+        private static void ProjectWindowItemOnGUI(string guid, Rect selectionRect) => HandleUtility();
 
-        private static void FocusByLetter(string guid)
+        private static void HandleUtility()
         {
             if (Event.current.type != EventType.KeyDown)
                 return;
