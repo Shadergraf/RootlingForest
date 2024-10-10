@@ -7,7 +7,7 @@ namespace Manatea.RootlingForest
     public class ForceDetectorDebugger : MonoBehaviour
     {
         public bool m_ShowDebugWindow = true;
-        public ForceDetector m_DebugForceDetector;
+        public BaseForceDetector m_DebugForceDetector;
 
         // TODO make this debugging stuff editor only
         private const int c_CaptureSamples = 800;

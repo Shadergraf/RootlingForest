@@ -3,7 +3,10 @@
     "rootNamespace": "Manatea.GameplaySystem",
     "references": [
         "GUID:ed7042dec4e340c47b5006bffc1935ec",
-        "GUID:d7fdb6ea84720db45a661c3eeef05357"
+        "GUID:d7fdb6ea84720db45a661c3eeef05357",
+        "GUID:bf920f722eda2274cb45dfae0332e103",
+        "GUID:52dd4d866d63f4340922689e9cd83b77",
+        "GUID:469445bf6a23e0f489cf3db8cd1a420d"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

@@ -128,6 +128,10 @@ namespace Manatea.RootlingForest
         [SerializeField]
         public GameplayAttribute m_ForceDetectionMultiplierAttribute;
         [SerializeField]
+        public GameplayEffect m_SelfGrabEffect;
+        [SerializeField]
+        public GameplayEffect m_TargetGrabEffect;
+        [SerializeField]
         public float m_ForceDetectionMultiplier = 0.3f;
 
         [SerializeField]
@@ -141,6 +145,7 @@ namespace Manatea.RootlingForest
         public bool m_DisableHandRaise;
 
         public GrabState CurrentGrabState => m_GrabState;
+        public ConfigurableJoint Joint => m_Joint;
         public Rigidbody Target
         {
             get => m_Target;
@@ -163,7 +168,10 @@ namespace Manatea.RootlingForest
 
         private float m_HandVerticalState = 0;
 
-        private GameplayAttributeOwner m_Attributes;
+        private GameplayAttributeOwner m_SelfAttributeOwner;
+        private GameplayEffectOwner m_SelfEffectOwner;
+        private GameplayEffectOwner m_TargetEffectOwner;
+
         private ConfigurableJoint m_Joint;
         private GrabPreferences m_Target_GrabPrefs;
 
@@ -172,9 +180,11 @@ namespace Manatea.RootlingForest
         private Vector3 targetLocalPosition;
         private float m_GrabTimer;
 
-        private GameplayAttributeModifier m_WalkSpeedModifier;
-        private GameplayAttributeModifier m_RotationRateModifier;
-        private GameplayAttributeModifier m_ForceDetectionMultiplierModifier;
+        private GameplayAttributeModifierInstance m_WalkSpeedModifier;
+        private GameplayAttributeModifierInstance m_RotationRateModifier;
+        private GameplayAttributeModifierInstance m_ForceDetectionMultiplierModifier;
+        private GameplayEffectInstance m_SelfGrabEffectInst;
+        private GameplayEffectInstance m_TargetGrabEffectInst;
 
         private Vector3 m_SmoothPullingForce;
 
@@ -207,8 +217,9 @@ namespace Manatea.RootlingForest
 
             m_GrabState = GrabState.Initializing;
 
-            m_Attributes = GetComponentInParent<GameplayAttributeOwner>();
-
+            m_SelfAttributeOwner = m_Self.GetComponent<GameplayAttributeOwner>();
+            m_SelfEffectOwner = m_Self.GetComponent<GameplayEffectOwner>();
+            m_TargetEffectOwner = Target.GetComponent<GameplayEffectOwner>();
 
             // HACK solves an issue with "enableCollision" property of the joint
             Target.detectCollisions = false;
@@ -357,18 +368,18 @@ namespace Manatea.RootlingForest
 
             m_SmoothPullingForce = m_Joint.currentForce;
 
-            if (m_Attributes)
+            if (m_SelfAttributeOwner)
             {
-                m_WalkSpeedModifier = new GameplayAttributeModifier() { Type = GameplayAttributeModifierType.Multiplicative, Value = 1 };
-                m_Attributes.AddAttributeModifier(m_WalkSpeedAttribute, m_WalkSpeedModifier);
+                m_WalkSpeedModifier = new GameplayAttributeModifierInstance() { Type = GameplayAttributeModifierType.Multiplicative, Value = 1 };
+                m_SelfAttributeOwner.AddAttributeModifier(m_WalkSpeedAttribute, m_WalkSpeedModifier);
 
-                m_RotationRateModifier = new GameplayAttributeModifier() { Type = GameplayAttributeModifierType.Multiplicative, Value = 1 };
-                m_Attributes.AddAttributeModifier(m_RotationRateAttribute, m_RotationRateModifier);
+                m_RotationRateModifier = new GameplayAttributeModifierInstance() { Type = GameplayAttributeModifierType.Multiplicative, Value = 1 };
+                m_SelfAttributeOwner.AddAttributeModifier(m_RotationRateAttribute, m_RotationRateModifier);
             }
 
             if (Target.TryGetComponent(out GameplayAttributeOwner targetAttOwner))
             {
-                m_ForceDetectionMultiplierModifier = new GameplayAttributeModifier() { Type = GameplayAttributeModifierType.Multiplicative, Value = m_ForceDetectionMultiplier };
+                m_ForceDetectionMultiplierModifier = new GameplayAttributeModifierInstance() { Type = GameplayAttributeModifierType.Multiplicative, Value = m_ForceDetectionMultiplier };
                 targetAttOwner.AddAttributeModifier(m_ForceDetectionMultiplierAttribute, m_ForceDetectionMultiplierModifier);
             }
 
@@ -435,13 +446,31 @@ namespace Manatea.RootlingForest
 
             m_HandBlocker.gameObject.SetActive(false);
 
-            if (m_Attributes)
+            // Remove Self attributes
+            if (m_SelfAttributeOwner)
             {
-                m_Attributes.RemoveAttributeModifier(m_WalkSpeedAttribute, m_WalkSpeedModifier);
-                m_Attributes.RemoveAttributeModifier(m_RotationRateAttribute, m_RotationRateModifier);
-                m_Attributes.RemoveAttributeModifier(m_RotationRateAttribute, m_RotationRateModifier);
+                m_SelfAttributeOwner.RemoveAttributeModifier(m_WalkSpeedAttribute, m_WalkSpeedModifier);
+                m_SelfAttributeOwner.RemoveAttributeModifier(m_RotationRateAttribute, m_RotationRateModifier);
+                m_WalkSpeedModifier = null;
+                m_RotationRateModifier = null;
             }
-            m_Attributes = null;
+            m_SelfAttributeOwner = null;
+
+            // Remove Self effects
+            if (m_SelfEffectOwner && m_SelfGrabEffectInst != null)
+            {
+                m_SelfEffectOwner.RemoveEffect(m_SelfGrabEffectInst);
+                m_SelfGrabEffectInst = null;
+            }
+            m_SelfEffectOwner = null;
+
+            // Remove Target effects
+            if (m_TargetEffectOwner && m_TargetGrabEffectInst != null)
+            {
+                m_TargetEffectOwner.RemoveEffect(m_TargetGrabEffectInst);
+                m_TargetGrabEffectInst = null;
+            }
+            m_TargetEffectOwner = null;
 
             m_GrabEnded.Invoke();
         }
@@ -460,13 +489,27 @@ namespace Manatea.RootlingForest
         }
         private void FixedUpdate()
         {
-            if (m_Joint == null || !Target.gameObject.activeInHierarchy)
+            if (m_Joint == null)
             {
                 enabled = false;
                 return;
             }
-
-            if (!m_Target_GrabPrefs || !m_Target_GrabPrefs.enabled)
+            if (Target == null)
+            {
+                enabled = false;
+                return;
+            }
+            if (!Target.gameObject.activeInHierarchy)
+            {
+                enabled = false;
+                return;
+            }
+            if (!m_Target_GrabPrefs)
+            {
+                enabled = false;
+                return;
+            }
+            if (!m_Target_GrabPrefs.enabled)
             {
                 enabled = false;
                 return;
@@ -575,11 +618,21 @@ namespace Manatea.RootlingForest
                 Destroy(m_Joint);
                 m_Joint = copiedJoint as ConfigurableJoint;
 
+                // Apply Self and Target effects
+                if (m_SelfEffectOwner && m_SelfGrabEffect)
+                {
+                    m_SelfGrabEffectInst = m_SelfEffectOwner.AddEffect(m_SelfGrabEffect);
+                }
+                if (m_TargetEffectOwner && m_TargetGrabEffect)
+                {
+                    m_TargetGrabEffectInst = m_TargetEffectOwner.AddEffect(m_TargetGrabEffect);
+                }
+
                 m_GrabState = GrabState.GrabEstablished;
             }
 
             // Lerp to final grab walk/rotation modifiers
-            if (m_Attributes)
+            if (m_SelfAttributeOwner)
             {
                 m_WalkSpeedModifier.Value = MMath.Damp(m_WalkSpeedModifier.Value, 0.4f, 20, Time.fixedDeltaTime);
                 m_RotationRateModifier.Value = MMath.Damp(m_RotationRateModifier.Value, 0.4f, 20, Time.fixedDeltaTime);
@@ -769,7 +822,7 @@ namespace Manatea.RootlingForest
             // TODO rotMult for pulling load is wrong!
 
             // Lerp to final grab walk/rotation modifiers
-            if (m_Attributes)
+            if (m_SelfAttributeOwner)
             {
                 m_WalkSpeedModifier.Value = MMath.Damp(m_WalkSpeedModifier.Value, moveMult, 10, Time.fixedDeltaTime);
                 m_RotationRateModifier.Value = MMath.Damp(m_RotationRateModifier.Value, rotMult, 10, Time.fixedDeltaTime);

@@ -1,9 +1,5 @@
-using Manatea;
 using Manatea.GameplaySystem;
-using System.Collections;
 using System.Collections.Generic;
-using Unity.Collections;
-using UnityEditor.Graphs;
 using UnityEngine;
 
 public class Inventory : MonoBehaviour
@@ -35,7 +31,7 @@ public class Inventory : MonoBehaviour
     public bool AddItem(GameObject item)
     {
         var tagOwner = item.GetComponentInParent<GameplayTagOwner>();
-        if (tagOwner && !tagOwner.Tags.SatisfiesTagFilter(m_TagFilter))
+        if (tagOwner && !tagOwner.SatisfiesTagFilter(m_TagFilter))
             return false;
 
         for (int i = 0; i < m_ItemSlots.Count; i++)
@@ -54,7 +50,7 @@ public class Inventory : MonoBehaviour
             return false;
 
         var tagOwner = item.GetComponentInParent<GameplayTagOwner>();
-        if (tagOwner && !tagOwner.Tags.SatisfiesTagFilter(m_TagFilter))
+        if (tagOwner && !tagOwner.SatisfiesTagFilter(m_TagFilter))
             return false;
 
         AddItem_Internal(item, slot);

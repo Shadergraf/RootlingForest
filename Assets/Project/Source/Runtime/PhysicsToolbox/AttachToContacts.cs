@@ -39,8 +39,8 @@ namespace Manatea.RootlingForest
         [SerializeField]
         private bool m_OrientToNormal;
 
-        private Rigidbody[] m_Keys = new Rigidbody[32];
-        private List<Rigidbody> m_KeysToDelete = new List<Rigidbody>(8);
+        private static Rigidbody[] m_Keys = new Rigidbody[32];
+        private static List<Rigidbody> m_KeysToDelete = new List<Rigidbody>(8);
 
 
         private void FixedUpdate()

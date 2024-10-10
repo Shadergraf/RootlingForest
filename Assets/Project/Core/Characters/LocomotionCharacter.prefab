@@ -416,45 +416,45 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f81fbd012d71834489105277a4e41c3f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  Self: {fileID: 4970427809924738771}
+  m_Self: {fileID: 4970427809924738771}
   m_UseTargetPosition: 0
   m_UseDrivers: 0
-  StartSpring: 10
-  EndSpring: 3000
-  StartDamper: 10
-  EndDamper: 50
-  SnapPositionThreshold: 0.15
-  SnapRotationThreshold: 10
-  StartDriveSpring: 0
-  EndDriveSpring: 2000
-  StartDriveDamper: 0
-  EndDriveDamper: 200
-  DamperSpeed: 30
-  HandTransform: {fileID: 4231361781513987864}
-  TargetPosition: {x: 0, y: 1, z: 0}
-  AutoTargetPosition: 1
-  ThrowForce: 7.5
-  ThrowRotation: 6
-  ThrowDir: {x: 0, y: 1, z: 1}
-  BreakForce: 750
-  BreakTorque: 750
-  LinearLimit: 0.01
-  EnableCollision: 1
-  rotationAngle: {x: 0, y: 0, z: 0}
-  DriverSpring: 50
-  DriverDamper: 5
-  OverburdenedThresholdMin: 25
-  OverburdenedThresholdMax: 35
-  OverburdenedMovementMult: 0.5
-  OverburdenedRotationMult: 0.15
+  m_StartSpring: 10
+  m_EndSpring: 3000
+  m_StartDamper: 10
+  m_EndDamper: 50
+  m_SnapPositionThreshold: 0.15
+  m_SnapRotationThreshold: 10
+  m_StartDriveSpring: 0
+  m_EndDriveSpring: 2000
+  m_StartDriveDamper: 0
+  m_EndDriveDamper: 200
+  m_DamperSpeed: 30
+  m_HandTransform: {fileID: 4231361781513987864}
+  m_TargetPosition: {x: 0, y: 1, z: 0}
+  m_AutoTargetPosition: 1
+  m_ThrowForce: 7.5
+  m_ThrowRotation: 6
+  m_ThrowDir: {x: 0, y: 1, z: 1}
+  m_BreakForce: 750
+  m_BreakTorque: 750
+  m_LinearLimit: 0.01
+  m_EnableCollision: 1
+  m_RotationAngle: {x: 0, y: 0, z: 0}
+  m_DriverSpring: 50
+  m_DriverDamper: 5
+  m_OverburdenedThresholdMin: 25
+  m_OverburdenedThresholdMax: 35
+  m_OverburdenedMovementMult: 0.5
+  m_OverburdenedRotationMult: 0.15
   m_RaisingExcludeLayers:
     serializedVersion: 2
     m_Bits: 4294967295
   m_HandExcludeLayers:
     serializedVersion: 2
     m_Bits: 256
-  GrabTime: 0.5
-  GrabTimeLeeway: 0.2
+  m_GrabTime: 0.5
+  m_GrabTimeLeeway: 0.2
   m_HandBlocker: {fileID: 3660782639794237185}
   m_WalkSpeedAttribute: {fileID: 11400000, guid: b08ce0e4b3536694bbf575ddf6619fa5,
     type: 2}
@@ -462,6 +462,8 @@ MonoBehaviour:
     type: 2}
   m_ForceDetectionMultiplierAttribute: {fileID: 11400000, guid: bdf1fcbd345381d4ba43a33e3773c7f8,
     type: 2}
+  m_SelfGrabEffect: {fileID: 11400000, guid: bb51642d0178cc947961258d307e7bc5, type: 2}
+  m_TargetGrabEffect: {fileID: 11400000, guid: 93d70801b26be23458f5db9be1588c4c, type: 2}
   m_ForceDetectionMultiplier: 0.3
   m_GrabStarted:
     m_PersistentCalls:

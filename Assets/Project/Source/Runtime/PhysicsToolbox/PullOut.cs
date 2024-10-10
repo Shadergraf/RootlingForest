@@ -25,7 +25,7 @@ namespace Manatea.RootlingForest
         [SerializeField]
         private UnityEvent m_PulledOut;
         [SerializeField]
-        private GameplayTagCollection m_AddTagsUntilPulledOut;
+        private List<GameplayTag> m_AddTagsUntilPulledOut;
 
         private float m_Progress = 1;
 
@@ -38,7 +38,7 @@ namespace Manatea.RootlingForest
             var tagOwner = GetComponent<GameplayTagOwner>();
             if (tagOwner)
             {
-                tagOwner.Tags.AddRange(m_AddTagsUntilPulledOut);
+                tagOwner.AddManagedRange(m_AddTagsUntilPulledOut);
             }
         }
 
@@ -82,7 +82,7 @@ namespace Manatea.RootlingForest
             var tagOwner = GetComponent<GameplayTagOwner>();
             if (tagOwner)
             {
-                tagOwner.Tags.RemoveRange(m_AddTagsUntilPulledOut);
+                tagOwner.RemoveManagedRange(m_AddTagsUntilPulledOut);
             }
 
             Vector3 leverForce = Vector3.zero;

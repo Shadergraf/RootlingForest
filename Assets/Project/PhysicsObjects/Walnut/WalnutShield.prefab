@@ -10,7 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 6693594424703698175}
   - component: {fileID: 8745740223903011295}
-  - component: {fileID: 8136665028575090533}
+  - component: {fileID: 8705683521526695646}
   m_Layer: 3
   m_Name: DragZone
   m_TagString: Untagged
@@ -46,9 +46,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Drag: 2
-  m_AngularDrag: 2
---- !u!65 &8136665028575090533
-BoxCollider:
+  m_AngularDrag: 6
+--- !u!64 &8705683521526695646
+MeshCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -65,9 +65,10 @@ BoxCollider:
   m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 0.47982657, y: 0.57542044, z: 0.24644032}
-  m_Center: {x: -0.0028066635, y: -0.04, z: 0.03699522}
+  serializedVersion: 5
+  m_Convex: 1
+  m_CookingOptions: 30
+  m_Mesh: {fileID: 4107326253205414084, guid: 2102e895c3a371a4aac1130efe80d34a, type: 3}
 --- !u!1 &768165729626383837
 GameObject:
   m_ObjectHideFlags: 0
@@ -918,6 +919,17 @@ PrefabInstance:
     - target: {fileID: 4438036652801548514, guid: 8262b2170c2f0da4387d50da78b2fc03,
         type: 3}
       propertyPath: 'm_MyTags.m_List.Array.data[1]'
+      value: 
+      objectReference: {fileID: 11400000, guid: 942d62db9bc34ae499e56a855290abc6,
+        type: 2}
+    - target: {fileID: 4438036652801548514, guid: 8262b2170c2f0da4387d50da78b2fc03,
+        type: 3}
+      propertyPath: m_InitialPermanentTags.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4438036652801548514, guid: 8262b2170c2f0da4387d50da78b2fc03,
+        type: 3}
+      propertyPath: 'm_InitialPermanentTags.Array.data[0]'
       value: 
       objectReference: {fileID: 11400000, guid: 942d62db9bc34ae499e56a855290abc6,
         type: 2}

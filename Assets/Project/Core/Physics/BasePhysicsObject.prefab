@@ -41,9 +41,10 @@ GameObject:
   m_Component:
   - component: {fileID: 2477153309223106300}
   - component: {fileID: 5794687575100476513}
-  - component: {fileID: 4941498879713128372}
-  - component: {fileID: 4741099696618946961}
   - component: {fileID: 4438036652801548514}
+  - component: {fileID: 4741099696618946961}
+  - component: {fileID: 1045475331040455733}
+  - component: {fileID: 4941498879713128372}
   m_Layer: 3
   m_Name: BasePhysicsObject
   m_TagString: Untagged
@@ -96,6 +97,48 @@ Rigidbody:
   m_Interpolate: 1
   m_Constraints: 0
   m_CollisionDetection: 2
+--- !u!114 &4438036652801548514
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2820277903825203249}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 87a03fefa4dbd7348b64c2e534204576, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Tags:
+    m_List: []
+--- !u!114 &4741099696618946961
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2820277903825203249}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e2ee4c4e098bbcd459201c714bd9c614, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Attributes: []
+--- !u!114 &1045475331040455733
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2820277903825203249}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ce284822480e71c449b49fd0a68b178a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_TagOwner: {fileID: 4438036652801548514}
+  m_AttributeOwner: {fileID: 4741099696618946961}
+  m_ActiveEffects: []
 --- !u!114 &4941498879713128372
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -121,36 +164,6 @@ MonoBehaviour:
   m_UseDropThrow: 0
   m_DropForce: {x: 0, y: 0, z: 0}
   m_DropTorque: 0
---- !u!114 &4741099696618946961
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2820277903825203249}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e2ee4c4e098bbcd459201c714bd9c614, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Attributes:
-  - m_Attribute: {fileID: 11400000, guid: bdf1fcbd345381d4ba43a33e3773c7f8, type: 2}
-    m_BaseValue: 1
-    m_Modifiers: []
---- !u!114 &4438036652801548514
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2820277903825203249}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 87a03fefa4dbd7348b64c2e534204576, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  m_Tags:
-    m_List: []
 --- !u!1 &6307152933887706289
 GameObject:
   m_ObjectHideFlags: 0

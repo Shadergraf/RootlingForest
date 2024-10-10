@@ -8,6 +8,68 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 3148698363816533016, guid: d62bf33f356aaad44b6590ec697f4088,
+        type: 3}
+      propertyPath: m_InitialPermanentTags.Array.size
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 3148698363816533016, guid: d62bf33f356aaad44b6590ec697f4088,
+        type: 3}
+      propertyPath: 'm_InitialPermanentTags.Array.data[0]'
+      value: 
+      objectReference: {fileID: 11400000, guid: c3be9f49b4e960f499b6c04d22824a9d,
+        type: 2}
+    - target: {fileID: 3148698363816533016, guid: d62bf33f356aaad44b6590ec697f4088,
+        type: 3}
+      propertyPath: 'm_InitialPermanentTags.Array.data[1]'
+      value: 
+      objectReference: {fileID: 11400000, guid: 942d62db9bc34ae499e56a855290abc6,
+        type: 2}
+    - target: {fileID: 4229647971727087320, guid: d62bf33f356aaad44b6590ec697f4088,
+        type: 3}
+      propertyPath: m_PostProcessor
+      value: 4516264023943282803
+      objectReference: {fileID: 0}
+    - target: {fileID: 4229647971727087320, guid: d62bf33f356aaad44b6590ec697f4088,
+        type: 3}
+      propertyPath: m_PostProcessorList.Array.size
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4229647971727087320, guid: d62bf33f356aaad44b6590ec697f4088,
+        type: 3}
+      propertyPath: 'm_PostProcessorList.Array.data[0]'
+      value: 4516264023943282801
+      objectReference: {fileID: 0}
+    - target: {fileID: 4229647971727087320, guid: d62bf33f356aaad44b6590ec697f4088,
+        type: 3}
+      propertyPath: 'managedReferences[4516264023943282801]'
+      value: Manatea.GameplaySystem Manatea.GameplaySystem.ClampAttributePostProcessor
+      objectReference: {fileID: 0}
+    - target: {fileID: 4229647971727087320, guid: d62bf33f356aaad44b6590ec697f4088,
+        type: 3}
+      propertyPath: 'managedReferences[4516264023943282803]'
+      value: Manatea.GameplaySystem Manatea.GameplaySystem.ClampAttributePostProcessor
+      objectReference: {fileID: 0}
+    - target: {fileID: 4229647971727087320, guid: d62bf33f356aaad44b6590ec697f4088,
+        type: 3}
+      propertyPath: managedReferences[4516264023943282801].Max
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4229647971727087320, guid: d62bf33f356aaad44b6590ec697f4088,
+        type: 3}
+      propertyPath: managedReferences[4516264023943282801].Min
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4229647971727087320, guid: d62bf33f356aaad44b6590ec697f4088,
+        type: 3}
+      propertyPath: managedReferences[4516264023943282803].Max
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4229647971727087320, guid: d62bf33f356aaad44b6590ec697f4088,
+        type: 3}
+      propertyPath: managedReferences[4516264023943282803].Min
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5176520583305314735, guid: d62bf33f356aaad44b6590ec697f4088,
         type: 3}
       propertyPath: m_Name

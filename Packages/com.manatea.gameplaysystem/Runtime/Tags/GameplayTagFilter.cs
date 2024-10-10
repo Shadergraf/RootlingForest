@@ -12,12 +12,12 @@ namespace Manatea.GameplaySystem
         /// <summary>
         /// All of these tags must be present
         /// </summary>
-        public GameplayTagCollection RequireTags;
+        public List<GameplayTag> RequireTags;
 
         /// <summary>
         /// None of these tags can be present
         /// </summary>
-        public GameplayTagCollection IgnoreTags;
+        public List<GameplayTag> IgnoreTags;
 
         /// <summary>
         /// Returns true if both Require and Ignore tag arrays are empty
@@ -30,8 +30,8 @@ namespace Manatea.GameplaySystem
         {
             return new GameplayTagFilter()
             {
-                RequireTags = new GameplayTagCollection(RequireTags),
-                IgnoreTags = new GameplayTagCollection(IgnoreTags),
+                RequireTags = new List<GameplayTag>(RequireTags),
+                IgnoreTags = new List<GameplayTag>(IgnoreTags),
             };
         }
     }

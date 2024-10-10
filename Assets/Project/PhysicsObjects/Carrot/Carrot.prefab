@@ -278,8 +278,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 87a03fefa4dbd7348b64c2e534204576, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Tags:
-    m_List: []
+  m_InitialPermanentTags:
+  - {fileID: 11400000, guid: 942d62db9bc34ae499e56a855290abc6, type: 2}
+  - {fileID: 11400000, guid: 1c18da10d3323594b984a916c6f91687, type: 2}
+  m_InitialTemporaryTags: []
 --- !u!1 &4489705001517973048
 GameObject:
   m_ObjectHideFlags: 0

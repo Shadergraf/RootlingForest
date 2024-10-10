@@ -446,7 +446,7 @@ namespace Manatea.RootlingForest
             {
                 GameplayTagOwner tagOwner = collider.GetComponentInParent<GameplayTagOwner>();
                 bool walkable = true;
-                if (tagOwner && tagOwner.Tags.Contains(m_NoStableGroundTag))
+                if (tagOwner && tagOwner.HasTag(m_NoStableGroundTag))
                 {
                     walkable = false;
                 }

@@ -16,7 +16,13 @@ MonoBehaviour:
   m_Data:
     m_SerializedData: []
   m_GUID: f0a4c3302d5d3094bb7c757964a5b210
-  m_SerializeEntries: []
+  m_SerializeEntries:
+  - m_GUID: 41725a6e20ba2e946a9947aaa44a7fdf
+    m_Address: PhysicsObjects/Glowshroom
+    m_ReadOnly: 0
+    m_SerializedLabels:
+    - PhysicsObject
+    FlaggedDuringContentUpdateRestriction: 0
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: b8e233b041eaf3f4e891a918f4dc637e, type: 2}
   m_SchemaSet:

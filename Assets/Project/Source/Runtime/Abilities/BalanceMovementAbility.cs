@@ -73,7 +73,7 @@ namespace Manatea.RootlingForest
         private float m_MovementSpeedMult;
         private Vector3 m_AdditionalForce;
 
-        private GameplayAttributeModifier m_MovementModifier = new GameplayAttributeModifier() { Type = GameplayAttributeModifierType.Multiplicative };
+        private GameplayAttributeModifierInstance m_MovementModifier = new GameplayAttributeModifierInstance() { Type = GameplayAttributeModifierType.Multiplicative };
 
         private RaycastHit[] m_GroundHits = new RaycastHit[32];
 

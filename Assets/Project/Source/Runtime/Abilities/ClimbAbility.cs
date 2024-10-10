@@ -21,16 +21,17 @@ namespace Manatea.RootlingForest
         public float m_TestRadius = 0.5f;
         public float m_ClimbingSpeed = 1.5f;
         public float m_ClimbingDistance = 0.41f;
+        public float m_LinearDistance = 0.5f;
 
         [Header("Debug")]
         public bool m_Debug = false;
 
         private ConfigurableJoint m_Joint;
-        private Rigidbody m_GrabRigid;
+        private Rigidbody m_GrabSurrogate;
 
         private RaycastHit[] m_WalHits = new RaycastHit[32];
 
-        public Transform m_ClimbingTarget;
+        public Collider m_ClimbingTarget;
         public Vector3 m_LocalPosition;
         public Vector3 m_LocalForward;
 
@@ -42,51 +43,47 @@ namespace Manatea.RootlingForest
 
         private void OnEnable()
         {
-            if (!m_GrabRigid)
+            if (!m_GrabSurrogate)
             {
                 var gameObj = new GameObject("ClimbTarget");
                 gameObj.transform.SetAsFirstSibling();
 
-                m_GrabRigid = gameObj.AddComponent<Rigidbody>();
-                m_GrabRigid.isKinematic = true;
+                m_GrabSurrogate = gameObj.AddComponent<Rigidbody>();
+                m_GrabSurrogate.isKinematic = true;
             }
 
-            m_GrabRigid.transform.position = m_Self.position;
-            m_GrabRigid.transform.rotation = m_Self.rotation;
-            m_GrabRigid.PublishTransform();
+            m_GrabSurrogate.transform.position = m_Self.position;
+            m_GrabSurrogate.transform.rotation = m_Self.rotation;
+            m_GrabSurrogate.PublishTransform();
 
-            m_Joint = m_Self.gameObject.AddComponent<ConfigurableJoint>();
-            m_Joint.connectedBody = m_GrabRigid;
-            m_Joint.autoConfigureConnectedAnchor = false;
-            m_Joint.breakForce = m_BreakForce;
-            m_Joint.breakTorque = m_BreakTorque;
-
-            m_Joint.xMotion = ConfigurableJointMotion.Free;
-            m_Joint.yMotion = ConfigurableJointMotion.Free;
-            m_Joint.zMotion = ConfigurableJointMotion.Free;
-            m_Joint.angularXMotion = ConfigurableJointMotion.Free;
-            m_Joint.angularYMotion = ConfigurableJointMotion.Free;
-            m_Joint.angularZMotion = ConfigurableJointMotion.Free;
-
-            m_Joint.xDrive = new JointDrive() { maximumForce = m_Joint.xDrive.maximumForce, positionSpring = 1000, positionDamper = 10 };
-            m_Joint.yDrive = new JointDrive() { maximumForce = m_Joint.yDrive.maximumForce, positionSpring = 1000, positionDamper = 10 };
-            m_Joint.zDrive = new JointDrive() { maximumForce = m_Joint.zDrive.maximumForce, positionSpring = 1000, positionDamper = 10 };
-
-            m_Joint.angularXDrive = new JointDrive() { maximumForce = m_Joint.angularXDrive.maximumForce, positionSpring = 1000, positionDamper = 10 };
-            m_Joint.angularYZDrive = new JointDrive() { maximumForce = m_Joint.angularYZDrive.maximumForce, positionSpring = 1000, positionDamper = 10 };
-
-            m_Joint.anchor = new Vector3(0, 0, m_ClimbingDistance);
+            CreateJoint();
 
             if (DetectWall(m_Self.transform.position, m_Self.transform.forward, out RaycastHit hit))
             {
                 Vector3 position = hit.point;
                 Vector3 normal = hit.normal.FlattenY().normalized;
-                m_ClimbingTarget = hit.collider.transform;
-                m_LocalPosition = hit.collider.transform.InverseTransformPoint(position);
-                m_LocalForward = hit.collider.transform.InverseTransformDirection(-normal);
-                m_GrabRigid.MovePosition(hit.point);
-                m_GrabRigid.MoveRotation(Quaternion.LookRotation(-normal));
+                m_ClimbingTarget = hit.collider;
+
+                m_GrabSurrogate.transform.position = m_ClimbingTarget.transform.position;
+                m_GrabSurrogate.transform.rotation = m_ClimbingTarget.transform.rotation;
+                m_GrabSurrogate.transform.localScale = m_ClimbingTarget.transform.lossyScale;
+                m_GrabSurrogate.PublishTransform();
+
+                if (m_ClimbingTarget.attachedRigidbody)
+                {
+                    m_Joint.connectedBody = m_ClimbingTarget.attachedRigidbody;
+                }
+                else
+                {
+                    m_Joint.connectedBody = m_GrabSurrogate;
+                }
+
+                m_LocalPosition = m_ClimbingTarget.transform.InverseTransformPoint(position);
+                m_LocalForward = m_ClimbingTarget.transform.InverseTransformDirection(-normal);
                 m_CurrentWallNormal = normal;
+
+                m_Joint.connectedAnchor = m_LocalPosition;
+
             }
             else
             {
@@ -113,30 +110,79 @@ namespace Manatea.RootlingForest
                 return;
             }
 
-            Vector3 worldPosition = m_ClimbingTarget.TransformPoint(m_LocalPosition);
-            Vector3 worldForward = m_ClimbingTarget.TransformDirection(m_LocalForward);
+            Vector3 worldPosition = m_ClimbingTarget.transform.TransformPoint(m_LocalPosition);
+            Vector3 worldForward = m_ClimbingTarget.transform.TransformDirection(m_LocalForward);
             worldPosition -= worldForward * 0.4f;
-
+            
             Vector3 contactMove = m_ScheduledMove;
             m_ScheduledMove = Vector3.zero;
             worldPosition += contactMove * m_ClimbingSpeed * Time.fixedDeltaTime;
 
-            if (DetectWall(worldPosition, worldForward, out RaycastHit hit))
-            {
-                Vector3 position = hit.point;
-                Vector3 normal = hit.normal.FlattenY().normalized;
-                m_ClimbingTarget = hit.collider.transform;
-                m_LocalPosition = hit.collider.transform.InverseTransformPoint(position);
-                m_LocalForward = hit.collider.transform.InverseTransformDirection(-normal);
-                m_GrabRigid.MovePosition(hit.point);
-                m_GrabRigid.MoveRotation(Quaternion.LookRotation(-normal));
-                m_CurrentWallNormal = normal;
-            }
-            else
-            {
-                enabled = false;
-                return;
-            }
+            Debug.Log(m_Joint.currentForce.magnitude);
+
+            //if (DetectWall(worldPosition, worldForward, out RaycastHit hit))
+            //{
+            //    Vector3 position = hit.point;
+            //    Vector3 normal = hit.normal.FlattenY().normalized;
+            //    m_ClimbingTarget = hit.collider;
+            //
+            //    m_GrabSurrogate.transform.position = m_ClimbingTarget.transform.position;
+            //    m_GrabSurrogate.transform.rotation = m_ClimbingTarget.transform.rotation;
+            //    m_GrabSurrogate.transform.localScale = m_ClimbingTarget.transform.lossyScale;
+            //    m_GrabSurrogate.PublishTransform();
+            //
+            //    if (m_ClimbingTarget.attachedRigidbody)
+            //    {
+            //        m_Joint.connectedBody = m_ClimbingTarget.attachedRigidbody;
+            //    }
+            //    else
+            //    {
+            //        m_Joint.connectedBody = m_GrabSurrogate;
+            //    }
+            //
+            //    m_LocalPosition = m_ClimbingTarget.transform.InverseTransformPoint(position);
+            //    m_LocalForward = m_ClimbingTarget.transform.InverseTransformDirection(-normal);
+            //    m_CurrentWallNormal = normal;
+            //
+            //    m_Joint.connectedAnchor = m_LocalPosition;
+            //
+            //}
+            //else
+            //{
+            //    enabled = false;
+            //    return;
+            //}
+        }
+
+        private void CreateJoint()
+        {
+            Debug.Assert(!m_Joint, "Joint already present!", this);
+
+            m_Joint = m_Self.gameObject.AddComponent<ConfigurableJoint>();
+            m_Joint.connectedBody = m_GrabSurrogate;
+            m_Joint.breakForce = m_BreakForce;
+            m_Joint.breakTorque = m_BreakTorque;
+
+            m_Joint.xMotion = ConfigurableJointMotion.Locked;
+            m_Joint.yMotion = ConfigurableJointMotion.Limited;
+            m_Joint.zMotion = ConfigurableJointMotion.Locked;
+            m_Joint.angularXMotion = ConfigurableJointMotion.Free;
+            m_Joint.angularYMotion = ConfigurableJointMotion.Free;
+            m_Joint.angularZMotion = ConfigurableJointMotion.Free;
+
+            m_Joint.linearLimit = new SoftJointLimit() { limit = m_LinearDistance };
+
+            //m_Joint.xDrive = new JointDrive() { maximumForce = m_Joint.xDrive.maximumForce, positionSpring = 1000, positionDamper = 10 };
+            //m_Joint.yDrive = new JointDrive() { maximumForce = m_Joint.yDrive.maximumForce, positionSpring = 1000, positionDamper = 10 };
+            //m_Joint.zDrive = new JointDrive() { maximumForce = m_Joint.zDrive.maximumForce, positionSpring = 1000, positionDamper = 10 };
+            //
+            //m_Joint.angularXDrive = new JointDrive() { maximumForce = m_Joint.angularXDrive.maximumForce, positionSpring = 1000, positionDamper = 10 };
+            //m_Joint.angularYZDrive = new JointDrive() { maximumForce = m_Joint.angularYZDrive.maximumForce, positionSpring = 1000, positionDamper = 10 };
+
+            m_Joint.anchor = new Vector3(0, 0, m_ClimbingDistance);
+
+            m_Joint.autoConfigureConnectedAnchor = false;
+            m_Joint.enableCollision = true;
         }
 
         public void Move(Vector3 scheduledMove)

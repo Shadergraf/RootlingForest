@@ -83,9 +83,5 @@ namespace Manatea.RootlingForest
                 rbs[i].isKinematic = false;
             }
         }
-
-        private void Update()
-        {
-        }
     }
 }

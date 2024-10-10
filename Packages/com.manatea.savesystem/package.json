@@ -1,0 +1,11 @@
+{
+	"name": "com.manatea.savesystem",
+	"displayName":"Manatea Save System",
+	"version": "1.0.0",
+    "unity": "2020.1",
+    "keywords": ["Manatea", "core"],
+	"description": "",
+	"dependencies": {
+        "com.manatea.core": "1.0.0"
+	}
+}

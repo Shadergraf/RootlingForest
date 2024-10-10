@@ -11,7 +11,9 @@ GameObject:
   - component: {fileID: 2459274439249617929}
   - component: {fileID: 4146674922894845674}
   - component: {fileID: 5137507898606658623}
+  - component: {fileID: 6251875238489936929}
   - component: {fileID: 5171198309114388193}
+  - component: {fileID: 9136856744536620587}
   - component: {fileID: 30843199278676019}
   m_Layer: 6
   m_Name: BaseCharacter
@@ -98,6 +100,20 @@ MonoBehaviour:
     type: 2}
   m_DebugLocomotion: 0
   m_DebugGroundDetection: 0
+--- !u!114 &6251875238489936929
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4226559076182182294}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 87a03fefa4dbd7348b64c2e534204576, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_InitialPermanentTags: []
+  m_InitialTemporaryTags: []
 --- !u!114 &5171198309114388193
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -113,19 +129,72 @@ MonoBehaviour:
   m_Attributes:
   - m_Attribute: {fileID: 11400000, guid: 544fa5972763a11478e613bc7b419079, type: 2}
     m_BaseValue: 3
+    m_PostProcessors:
+    - rid: 4516264047519465900
+    - rid: 4516264047519465901
     m_Modifiers: []
   - m_Attribute: {fileID: 11400000, guid: 3290dc8df33c44c42831de70df3717fb, type: 2}
     m_BaseValue: 3
+    m_PostProcessors:
+    - rid: 4516264047519465909
     m_Modifiers: []
   - m_Attribute: {fileID: 11400000, guid: d62daeae609380a4e93f192aae3830a9, type: 2}
     m_BaseValue: 0.9
+    m_PostProcessors: []
     m_Modifiers: []
   - m_Attribute: {fileID: 11400000, guid: b08ce0e4b3536694bbf575ddf6619fa5, type: 2}
     m_BaseValue: 100
+    m_PostProcessors:
+    - rid: 4516264047519465910
     m_Modifiers: []
   - m_Attribute: {fileID: 11400000, guid: 13efa8a8c038c3a47ae5293010294aa4, type: 2}
     m_BaseValue: 1
+    m_PostProcessors:
+    - rid: 4516264047519465911
     m_Modifiers: []
+  references:
+    version: 2
+    RefIds:
+    - rid: 4516264047519465900
+      type: {class: ValuePostProcessor, ns: Manatea.GameplaySystem, asm: Manatea.GameplaySystem}
+      data:
+        Limiter: 1
+        Value: 0
+    - rid: 4516264047519465901
+      type: {class: AttributePostProcessor, ns: Manatea.GameplaySystem, asm: Manatea.GameplaySystem}
+      data:
+        Limiter: 0
+        Attribute: {fileID: 11400000, guid: 3290dc8df33c44c42831de70df3717fb, type: 2}
+    - rid: 4516264047519465909
+      type: {class: ValuePostProcessor, ns: Manatea.GameplaySystem, asm: Manatea.GameplaySystem}
+      data:
+        Limiter: 1
+        Value: 0
+    - rid: 4516264047519465910
+      type: {class: ValuePostProcessor, ns: Manatea.GameplaySystem, asm: Manatea.GameplaySystem}
+      data:
+        Limiter: 1
+        Value: 0
+    - rid: 4516264047519465911
+      type: {class: ValuePostProcessor, ns: Manatea.GameplaySystem, asm: Manatea.GameplaySystem}
+      data:
+        Limiter: 1
+        Value: 0
+--- !u!114 &9136856744536620587
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4226559076182182294}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ce284822480e71c449b49fd0a68b178a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_TagOwner: {fileID: 6251875238489936929}
+  m_AttributeOwner: {fileID: 5171198309114388193}
+  m_ActiveEffects: []
 --- !u!114 &30843199278676019
 MonoBehaviour:
   m_ObjectHideFlags: 0

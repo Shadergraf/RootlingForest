@@ -26,8 +26,8 @@ namespace Manatea.RootlingForest
 
         private GameplayAttributeOwner m_AttributeOwner;
 
-        private GameplayAttributeModifier m_MoveSpeedMod;
-        private GameplayAttributeModifier m_RotationSpeedMod;
+        private GameplayAttributeModifierInstance m_MoveSpeedMod;
+        private GameplayAttributeModifierInstance m_RotationSpeedMod;
 
         public State CurrentState = State.Idle;
 
@@ -52,14 +52,14 @@ namespace Manatea.RootlingForest
 
             m_AttributeOwner = GetComponent<GameplayAttributeOwner>();
 
-            m_MoveSpeedMod = new GameplayAttributeModifier()
+            m_MoveSpeedMod = new GameplayAttributeModifierInstance()
             {
                 Type = GameplayAttributeModifierType.Multiplicative,
                 Value = 1,
             };
             m_AttributeOwner.AddAttributeModifier(m_MoveSpeedAttribute, m_MoveSpeedMod);
 
-            m_RotationSpeedMod = new GameplayAttributeModifier()
+            m_RotationSpeedMod = new GameplayAttributeModifierInstance()
             {
                 Type = GameplayAttributeModifierType.Multiplicative,
                 Value = 1,

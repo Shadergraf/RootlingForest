@@ -12,8 +12,22 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ad06ea934e330ab479eae4b0d95f9e7a, type: 3}
   m_Name: VideoFeedbackRenderFeature
   m_EditorClassIdentifier: 
-  m_Active: 1
-  Mix: 0.043
+  m_Active: 0
+  Mix: 0.08
+--- !u!114 &-4854413793816578618
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4b89c0077814cbe4381b906ef3540060, type: 3}
+  m_Name: CanopyShadowsRenderFeature
+  m_EditorClassIdentifier: 
+  m_Active: 0
+  Mix: 0.136
 --- !u!114 &-2804648790140669555
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -110,7 +124,8 @@ MonoBehaviour:
   m_RendererFeatures:
   - {fileID: -2024668485343099023}
   - {fileID: -8606165567778221456}
-  m_RendererFeatureMap: 7147325fbdeee6e37092617603c29088
+  - {fileID: -4854413793816578618}
+  m_RendererFeatureMap: 7147325fbdeee6e37092617603c29088c675ced25fa8a1bc
   m_UseNativeRenderPass: 0
   postProcessData: {fileID: 11400000, guid: 41439944d30ece34e96484bdb6645b55, type: 2}
   xrSystemData: {fileID: 11400000, guid: 60e1133243b97e347b653163a8c01b64, type: 2}

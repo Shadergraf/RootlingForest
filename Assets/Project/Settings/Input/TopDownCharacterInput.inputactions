@@ -33,9 +33,9 @@
                     "initialStateCheck": false
                 },
                 {
-                    "name": "Throw",
+                    "name": "Eat",
                     "type": "Button",
-                    "id": "b4b5df64-39a1-42a3-a7c8-80366536e81f",
+                    "id": "69b3d448-74bc-4375-94da-f2ec61ceacdf",
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": "",
@@ -155,23 +155,23 @@
                 },
                 {
                     "name": "",
-                    "id": "83eaf440-abc1-4061-bc81-8dc622d9468c",
-                    "path": "<Gamepad>/buttonEast",
+                    "id": "c9e19634-c46f-48fd-9aa0-9d48e669b9dc",
+                    "path": "<Gamepad>/dpad/up",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "Throw",
+                    "action": "Eat",
                     "isComposite": false,
                     "isPartOfComposite": false
                 },
                 {
                     "name": "",
-                    "id": "b6f196e6-503f-4c13-bf88-a5141cf1c877",
-                    "path": "<Mouse>/rightButton",
+                    "id": "c35fb17a-ed73-4b3d-8e9e-8f187070b1d1",
+                    "path": "<Keyboard>/1",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
-                    "action": "Throw",
+                    "action": "Eat",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

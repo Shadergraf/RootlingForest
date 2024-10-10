@@ -9,16 +9,20 @@ namespace Manatea.GameplaySystem
     public class GameplayAttributeOwner : MonoBehaviour
     {
         [Serializable]
-        public class ValuedGameplayAttribute
+        public class GameplayAttributeInstance
         {
             [SerializeField]
             private GameplayAttribute m_Attribute;
             [SerializeField]
             private float m_BaseValue;
+            [SubclassSelector]
+            [SerializeReference]
+            private IGameplayAttributePostProcessor[] m_PostProcessors;
             [SerializeField]
-            private List<GameplayAttributeModifier> m_Modifiers = new();
+            private List<GameplayAttributeModifierInstance> m_Modifiers = new();
 
             public event Action OnChange;
+
 
             public GameplayAttribute Attribute => m_Attribute;
             public float BaseValue
@@ -53,13 +57,13 @@ namespace Manatea.GameplaySystem
                 }
             }
 
-            public ValuedGameplayAttribute(GameplayAttribute attribute, float baseValue = 0)
+            public GameplayAttributeInstance(GameplayAttribute attribute, float baseValue = 0)
             {
                 m_Attribute = attribute;
                 BaseValue = baseValue;
             }
 
-            public bool AddModifier(GameplayAttributeModifier modifier)
+            public bool AddModifier(GameplayAttributeModifierInstance modifier)
             {
                 if (m_Modifiers.Contains(modifier))
                 {
@@ -69,18 +73,19 @@ namespace Manatea.GameplaySystem
                 m_Modifiers.Add(modifier);
                 return true;
             }
-            public bool RemoveModifier(GameplayAttributeModifier modifier)
+            public bool RemoveModifier(GameplayAttributeModifierInstance modifier)
             {
                 return m_Modifiers.Remove(modifier);
             }
-            public ReadOnlyCollection<GameplayAttributeModifier> GetModifierList()
+            public ReadOnlyCollection<GameplayAttributeModifierInstance> GetModifierList()
             {
                 return m_Modifiers.AsReadOnly();
             }
         }
 
         [SerializeField]
-        private List<ValuedGameplayAttribute> m_Attributes;
+        private List<GameplayAttributeInstance> m_Attributes;
+
 
         public bool AddAttribute(GameplayAttribute attribute, float baseValue = 0)
         {
@@ -88,7 +93,7 @@ namespace Manatea.GameplaySystem
                 if (m_Attributes[i].Attribute == attribute)
                     return false;
 
-            m_Attributes.Add(new ValuedGameplayAttribute(attribute, baseValue));
+            m_Attributes.Add(new GameplayAttributeInstance(attribute, baseValue));
 
             return true;
         }
@@ -124,7 +129,7 @@ namespace Manatea.GameplaySystem
             }
             return false;
         }
-        public bool AddAttributeModifier(GameplayAttribute attribute, GameplayAttributeModifier modifier)
+        public bool AddAttributeModifier(GameplayAttribute attribute, GameplayAttributeModifierInstance modifier)
         {
             for (int i = 0; i < m_Attributes.Count; i++)
             {
@@ -136,7 +141,7 @@ namespace Manatea.GameplaySystem
             }
             return false;
         }
-        public bool RemoveAttributeModifier(GameplayAttribute attribute, GameplayAttributeModifier modifier)
+        public bool RemoveAttributeModifier(GameplayAttribute attribute, GameplayAttributeModifierInstance modifier)
         {
             for (int i = 0; i < m_Attributes.Count; i++)
             {
@@ -148,7 +153,7 @@ namespace Manatea.GameplaySystem
             return false;
         }
 
-        public ValuedGameplayAttribute GetValuedAttribute(GameplayAttribute attribute)
+        public GameplayAttributeInstance GetValuedAttribute(GameplayAttribute attribute)
         {
             for (int i = 0; i < m_Attributes.Count; i++)
             {
@@ -194,35 +199,63 @@ namespace Manatea.GameplaySystem
     }
 
     [Serializable]
-    public class GameplayAttributeModifier
+    public struct GameplayAttributeModification
     {
-        [SerializeField]
-        private GameplayAttributeModifierType m_Type;
-        [SerializeField]
-        private float m_Value;
+        public GameplayAttribute Attribute;
+        public GameplayAttributeModifierType Type;
+        public float Value;
+    }
 
+    [Serializable]
+    public struct GameplayAttributeModifier
+    {
+        public GameplayAttributeModifierType Type;
+        public float Value;
+    }
+
+    [Serializable]
+    public class GameplayAttributeModifierInstance
+    {
         public event Action OnChange;
+
+        private GameplayAttributeModifier m_Modifier;
+
+
+        public GameplayAttributeModifierInstance()
+        { }
+        public GameplayAttributeModifierInstance(GameplayAttributeModifier modifier)
+        {
+            m_Modifier = modifier;
+        }
+        public GameplayAttributeModifierInstance(GameplayAttributeModifierType type, float value)
+        {
+            m_Modifier = new GameplayAttributeModifier()
+            {
+                Type = type,
+                Value = value,
+            };
+        }
 
         public GameplayAttributeModifierType Type
         {
-            get => m_Type;
+            get => m_Modifier.Type;
             set
             {
-                if (value != m_Type)
+                if (value != m_Modifier.Type)
                 {
-                    m_Type = value;
+                    m_Modifier.Type = value;
                     OnChange?.Invoke();
                 }
             }
         }
         public float Value
         {
-            get => m_Value;
+            get => m_Modifier.Value;
             set
             {
-                if (value != m_Value)
+                if (value != m_Modifier.Value)
                 {
-                    m_Value = value;
+                    m_Modifier.Value = value;
                     OnChange?.Invoke();
                 }
             }
@@ -235,4 +268,28 @@ namespace Manatea.GameplaySystem
         Multiplicative = 1,
     }
 
+    public interface IGameplayAttributePostProcessor
+    {
+        public float Process() => 0;
+    }
+    [Serializable]
+    public class ValuePostProcessor : IGameplayAttributePostProcessor
+    {
+        public GameplayAttributePostProcessorLimiter Limiter;
+        public float Value;
+        public float Process() => Value;
+    }
+    [Serializable]
+    public class AttributePostProcessor : IGameplayAttributePostProcessor
+    {
+        public GameplayAttributePostProcessorLimiter Limiter;
+        public GameplayAttribute Attribute;
+        public float Process() => 0;
+    }
+
+    public enum GameplayAttributePostProcessorLimiter
+    {
+        Max = 1,
+        Min = 0,
+    }
 }

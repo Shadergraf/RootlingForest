@@ -15,6 +15,7 @@ namespace Manatea.GameplaySystem
         [SerializeField]
         protected GameplayTag m_Parent;
 
+
         public GameplayTag Parent => m_Parent;
 
         public int AncestorCount => m_Parent ? m_Parent.AncestorCount + 1 : 0;

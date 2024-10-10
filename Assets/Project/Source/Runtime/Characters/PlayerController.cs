@@ -2,38 +2,45 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Serialization;
 
 namespace Manatea.RootlingForest
 {
     public class PlayerController : CharacterController
     {
-        public JumpMovementAbility m_JumpAbility;
-        public GrabAbility PullAbility;
-        public CapsuleCollider TriggerCollider;
-        public ClimbAbility m_ClimbAbility;
+        [SerializeField]
+        private JumpMovementAbility m_JumpAbility;
+        [SerializeField]
+        [FormerlySerializedAs("PullAbility")]
+        private GrabAbility m_GrabAbility;
+        [SerializeField]
+        [FormerlySerializedAs("TriggerCollider")]
+        private CapsuleCollider m_TriggerCollider;
+        [SerializeField]
+        private ClimbAbility m_ClimbAbility;
+        [SerializeField]
+        private EatAbility m_EatAbility;
 
-        public InputActionAsset m_InputAsset;
-        public int m_Player = -1;
+        [SerializeField]
+        private InputActionAsset m_InputAsset;
+        [SerializeField]
+        private int m_Player = -1;
 
-        public LayerMask m_GrabLayerMask;
+        [SerializeField]
+        private LayerMask m_GrabLayerMask;
 
         [Header("Debug")]
-        public Vector3 m_DebugMoveInput;
+        [SerializeField]
+        private Vector3 m_DebugMoveInput;
 
         private Collider[] Colliders;
         private int OverlapCount;
-
-        private Keyboard m_Keyboard;
-        private Mouse m_Mouse;
-        private Gamepad m_Gamepad;
-
-        public float InputSmoothing = 2;
 
         private InputActionAsset m_InputActions;
         private InputAction m_MovementAction;
         private InputAction m_JumpAction;
         private InputAction m_GrabAction;
-        private InputAction m_ThrowAction;
+        private InputAction m_EatAction;
 
         private Vector2 m_LastInput;
 
@@ -81,7 +88,7 @@ namespace Manatea.RootlingForest
             m_MovementAction    = m_InputActions.actionMaps[0].actions[0];
             m_JumpAction        = m_InputActions.actionMaps[0].actions[1];
             m_GrabAction        = m_InputActions.actionMaps[0].actions[2];
-            m_ThrowAction       = m_InputActions.actionMaps[0].actions[3];
+            m_EatAction         = m_InputActions.actionMaps[0].actions[3];
         }
 
         private void Start()
@@ -91,21 +98,17 @@ namespace Manatea.RootlingForest
                 return;
             }
 
-            m_MovementAction.Enable();
-            m_JumpAction.Enable();
-            m_GrabAction.Enable();
-            m_ThrowAction.Enable();
+            m_JumpAction.performed += JumpAction;
+            m_GrabAction.performed += GrabAction;
+            m_EatAction.performed += EatAction;
         }
 
         private void OnEnable()
         {
-            m_Keyboard = InputSystem.GetDevice<Keyboard>();
-            m_Mouse = InputSystem.GetDevice<Mouse>();
-            m_Gamepad = InputSystem.GetDevice<Gamepad>();
-
-
-            m_JumpAction.performed += JumpAction;
-            m_GrabAction.performed += GrabAction;
+            m_MovementAction.Enable();
+            m_JumpAction.Enable();
+            m_GrabAction.Enable();
+            m_EatAction.Enable();
         }
         private void OnDisable()
         {
@@ -117,10 +120,14 @@ namespace Manatea.RootlingForest
             m_MovementAction.Disable();
             m_JumpAction.Disable();
             m_GrabAction.Disable();
-            m_ThrowAction.Disable();
+            m_EatAction.Disable();
+        }
+        private void OnDestroy()
+        {
 
             m_JumpAction.performed -= JumpAction;
             m_GrabAction.performed -= GrabAction;
+            m_EatAction.performed -= EatAction;
         }
 
 
@@ -153,14 +160,6 @@ namespace Manatea.RootlingForest
                 m_ClimbAbility.Move(move);
             }
 
-            // TODO test if single button grab/throw input feels good
-            //if (m_ThrowAction.WasPressedThisFrame())
-            //{
-            //    if (PullAbility.enabled)
-            //    {
-            //        PullAbility.Throw();
-            //    }
-            //}
 
             if (m_ClimbAbility && Mouse.current != null && Mouse.current.rightButton.wasPressedThisFrame)
             {
@@ -198,9 +197,9 @@ namespace Manatea.RootlingForest
             }
 
             // TODO capsule cast to find nearest collider
-            if (!PullAbility.enabled)
+            if (!m_GrabAbility.enabled)
             {
-                TriggerCollider.GetGlobalParams(out Vector3 p1, out Vector3 p2, out float radius);
+                m_TriggerCollider.GetGlobalParams(out Vector3 p1, out Vector3 p2, out float radius);
                 OverlapCount = Physics.OverlapCapsuleNonAlloc(p1, p2, radius, Colliders, m_GrabLayerMask);
 
                 for (int i = 0; i < OverlapCount; i++)
@@ -212,8 +211,8 @@ namespace Manatea.RootlingForest
                         continue;
                     if (!rigid.GetComponent<GrabPreferences>())
                         continue;
-                    PullAbility.Target = rigid;
-                    PullAbility.enabled = true;
+                    m_GrabAbility.Target = rigid;
+                    m_GrabAbility.enabled = true;
                     break;
                 }
             }
@@ -221,18 +220,28 @@ namespace Manatea.RootlingForest
             {
                 if (m_MovementAction.ReadValue<Vector2>().magnitude > 0.3f)
                 {
-                    PullAbility.Throw();
+                    m_GrabAbility.Throw();
                 }
                 else
                 {
-                    PullAbility.Drop();
+                    m_GrabAbility.Drop();
                 }
             }
         }
-
-        private float Smoothing01(float x, float n)
+        private void EatAction(InputAction.CallbackContext ctx)
         {
-            return MMath.Pow(x, n) / (MMath.Pow(x, n) + MMath.Pow(1.0f - x, n));
+            if (!ctx.performed && ctx.ReadValue<float>() < 0.5f)
+                return;
+
+            if (!m_GrabAbility.Target)
+                return;
+
+            var eatPrefs = m_GrabAbility.Target.GetComponentInChildren<EatPreferences>();
+            if (!eatPrefs)
+                return;
+
+            m_EatAbility.Target = m_GrabAbility.Target.gameObject;
+            m_EatAbility.enabled = true;
         }
     }
 }

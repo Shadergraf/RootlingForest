@@ -25,7 +25,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 948824525337825213}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: -0, y: 0.000001758337, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -99,6 +99,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Mass
       value: 0.4
+      objectReference: {fileID: 0}
+    - target: {fileID: 690915299916681563, guid: 6389f7dc5bd582f44affd90e3f3c4f7f,
+        type: 3}
+      propertyPath: m_CollisionDetection
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 773119421530684967, guid: 6389f7dc5bd582f44affd90e3f3c4f7f,
         type: 3}
@@ -198,7 +203,7 @@ PrefabInstance:
     - target: {fileID: 3490569723215449986, guid: 6389f7dc5bd582f44affd90e3f3c4f7f,
         type: 3}
       propertyPath: m_AllowOverlapAfterDrop
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 3490569723215449986, guid: 6389f7dc5bd582f44affd90e3f3c4f7f,
         type: 3}
@@ -214,6 +219,11 @@ PrefabInstance:
         type: 3}
       propertyPath: GroundRotationRate
       value: 0.15
+      objectReference: {fileID: 0}
+    - target: {fileID: 8597781962724660110, guid: 6389f7dc5bd582f44affd90e3f3c4f7f,
+        type: 3}
+      propertyPath: m_GroundRotationRate
+      value: 720
       objectReference: {fileID: 0}
     - target: {fileID: 8637521886535575888, guid: 6389f7dc5bd582f44affd90e3f3c4f7f,
         type: 3}
@@ -258,7 +268,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1bde55889d13e0641bf90c9d811b877c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  CharacterMovement: {fileID: 4924809145838162435}
+  m_CharacterMovement: {fileID: 4924809145838162435}
   m_MoveDir: {x: 0, y: 0, z: 0}
   m_Radius: 1
   m_TickRate: 0.25

@@ -15,7 +15,7 @@ MonoBehaviour:
   m_DefaultGroup: f0a4c3302d5d3094bb7c757964a5b210
   m_currentHash:
     serializedVersion: 2
-    Hash: 54a1fc28e2ed65f10945a4a4fbfb0c98
+    Hash: 8f9e30dc6832512a8942299c4c1e26c0
   m_OptimizeCatalogSize: 0
   m_BuildRemoteCatalog: 0
   m_BundleLocalCatalog: 0
@@ -94,6 +94,7 @@ MonoBehaviour:
     - Locale
     - Locale-en
     - Locale-de-DE
+    - PhysicsObject
   m_SchemaTemplates: []
   m_GroupTemplateObjects:
   - {fileID: 11400000, guid: e944b278587a3d84f939f48fad32fcbc, type: 2}

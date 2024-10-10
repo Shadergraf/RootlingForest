@@ -1,0 +1,17 @@
+{
+    "name": "Manatea.SaveSystem",
+    "rootNamespace": "",
+    "references": [
+        "GUID:1c8683d6679e54a4ba2be934da560aa3",
+        "GUID:587b1811624b10941ade890eef72ef6a"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
