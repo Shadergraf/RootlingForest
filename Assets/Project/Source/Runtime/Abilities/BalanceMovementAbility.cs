@@ -200,6 +200,16 @@ namespace Manatea.RootlingForest
 
                 #endregion
 
+                // Slow down falls for rope walks
+                if (Vector3.Dot(sim.Movement.Rigidbody.velocity, Physics.gravity) > 0)
+                {
+                    Vector3 velocity = sim.Movement.Rigidbody.velocity;
+                    velocity.y *= 0.9f;
+                    sim.Movement.Rigidbody.velocity = velocity;
+                }
+                // Slow down gravity for rope walks
+                sim.Movement.Rigidbody.AddForce(-Physics.gravity * 0.5f, ForceMode.Acceleration);
+
 
                 Vector3 ledgeDir = sim.GroundLowerHit.point - sim.Movement.FeetPos;
                 Vector3 ledgeDirProjected = ledgeDir.FlattenY();
