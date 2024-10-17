@@ -109,8 +109,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 87a03fefa4dbd7348b64c2e534204576, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Tags:
-    m_List: []
+  m_InitialPermanentTags: []
+  m_InitialTemporaryTags: []
 --- !u!114 &4741099696618946961
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -123,7 +123,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e2ee4c4e098bbcd459201c714bd9c614, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Attributes: []
+  m_InitialAttributes: []
+  m_AttributeInstances: []
+  references:
+    version: 2
+    RefIds: []
 --- !u!114 &1045475331040455733
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -230,6 +230,16 @@ PrefabInstance:
       propertyPath: m_Attributes.Array.data[3].m_BaseValue
       value: 25
       objectReference: {fileID: 0}
+    - target: {fileID: 8637521886535575888, guid: 6389f7dc5bd582f44affd90e3f3c4f7f,
+        type: 3}
+      propertyPath: m_InitialAttributes.Array.data[3].BaseValue
+      value: 25
+      objectReference: {fileID: 0}
+    - target: {fileID: 8637521886535575888, guid: 6389f7dc5bd582f44affd90e3f3c4f7f,
+        type: 3}
+      propertyPath: m_AttributeInstances.Array.data[3].m_BaseValue
+      value: 25
+      objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 1412583809829947734, guid: d62bf33f356aaad44b6590ec697f4088, type: 3}
     m_RemovedGameObjects: []

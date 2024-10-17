@@ -203,9 +203,7 @@ namespace Manatea.RootlingForest
                 // Slow down falls for rope walks
                 if (Vector3.Dot(sim.Movement.Rigidbody.velocity, Physics.gravity) > 0)
                 {
-                    Vector3 velocity = sim.Movement.Rigidbody.velocity;
-                    velocity.y *= 0.9f;
-                    sim.Movement.Rigidbody.velocity = velocity;
+                    sim.Movement.Rigidbody.AddForce(Vector3.Project(Physics.gravity.normalized, -sim.Movement.Rigidbody.velocity) * 1, ForceMode.VelocityChange);
                 }
                 // Slow down gravity for rope walks
                 sim.Movement.Rigidbody.AddForce(-Physics.gravity * 0.5f, ForceMode.Acceleration);

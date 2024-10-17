@@ -144,6 +144,9 @@ namespace Manatea.RootlingForest
         [SerializeField]
         public bool m_DisableHandRaise;
 
+        [SerializeField]
+        public bool m_Debug;
+
         public GrabState CurrentGrabState => m_GrabState;
         public ConfigurableJoint Joint => m_Joint;
         public Rigidbody Target
@@ -832,6 +835,8 @@ namespace Manatea.RootlingForest
 
         private void OnGUI()
         {
+            if (!m_Debug)
+                return;
             MGUI.DrawWorldProgressBar(transform.position, new Rect(10, 10, 50, 9), m_HeavyLoad);
             MGUI.DrawWorldProgressBar(transform.position, new Rect(10, 20, 50, 9), m_PullingLoad);
         }

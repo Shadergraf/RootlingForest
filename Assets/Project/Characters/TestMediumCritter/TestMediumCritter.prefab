@@ -118,6 +118,11 @@ PrefabInstance:
       propertyPath: GroundRotationRate
       value: 0.15
       objectReference: {fileID: 0}
+    - target: {fileID: 8597781962724660110, guid: 6389f7dc5bd582f44affd90e3f3c4f7f,
+        type: 3}
+      propertyPath: m_GroundRotationRate
+      value: 0.15
+      objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 1412583809829947734, guid: d62bf33f356aaad44b6590ec697f4088, type: 3}
     m_RemovedGameObjects: []
@@ -146,7 +151,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1bde55889d13e0641bf90c9d811b877c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  CharacterMovement: {fileID: 8537123034839085335}
+  m_CharacterMovement: {fileID: 8537123034839085335}
   m_MoveDir: {x: 0, y: 0, z: 0}
   m_Radius: 1
   m_TickRate: 0.25

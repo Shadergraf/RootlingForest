@@ -473,6 +473,7 @@ MonoBehaviour:
       m_Calls: []
   m_DisableHandVerticalState: 0
   m_DisableHandRaise: 0
+  m_Debug: 0
 --- !u!1001 &5578867091486015368
 PrefabInstance:
   m_ObjectHideFlags: 0

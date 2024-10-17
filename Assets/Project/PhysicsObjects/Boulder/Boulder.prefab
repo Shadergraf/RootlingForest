@@ -2083,6 +2083,11 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 1045475331040455733, guid: 8262b2170c2f0da4387d50da78b2fc03,
+        type: 3}
+      propertyPath: m_TagOwner
+      value: 
+      objectReference: {fileID: 0}
     - target: {fileID: 2477153309223106300, guid: 8262b2170c2f0da4387d50da78b2fc03,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -2151,7 +2156,22 @@ PrefabInstance:
         type: 2}
     - target: {fileID: 4741099696618946961, guid: 8262b2170c2f0da4387d50da78b2fc03,
         type: 3}
+      propertyPath: 'managedReferences[-2]'
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 4741099696618946961, guid: 8262b2170c2f0da4387d50da78b2fc03,
+        type: 3}
       propertyPath: m_Attributes.Array.size
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4741099696618946961, guid: 8262b2170c2f0da4387d50da78b2fc03,
+        type: 3}
+      propertyPath: m_InitialAttributes.Array.size
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4741099696618946961, guid: 8262b2170c2f0da4387d50da78b2fc03,
+        type: 3}
+      propertyPath: m_AttributeInstances.Array.size
       value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 4741099696618946961, guid: 8262b2170c2f0da4387d50da78b2fc03,
@@ -2175,6 +2195,75 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Attributes.Array.data[1].m_BaseValue
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4741099696618946961, guid: 8262b2170c2f0da4387d50da78b2fc03,
+        type: 3}
+      propertyPath: 'managedReferences[4516264086448636041]'
+      value: Manatea.GameplaySystem Manatea.GameplaySystem.ValuePostProcessor
+      objectReference: {fileID: 0}
+    - target: {fileID: 4741099696618946961, guid: 8262b2170c2f0da4387d50da78b2fc03,
+        type: 3}
+      propertyPath: m_InitialAttributes.Array.data[0].Attribute
+      value: 
+      objectReference: {fileID: 11400000, guid: bdf1fcbd345381d4ba43a33e3773c7f8,
+        type: 2}
+    - target: {fileID: 4741099696618946961, guid: 8262b2170c2f0da4387d50da78b2fc03,
+        type: 3}
+      propertyPath: m_InitialAttributes.Array.data[0].BaseValue
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4741099696618946961, guid: 8262b2170c2f0da4387d50da78b2fc03,
+        type: 3}
+      propertyPath: m_InitialAttributes.Array.data[1].Attribute
+      value: 
+      objectReference: {fileID: 11400000, guid: 544fa5972763a11478e613bc7b419079,
+        type: 2}
+    - target: {fileID: 4741099696618946961, guid: 8262b2170c2f0da4387d50da78b2fc03,
+        type: 3}
+      propertyPath: m_InitialAttributes.Array.data[1].BaseValue
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4741099696618946961, guid: 8262b2170c2f0da4387d50da78b2fc03,
+        type: 3}
+      propertyPath: managedReferences[4516264086448636041].Value
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4741099696618946961, guid: 8262b2170c2f0da4387d50da78b2fc03,
+        type: 3}
+      propertyPath: m_AttributeInstances.Array.data[0].m_Attribute
+      value: 
+      objectReference: {fileID: 11400000, guid: bdf1fcbd345381d4ba43a33e3773c7f8,
+        type: 2}
+    - target: {fileID: 4741099696618946961, guid: 8262b2170c2f0da4387d50da78b2fc03,
+        type: 3}
+      propertyPath: m_AttributeInstances.Array.data[0].m_BaseValue
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4741099696618946961, guid: 8262b2170c2f0da4387d50da78b2fc03,
+        type: 3}
+      propertyPath: m_AttributeInstances.Array.data[1].m_Attribute
+      value: 
+      objectReference: {fileID: 11400000, guid: 544fa5972763a11478e613bc7b419079,
+        type: 2}
+    - target: {fileID: 4741099696618946961, guid: 8262b2170c2f0da4387d50da78b2fc03,
+        type: 3}
+      propertyPath: m_AttributeInstances.Array.data[1].m_BaseValue
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4741099696618946961, guid: 8262b2170c2f0da4387d50da78b2fc03,
+        type: 3}
+      propertyPath: managedReferences[4516264086448636041].Limiter
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4741099696618946961, guid: 8262b2170c2f0da4387d50da78b2fc03,
+        type: 3}
+      propertyPath: m_InitialAttributes.Array.data[1].PostProcessors.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4741099696618946961, guid: 8262b2170c2f0da4387d50da78b2fc03,
+        type: 3}
+      propertyPath: 'm_InitialAttributes.Array.data[1].PostProcessors.Array.data[0]'
+      value: 4516264086448636041
       objectReference: {fileID: 0}
     - target: {fileID: 4941498879713128372, guid: 8262b2170c2f0da4387d50da78b2fc03,
         type: 3}
@@ -2393,11 +2482,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 87a03fefa4dbd7348b64c2e534204576, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Tags:
-  - {fileID: 11400000, guid: 942d62db9bc34ae499e56a855290abc6, type: 2}
-  m_MyTags:
-    m_List:
-    - {fileID: 11400000, guid: 942d62db9bc34ae499e56a855290abc6, type: 2}
+  m_InitialPermanentTags: []
+  m_InitialTemporaryTags: []
 --- !u!1001 &9106173011705223526
 PrefabInstance:
   m_ObjectHideFlags: 0

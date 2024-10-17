@@ -4,6 +4,8 @@ using UnityEngine;
 
 namespace Manatea.GameplaySystem
 {
+    [DisallowMultipleComponent]
+    [DefaultExecutionOrder(-98)]
     public class GameplayEffectOwner : MonoBehaviour
     {
         [SerializeField]

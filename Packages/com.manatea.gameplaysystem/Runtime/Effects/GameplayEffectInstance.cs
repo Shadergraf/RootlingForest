@@ -77,18 +77,25 @@ namespace Manatea.GameplaySystem
                     if (Effect.Lifetime == EffectLifetime.Instant)
                     {
                         var modification = Effect.GameplayAttributeModifications[i];
-                        if (m_EffectOwner.AttributeOwner.TryGetAttributeBaseValue(modification.Attribute, out float baseValue))
+                        var attrInst = m_EffectOwner.AttributeOwner.GetAttributeInstance(modification.Attribute);
+                        if (attrInst != null)
                         {
+                            float value = attrInst.BaseValue;
                             if (modification.Type == GameplayAttributeModifierType.Additive)
                             {
-                                baseValue += modification.Value;
+                                value += modification.Value;
                             }
                             if (modification.Type == GameplayAttributeModifierType.Multiplicative)
                             {
-                                baseValue *= modification.Value;
+                                value *= modification.Value;
                             }
 
-                            m_EffectOwner.AttributeOwner.SetAttributeBaseValue(modification.Attribute, baseValue);
+                            for (int j = 0; j < attrInst.PostProcessors.Length; j++)
+                            {
+                                attrInst.PostProcessors[j].Process(m_EffectOwner.AttributeOwner, modification.Attribute, ref value);
+                            }
+
+                            attrInst.BaseValue = value;
                         }
                     }
                     else

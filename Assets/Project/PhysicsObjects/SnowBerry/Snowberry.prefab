@@ -3013,7 +3013,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: eb3cc84e43b733b4cb0ed0c559472889, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Volume: 1
 --- !u!1 &4839551180598620559
 GameObject:
   m_ObjectHideFlags: 0
@@ -6262,6 +6261,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4741099696618946961, guid: 8262b2170c2f0da4387d50da78b2fc03,
         type: 3}
+      propertyPath: m_InitialAttributes.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4741099696618946961, guid: 8262b2170c2f0da4387d50da78b2fc03,
+        type: 3}
       propertyPath: m_AttributeInstances.Array.size
       value: 1
       objectReference: {fileID: 0}
@@ -6274,6 +6278,17 @@ PrefabInstance:
     - target: {fileID: 4741099696618946961, guid: 8262b2170c2f0da4387d50da78b2fc03,
         type: 3}
       propertyPath: m_Attributes.Array.data[0].m_BaseValue
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4741099696618946961, guid: 8262b2170c2f0da4387d50da78b2fc03,
+        type: 3}
+      propertyPath: m_InitialAttributes.Array.data[0].Attribute
+      value: 
+      objectReference: {fileID: 11400000, guid: bdf1fcbd345381d4ba43a33e3773c7f8,
+        type: 2}
+    - target: {fileID: 4741099696618946961, guid: 8262b2170c2f0da4387d50da78b2fc03,
+        type: 3}
+      propertyPath: m_InitialAttributes.Array.data[0].BaseValue
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4741099696618946961, guid: 8262b2170c2f0da4387d50da78b2fc03,

@@ -126,28 +126,54 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e2ee4c4e098bbcd459201c714bd9c614, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Attributes:
+  m_InitialAttributes:
+  - Attribute: {fileID: 11400000, guid: 544fa5972763a11478e613bc7b419079, type: 2}
+    BaseValue: 3
+    PostProcessors:
+    - rid: 4516264047519465900
+    - rid: 4516264047519465901
+  - Attribute: {fileID: 11400000, guid: 3290dc8df33c44c42831de70df3717fb, type: 2}
+    BaseValue: 3
+    PostProcessors:
+    - rid: 4516264047519465909
+  - Attribute: {fileID: 11400000, guid: d62daeae609380a4e93f192aae3830a9, type: 2}
+    BaseValue: 0.9
+    PostProcessors: []
+  - Attribute: {fileID: 11400000, guid: b08ce0e4b3536694bbf575ddf6619fa5, type: 2}
+    BaseValue: 100
+    PostProcessors:
+    - rid: 4516264047519465911
+  - Attribute: {fileID: 11400000, guid: 13efa8a8c038c3a47ae5293010294aa4, type: 2}
+    BaseValue: 1
+    PostProcessors:
+    - rid: 4516264047519465911
+  m_AttributeInstances:
   - m_Attribute: {fileID: 11400000, guid: 544fa5972763a11478e613bc7b419079, type: 2}
+    m_AttributeOwner: {fileID: 0}
     m_BaseValue: 3
     m_PostProcessors:
     - rid: 4516264047519465900
     - rid: 4516264047519465901
     m_Modifiers: []
   - m_Attribute: {fileID: 11400000, guid: 3290dc8df33c44c42831de70df3717fb, type: 2}
+    m_AttributeOwner: {fileID: 0}
     m_BaseValue: 3
     m_PostProcessors:
     - rid: 4516264047519465909
     m_Modifiers: []
   - m_Attribute: {fileID: 11400000, guid: d62daeae609380a4e93f192aae3830a9, type: 2}
+    m_AttributeOwner: {fileID: 0}
     m_BaseValue: 0.9
     m_PostProcessors: []
     m_Modifiers: []
   - m_Attribute: {fileID: 11400000, guid: b08ce0e4b3536694bbf575ddf6619fa5, type: 2}
+    m_AttributeOwner: {fileID: 0}
     m_BaseValue: 100
     m_PostProcessors:
-    - rid: 4516264047519465910
+    - rid: 4516264047519465911
     m_Modifiers: []
   - m_Attribute: {fileID: 11400000, guid: 13efa8a8c038c3a47ae5293010294aa4, type: 2}
+    m_AttributeOwner: {fileID: 0}
     m_BaseValue: 1
     m_PostProcessors:
     - rid: 4516264047519465911
@@ -166,11 +192,6 @@ MonoBehaviour:
         Limiter: 0
         Attribute: {fileID: 11400000, guid: 3290dc8df33c44c42831de70df3717fb, type: 2}
     - rid: 4516264047519465909
-      type: {class: ValuePostProcessor, ns: Manatea.GameplaySystem, asm: Manatea.GameplaySystem}
-      data:
-        Limiter: 1
-        Value: 0
-    - rid: 4516264047519465910
       type: {class: ValuePostProcessor, ns: Manatea.GameplaySystem, asm: Manatea.GameplaySystem}
       data:
         Limiter: 1

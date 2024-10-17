@@ -548,6 +548,16 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5171198309114388193, guid: bf0177a3809de3d49ac5dcdb1afa9084,
         type: 3}
+      propertyPath: m_InitialAttributes.Array.size
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 5171198309114388193, guid: bf0177a3809de3d49ac5dcdb1afa9084,
+        type: 3}
+      propertyPath: m_AttributeInstances.Array.size
+      value: 6
+      objectReference: {fileID: 0}
+    - target: {fileID: 5171198309114388193, guid: bf0177a3809de3d49ac5dcdb1afa9084,
+        type: 3}
       propertyPath: m_Attributes.Array.data[5].m_Attribute
       value: 
       objectReference: {fileID: 11400000, guid: bdf1fcbd345381d4ba43a33e3773c7f8,
@@ -555,6 +565,28 @@ PrefabInstance:
     - target: {fileID: 5171198309114388193, guid: bf0177a3809de3d49ac5dcdb1afa9084,
         type: 3}
       propertyPath: m_Attributes.Array.data[5].m_BaseValue
+      value: 0.3
+      objectReference: {fileID: 0}
+    - target: {fileID: 5171198309114388193, guid: bf0177a3809de3d49ac5dcdb1afa9084,
+        type: 3}
+      propertyPath: m_InitialAttributes.Array.data[5].Attribute
+      value: 
+      objectReference: {fileID: 11400000, guid: bdf1fcbd345381d4ba43a33e3773c7f8,
+        type: 2}
+    - target: {fileID: 5171198309114388193, guid: bf0177a3809de3d49ac5dcdb1afa9084,
+        type: 3}
+      propertyPath: m_InitialAttributes.Array.data[5].BaseValue
+      value: 0.3
+      objectReference: {fileID: 0}
+    - target: {fileID: 5171198309114388193, guid: bf0177a3809de3d49ac5dcdb1afa9084,
+        type: 3}
+      propertyPath: m_AttributeInstances.Array.data[5].m_Attribute
+      value: 
+      objectReference: {fileID: 11400000, guid: bdf1fcbd345381d4ba43a33e3773c7f8,
+        type: 2}
+    - target: {fileID: 5171198309114388193, guid: bf0177a3809de3d49ac5dcdb1afa9084,
+        type: 3}
+      propertyPath: m_AttributeInstances.Array.data[5].m_BaseValue
       value: 0.3
       objectReference: {fileID: 0}
     m_RemovedComponents: []

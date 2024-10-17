@@ -1,3 +1,4 @@
+using Manatea.GameplaySystem;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -20,6 +21,8 @@ namespace Manatea.RootlingForest
         private ClimbAbility m_ClimbAbility;
         [SerializeField]
         private EatAbility m_EatAbility;
+        [SerializeField]
+        private GameplayAttribute m_HealthAttribute;
 
         [SerializeField]
         private InputActionAsset m_InputAsset;
@@ -174,6 +177,9 @@ namespace Manatea.RootlingForest
             }
 
             m_LastInput = rawInput;
+
+            CharacterMovement.AttributeOwner.TryGetAttributeEvaluatedValue(m_HealthAttribute, out float health);
+            Debug.Log(health);
         }
 
 

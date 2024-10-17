@@ -13,21 +13,6 @@ namespace Manatea.RootlingForest
         private ForceDetectorConfig m_Config;
         [SerializeField]
         private bool m_DisableDetection = false;
-        [SerializeField]
-        private GameObject[] m_SpawnObjects;
-        [SerializeField]
-        private bool m_DestroyObject;
-        [SerializeField]
-        private float m_Force;
-        [SerializeField, Range(0, 1)]
-        private float m_RadialForce = 1;
-        [SerializeField]
-        private bool m_EnableDebugGraphs;
-        [SerializeField]
-        private bool m_OnlyBreakWhenBeingHit;
-        // Events
-        [SerializeField]
-        private UnityEvent m_ForceDetected;
 
         #endregion
 
@@ -41,6 +26,8 @@ namespace Manatea.RootlingForest
         public Vector3 FinalForce => m_FinalForce;
         public Vector3 ContactImpulse => m_ContactImpulse;
         public Vector3 ContactVelocity => m_ContactVelocity;
+
+        public GameplayAttributeOwner AttributeOwner => m_AttributeOwner;
 
         #endregion
 
@@ -125,7 +112,7 @@ namespace Manatea.RootlingForest
 
             if (!m_DisableDetection && m_FinalForce.magnitude > m_Config.ImpulseMagnitude)
             {
-                ForceDetected();
+                HandleForceDetected(m_FinalForce);
             }
         }
 
@@ -136,10 +123,11 @@ namespace Manatea.RootlingForest
             if (m_Config.ContactImpulseInfluence != 0 || m_Config.ContactVelocityInfluence != 0)
             {
                 Vector3 relativeVelocity = collision.relativeVelocity;
-                if (m_OnlyBreakWhenBeingHit)
-                {
-                    relativeVelocity += m_LastVelocity;
-                }
+                // TODO I dont know why we are doing this
+                //if (m_OnlyBreakWhenBeingHit)
+                //{
+                //    relativeVelocity += m_LastVelocity;
+                //}
 
                 float mult = 1;
 
@@ -179,50 +167,20 @@ namespace Manatea.RootlingForest
             }
         }
 
-        private void ForceDetected()
+        private void HandleForceDetected(Vector3 force)
         {
             if (m_DamageTimeout)
             {
                 return;
             }
+            StartCoroutine(CO_Timeout());
 
-            m_ForceDetected.Invoke();
+            ForceDetected(force);
+        }
 
-            if (m_Config.HealthAttribute && m_AttributeOwner)
-            {
-                m_AttributeOwner.ChangeAttributeBaseValue(m_Config.HealthAttribute, v => v - 1);
+        protected virtual void ForceDetected(Vector3 force)
+        {
 
-                if (m_AttributeOwner.TryGetAttributeEvaluatedValue(m_Config.HealthAttribute, out float health) && health > 0)
-                {
-                    StartCoroutine(CO_Timeout());
-                    return;
-                }
-            }
-
-            Rigidbody sourceRigid = GetComponent<Rigidbody>();
-            for (int i = 0; i < m_SpawnObjects.Length; ++i)
-            {
-                m_SpawnObjects[i].SetActive(true);
-                m_SpawnObjects[i].transform.SetParent(transform.parent);
-                Rigidbody rigid = m_SpawnObjects[i].GetComponent<Rigidbody>();
-                rigid.velocity = sourceRigid.velocity;
-                rigid.angularVelocity = sourceRigid.angularVelocity;
-
-                Vector3 randomDir = Random.onUnitSphere;
-                Vector3 radialDir = rigid.position - sourceRigid.position;
-                if (radialDir.magnitude < 0.001f)
-                {
-                    radialDir = randomDir;
-                }
-                Vector3 forceDir = Vector3.Lerp(randomDir, radialDir, m_RadialForce).normalized;
-                //rigid.AddForce(force * m_Force, m_UseMass ? ForceMode.Impulse : ForceMode.VelocityChange);
-                rigid.velocity += forceDir * (m_Force);
-            }
-
-            if (m_DestroyObject)
-            {
-                Destroy(gameObject);
-            }
         }
 
         private IEnumerator CO_Timeout()

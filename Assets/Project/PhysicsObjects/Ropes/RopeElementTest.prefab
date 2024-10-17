@@ -107,6 +107,11 @@ MonoBehaviour:
   m_Orientations: []
   m_UpdateGrabLocation: 0
   m_AllowOverlapAfterDrop: 1
+  m_UseCustomThrow: 0
+  m_ThrowRotation: 0
+  m_UseDropThrow: 0
+  m_DropForce: {x: 0, y: 0, z: 0}
+  m_DropTorque: 0
 --- !u!153 &244979003951576699
 ConfigurableJoint:
   m_ObjectHideFlags: 0
@@ -199,7 +204,7 @@ ConfigurableJoint:
     maximumForce: 3.4028233e+38
     useAcceleration: 0
   m_ProjectionMode: 1
-  m_ProjectionDistance: 0.1
+  m_ProjectionDistance: 0.07
   m_ProjectionAngle: 180
   m_ConfiguredInWorldSpace: 0
   m_SwapBodies: 0
@@ -221,10 +226,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e2ee4c4e098bbcd459201c714bd9c614, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Attributes:
+  m_InitialAttributes:
+  - Attribute: {fileID: 11400000, guid: d62daeae609380a4e93f192aae3830a9, type: 2}
+    BaseValue: 3
+    PostProcessors: []
+  m_AttributeInstances:
   - m_Attribute: {fileID: 11400000, guid: d62daeae609380a4e93f192aae3830a9, type: 2}
+    m_AttributeOwner: {fileID: 0}
     m_BaseValue: 3
+    m_PostProcessors: []
     m_Modifiers: []
+  references:
+    version: 2
+    RefIds: []
 --- !u!1 &6245647005231283941
 GameObject:
   m_ObjectHideFlags: 0

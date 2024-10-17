@@ -262,10 +262,19 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e2ee4c4e098bbcd459201c714bd9c614, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_Attributes:
+  m_InitialAttributes:
+  - Attribute: {fileID: 11400000, guid: d62daeae609380a4e93f192aae3830a9, type: 2}
+    BaseValue: 5
+    PostProcessors: []
+  m_AttributeInstances:
   - m_Attribute: {fileID: 11400000, guid: d62daeae609380a4e93f192aae3830a9, type: 2}
+    m_AttributeOwner: {fileID: 0}
     m_BaseValue: 5
+    m_PostProcessors: []
     m_Modifiers: []
+  references:
+    version: 2
+    RefIds: []
 --- !u!114 &2543387271544028023
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -411,6 +420,16 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4741099696618946961, guid: 8262b2170c2f0da4387d50da78b2fc03,
         type: 3}
+      propertyPath: m_InitialAttributes.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4741099696618946961, guid: 8262b2170c2f0da4387d50da78b2fc03,
+        type: 3}
+      propertyPath: m_AttributeInstances.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4741099696618946961, guid: 8262b2170c2f0da4387d50da78b2fc03,
+        type: 3}
       propertyPath: m_Attributes.Array.data[0].m_Attribute
       value: 
       objectReference: {fileID: 11400000, guid: d62daeae609380a4e93f192aae3830a9,
@@ -418,6 +437,28 @@ PrefabInstance:
     - target: {fileID: 4741099696618946961, guid: 8262b2170c2f0da4387d50da78b2fc03,
         type: 3}
       propertyPath: m_Attributes.Array.data[0].m_BaseValue
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4741099696618946961, guid: 8262b2170c2f0da4387d50da78b2fc03,
+        type: 3}
+      propertyPath: m_InitialAttributes.Array.data[0].Attribute
+      value: 
+      objectReference: {fileID: 11400000, guid: d62daeae609380a4e93f192aae3830a9,
+        type: 2}
+    - target: {fileID: 4741099696618946961, guid: 8262b2170c2f0da4387d50da78b2fc03,
+        type: 3}
+      propertyPath: m_InitialAttributes.Array.data[0].BaseValue
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 4741099696618946961, guid: 8262b2170c2f0da4387d50da78b2fc03,
+        type: 3}
+      propertyPath: m_AttributeInstances.Array.data[0].m_Attribute
+      value: 
+      objectReference: {fileID: 11400000, guid: d62daeae609380a4e93f192aae3830a9,
+        type: 2}
+    - target: {fileID: 4741099696618946961, guid: 8262b2170c2f0da4387d50da78b2fc03,
+        type: 3}
+      propertyPath: m_AttributeInstances.Array.data[0].m_BaseValue
       value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 4941498879713128372, guid: 8262b2170c2f0da4387d50da78b2fc03,
