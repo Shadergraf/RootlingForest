@@ -25,7 +25,6 @@ namespace UnityEngine.VFX.Utility
 
         protected override void Awake()
         {
-            Debug.Log("AttributeBinder Awake");
             base.Awake();
             
             if (!AttributeOwner.hasValue)
