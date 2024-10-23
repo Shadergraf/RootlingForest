@@ -20,3 +20,4 @@ MonoBehaviour:
   - Attribute: {fileID: 11400000, guid: b08ce0e4b3536694bbf575ddf6619fa5, type: 2}
     Type: 1
     Value: 3
+  m_Events: []

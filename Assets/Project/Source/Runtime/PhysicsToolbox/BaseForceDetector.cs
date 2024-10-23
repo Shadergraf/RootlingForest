@@ -20,7 +20,7 @@ namespace Manatea.RootlingForest
 
         public ForceDetectorConfig Config => m_Config;
         public bool DisableDetection => m_DisableDetection;
-        public Vector3 Velocity => m_Rigidbody.velocity;
+        public Vector3 Velocity => m_Rigidbody.linearVelocity;
         public Vector3 Acceleration => m_Acceleration;
         public Vector3 Jerk => m_Jerk;
         public Vector3 FinalForce => m_FinalForce;
@@ -55,20 +55,20 @@ namespace Manatea.RootlingForest
 
         #region Unity Events
 
-        private void Awake()
+        protected virtual void Awake()
         {
             m_Rigidbody = GetComponent<Rigidbody>();
             m_AttributeOwner = GetComponent<GameplayAttributeOwner>();
             m_TagOwner = GetComponent<GameplayTagOwner>();
         }
-        private void OnEnable()
+        protected virtual void OnEnable()
         {
-            m_LastVelocity = m_Rigidbody.velocity;
+            m_LastVelocity = m_Rigidbody.linearVelocity;
             m_Acceleration = Vector3.zero;
         }
 
 
-        private void OnCollisionEnter(Collision collision)
+        protected virtual void OnCollisionEnter(Collision collision)
         {
             ContactResponse(collision);
         }
@@ -77,12 +77,12 @@ namespace Manatea.RootlingForest
         //    ContactResponse(collision);
         //}
 
-        private void FixedUpdate()
+        protected virtual void FixedUpdate()
         {
-            m_Acceleration = (m_Rigidbody.velocity - m_LastVelocity) / Time.fixedDeltaTime;
+            m_Acceleration = (m_Rigidbody.linearVelocity - m_LastVelocity) / Time.fixedDeltaTime;
             m_Jerk = (m_Acceleration - m_LastAcceleration) / Time.fixedDeltaTime;
 
-            m_LastVelocity = m_Rigidbody.velocity;
+            m_LastVelocity = m_Rigidbody.linearVelocity;
             m_LastAcceleration = m_Acceleration;
 
             m_AccumulatedForces = MMath.Damp(m_AccumulatedForces, Vector3.zero, m_Config.ImpulseTimeFalloff, Time.fixedDeltaTime);

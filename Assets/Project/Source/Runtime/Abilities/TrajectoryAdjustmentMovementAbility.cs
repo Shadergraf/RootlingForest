@@ -59,14 +59,14 @@ namespace Manatea.RootlingForest
             if (groundMagnetFound && !sim.IsStableGrounded)
             {
                 // Add enough force to transform the current trajectory into one that hits the ground magnetism point
-                if (Ballistics.CalculateInitialVelocity(sim.Movement.FeetPos, groundMagnet.Hit.point, sim.Movement.Rigidbody.velocity.magnitude, Physics.gravity, out Vector3 velA, out Vector3 velB))
+                if (Ballistics.CalculateInitialVelocity(sim.Movement.FeetPos, groundMagnet.Hit.point, sim.Movement.Rigidbody.linearVelocity.magnitude, Physics.gravity, out Vector3 velA, out Vector3 velB))
                 {
                     Vector3 targetVel = velA;
-                    if (Vector3.Distance(velB, sim.Movement.Rigidbody.velocity) < Vector3.Distance(velA, sim.Movement.Rigidbody.velocity))
+                    if (Vector3.Distance(velB, sim.Movement.Rigidbody.linearVelocity) < Vector3.Distance(velA, sim.Movement.Rigidbody.linearVelocity))
                     {
                         targetVel = velB;
                     }
-                    targetVel = targetVel - sim.Movement.Rigidbody.velocity;
+                    targetVel = targetVel - sim.Movement.Rigidbody.linearVelocity;
                     targetVel *= m_AdjustmentForce;
                     targetVel *= MMath.Sqrt(MMath.InverseLerp(0, 0.3f, sim.AirborneTimer));
                     sim.Movement.Rigidbody.AddForce(targetVel, ForceMode.Force);
@@ -80,7 +80,7 @@ namespace Manatea.RootlingForest
             int layerMask = LayerMaskExtensions.CalculatePhysicsLayerMask(gameObject.layer);
 
             // Trajectory tests
-            Vector2 vel2D = new Vector2(sim.Movement.Rigidbody.velocity.XZ().magnitude, sim.Movement.Rigidbody.velocity.y);
+            Vector2 vel2D = new Vector2(sim.Movement.Rigidbody.linearVelocity.XZ().magnitude, sim.Movement.Rigidbody.linearVelocity.y);
             (float a, float b) trajectoryParams = Ballistics.CalculateParabola(vel2D, Physics.gravity.y);
 
             bool groundFound = false;
@@ -94,8 +94,8 @@ namespace Manatea.RootlingForest
                 float px2 = (i + 1) * m_TrajectoryStepSize;
                 float py1 = Ballistics.Parabola(trajectoryParams.a, trajectoryParams.b, px1);
                 float py2 = Ballistics.Parabola(trajectoryParams.a, trajectoryParams.b, px2);
-                Vector3 p1 = sim.Movement.FeetPos + sim.Movement.Rigidbody.velocity.FlattenY().normalized * px1 + Vector3.up * py1;
-                Vector3 p2 = sim.Movement.FeetPos + sim.Movement.Rigidbody.velocity.FlattenY().normalized * px2 + Vector3.up * py2;
+                Vector3 p1 = sim.Movement.FeetPos + sim.Movement.Rigidbody.linearVelocity.FlattenY().normalized * px1 + Vector3.up * py1;
+                Vector3 p2 = sim.Movement.FeetPos + sim.Movement.Rigidbody.linearVelocity.FlattenY().normalized * px2 + Vector3.up * py2;
 
                 for (int j = 0; j < 2; j++)
                 {
@@ -125,7 +125,7 @@ namespace Manatea.RootlingForest
                             continue;
                         if (m_GroundHits[k].point.y > sim.Movement.FeetPos.y)
                             continue;
-                        if (Vector3.Dot(m_GroundHits[k].point - sim.Movement.FeetPos, sim.Movement.Rigidbody.velocity) < 0)
+                        if (Vector3.Dot(m_GroundHits[k].point - sim.Movement.FeetPos, sim.Movement.Rigidbody.linearVelocity) < 0)
                             continue;
                         if (!sim.Movement.IsRaycastHitWalkable(m_GroundHits[k]))
                             continue;
@@ -134,7 +134,7 @@ namespace Manatea.RootlingForest
                         Vector3 pointFeetSpace = m_GroundHits[k].point - sim.Movement.FeetPos;
                         Vector2 point2D = new Vector2(pointFeetSpace.XZ().magnitude, pointFeetSpace.y);
                         Vector2 sampledPoint = Ballistics.GetClosestPointOnParabola(trajectoryParams.a, trajectoryParams.b, point2D);
-                        Vector3 pointOnTrajectory = sim.Movement.FeetPos + sim.Movement.Rigidbody.velocity.FlattenY().normalized * sampledPoint.x + Vector3.up * sampledPoint.y;
+                        Vector3 pointOnTrajectory = sim.Movement.FeetPos + sim.Movement.Rigidbody.linearVelocity.FlattenY().normalized * sampledPoint.x + Vector3.up * sampledPoint.y;
                         float distanceHeuristic = Vector3.Distance(m_GroundHits[k].point, pointOnTrajectory) * 2.5f + Vector3.Distance(m_GroundHits[k].point, sim.Movement.FeetPos);
                         if (m_Debug)
                         {

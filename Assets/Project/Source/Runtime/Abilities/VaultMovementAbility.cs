@@ -50,7 +50,7 @@ namespace Manatea.RootlingForest
                 Vector3 vaultingDir = (vaultingHit.point - sim.Movement.FeetPos).FlattenY().normalized;
                 if (!m_VaultingActive)
                 {
-                    if (Vector3.Dot(sim.ScheduledMove.normalized, vaultingDir) > 0.4 && sim.Movement.Rigidbody.velocity.FlattenY().magnitude < 1 && sim.IsStableGrounded)
+                    if (Vector3.Dot(sim.ScheduledMove.normalized, vaultingDir) > 0.4 && sim.Movement.Rigidbody.linearVelocity.FlattenY().magnitude < 1 && sim.IsStableGrounded)
                     {
                         m_VaultingTimer += Time.fixedDeltaTime;
                     }
@@ -68,7 +68,7 @@ namespace Manatea.RootlingForest
                 if (m_VaultingActive)
                 {
                     m_VaultingTimer += Time.fixedDeltaTime;
-                    if (sim.Movement.Rigidbody.velocity.y < 0.5f)
+                    if (sim.Movement.Rigidbody.linearVelocity.y < 0.5f)
                     {
                         Vector3 vaultingForce = Vector3.up;
                         vaultingForce *= m_VaultingForce;

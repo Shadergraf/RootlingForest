@@ -112,6 +112,14 @@ namespace Manatea.GameplaySystem
                 }
             }
 
+            if (m_EffectOwner.EventReceiver)
+            {
+                for (int i = 0; i < Effect.Events.Length; i++)
+                {
+                    m_EffectOwner.EventReceiver.SendEventImmediate(Effect.Events[i], null);
+                }
+            }
+
             return true;
         }
         internal bool Remove()

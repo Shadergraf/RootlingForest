@@ -398,7 +398,7 @@ namespace Manatea.RootlingForest
             Vector3 handPosWorld = m_Joint.transform.TransformPoint(m_Joint.anchor);
             if (m_Target_GrabPrefs.UpdateGrabLocation)
             {
-                handPosWorld += m_Self.velocity * 0.01f;
+                handPosWorld += m_Self.linearVelocity * 0.01f;
             }
             Vector3 targetHandPos = Target.transform.InverseTransformPoint(Target.ClosestPointOnBounds(handPosWorld));
             switch (m_Target_GrabPrefs.LocationRule)
@@ -819,7 +819,7 @@ namespace Manatea.RootlingForest
             float totalPullingForce = MMath.InverseLerpClamped(30, 70, m_SmoothPullingForce.magnitude);
             float linearPullingForce = MMath.Pow(MMath.InverseLerpClamped(0.9f, 1, Vector3.Dot(forwardDir, m_SmoothPullingForce)), 2) * 0 + 1;
             m_PullingLoad = totalPullingForce * linearPullingForce;
-            moveMult = MMath.Lerp(moveMult, MMath.RemapClamped(0.5f, 0, 1, 1.5f, m_Self.velocity.magnitude), m_PullingLoad);
+            moveMult = MMath.Lerp(moveMult, MMath.RemapClamped(0.5f, 0, 1, 1.5f, m_Self.linearVelocity.magnitude), m_PullingLoad);
             rotMult = MMath.Lerp(rotMult, 0, m_PullingLoad);
 
             // TODO rotMult for pulling load is wrong!
@@ -889,7 +889,7 @@ namespace Manatea.RootlingForest
                 }
 
                 float massLocationMult = MMath.RemapClamped(0.5f, 1.0f, 1, 0.6f, rb.mass);
-                rb.velocity += velocity / sampleCount * massLocationMult;
+                rb.linearVelocity += velocity / sampleCount * massLocationMult;
 
                 float massRotationMult = MMath.RemapClamped(0.5f, 1.0f, 1, 0.25f, rb.mass);
                 Vector3 forward = velocity.normalized;

@@ -18,14 +18,14 @@ namespace Manatea.GameplaySystem
         private List<GameplayTag> m_InitialTemporaryTags;
 
 
-        internal List<GameplayTag> m_UnmanagedTags;
-        internal List<GameplayTag> m_ManagedTags;
+        internal List<GameplayTag> m_UnmanagedTags = new List<GameplayTag>();
+        internal List<GameplayTag> m_ManagedTags = new List<GameplayTag>();
 
 
         private void Awake()
         {
-            m_ManagedTags = new List<GameplayTag>(m_InitialPermanentTags);
-            m_UnmanagedTags = new List<GameplayTag>(m_InitialTemporaryTags);
+            m_ManagedTags.AddRange(m_InitialPermanentTags);
+            m_UnmanagedTags.AddRange(m_InitialTemporaryTags);
         }
 
 

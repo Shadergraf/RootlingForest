@@ -1,4 +1,5 @@
-﻿using Manatea.GameplaySystem;
+﻿using Manatea;
+using Manatea.GameplaySystem;
 using UnityEngine.VFX;
 
 namespace UnityEngine.VFX.Utility
@@ -12,23 +13,34 @@ namespace UnityEngine.VFX.Utility
 
         [VFXPropertyBinding("System.Single"), SerializeField]
         protected ExposedProperty m_Property = "Attribute";
-        public GameplayAttributeOwner AttributeOwner = null;
+        public Optional<GameplayAttributeOwner> AttributeOwner;
         public GameplayAttribute Attribute = null;
         public AnimationCurve MappingCurve;
         public GameplayAttributeValueMode ValueMode = GameplayAttributeValueMode.EvaluatedValue;
 
         public override bool IsValid(VisualEffect component)
         {
-            return AttributeOwner && Attribute;
+            return Attribute;
+        }
+
+        protected override void Awake()
+        {
+            Debug.Log("AttributeBinder Awake");
+            base.Awake();
+            
+            if (!AttributeOwner.hasValue)
+            {
+                AttributeOwner.value = GetComponentInParent<GameplayAttributeOwner>();
+            }
         }
 
         public override void UpdateBinding(VisualEffect component)
         {
             float value = 0;
             if (ValueMode == GameplayAttributeValueMode.EvaluatedValue)
-                AttributeOwner.TryGetAttributeEvaluatedValue(Attribute, out value);
+                AttributeOwner.value.TryGetAttributeEvaluatedValue(Attribute, out value);
             if (ValueMode == GameplayAttributeValueMode.BaseValue)
-                AttributeOwner.TryGetAttributeBaseValue(Attribute, out value);
+                AttributeOwner.value.TryGetAttributeBaseValue(Attribute, out value);
 
             component.SetFloat(m_Property, MappingCurve.Evaluate(value));
         }

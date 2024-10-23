@@ -34,7 +34,7 @@ namespace Manatea.RootlingForest
             // TODO handle multiple colliders with the same rigidbody in one frame
             if (!other.attachedRigidbody.isKinematic)
             {
-                other.attachedRigidbody.velocity = other.attachedRigidbody.velocity * (1 - Time.fixedDeltaTime * m_Drag);
+                other.attachedRigidbody.linearVelocity = other.attachedRigidbody.linearVelocity * (1 - Time.fixedDeltaTime * m_Drag);
                 other.attachedRigidbody.angularVelocity = other.attachedRigidbody.angularVelocity * (1 - Time.fixedDeltaTime * m_AngularDrag);
             }
         }

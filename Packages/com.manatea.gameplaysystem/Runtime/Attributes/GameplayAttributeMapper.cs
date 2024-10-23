@@ -7,7 +7,7 @@ namespace Manatea.GameplaySystem
     public class GameplayAttributeMapper : MonoBehaviour
     {
         [SerializeField]
-        private GameplayAttributeOwner m_AttributeOwner;
+        private Optional<GameplayAttributeOwner> m_AttributeOwner;
 
         [SerializeField]
         private GameplayAttribute m_Attribute;
@@ -22,6 +22,13 @@ namespace Manatea.GameplaySystem
         private float m_OldValue;
 
 
+        private void Awake()
+        {
+            if (!m_AttributeOwner.hasValue)
+            {
+                m_AttributeOwner.value = GetComponentInParent<GameplayAttributeOwner>();
+            }
+        }
         private void OnEnable()
         {
             float attributeValue = GetValue();
@@ -45,10 +52,10 @@ namespace Manatea.GameplaySystem
             switch (m_ValueMode)
             {
                 case GameplayAttributeValueMode.EvaluatedValue:
-                    m_AttributeOwner.TryGetAttributeEvaluatedValue(m_Attribute, out attributeValue);
+                    m_AttributeOwner.value.TryGetAttributeEvaluatedValue(m_Attribute, out attributeValue);
                     break;
                 case GameplayAttributeValueMode.BaseValue:
-                    m_AttributeOwner.TryGetAttributeBaseValue(m_Attribute, out attributeValue);
+                    m_AttributeOwner.value.TryGetAttributeBaseValue(m_Attribute, out attributeValue);
                     break;
             }
             return attributeValue;

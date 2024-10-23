@@ -55,7 +55,7 @@ namespace Manatea.RootlingForest
             m_BatteryStateChanged.Invoke(m_Battery);
             m_ModulatedBatteryStateChanged.Invoke(m_ModulationCurve.Evaluate(m_Battery));
 
-            m_Acceleration = (m_Rigid.velocity - m_LastVelocity) / Time.fixedDeltaTime;
+            m_Acceleration = (m_Rigid.linearVelocity - m_LastVelocity) / Time.fixedDeltaTime;
             m_Jerk = (m_Acceleration - m_LastAcceleration) / Time.fixedDeltaTime;
 
             if (m_Jerk.magnitude >= m_MinAccelerationMagnitude)
@@ -63,7 +63,7 @@ namespace Manatea.RootlingForest
                 ForceDetected(m_Jerk.magnitude * m_AccelerationToBatteryMult * Time.fixedDeltaTime);
             }
 
-            m_LastVelocity = m_Rigid.velocity;
+            m_LastVelocity = m_Rigid.linearVelocity;
             m_LastAcceleration = m_Acceleration;
         }
 

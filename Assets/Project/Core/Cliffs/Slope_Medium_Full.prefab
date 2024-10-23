@@ -8,6 +8,11 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: -8778871801483706898, guid: 4272eb7ec91b6be41a6d3f28d0e0c669,
+        type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
+      objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 4272eb7ec91b6be41a6d3f28d0e0c669,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -60,9 +65,24 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -5742768627829496229, guid: 4272eb7ec91b6be41a6d3f28d0e0c669,
         type: 3}
+      propertyPath: m_ReceiveGI
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: -5742768627829496229, guid: 4272eb7ec91b6be41a6d3f28d0e0c669,
+        type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
       value: 
       objectReference: {fileID: 2100000, guid: d40ce77ede6490d499bf6bba66a443c1, type: 2}
+    - target: {fileID: -4737395807898423603, guid: 4272eb7ec91b6be41a6d3f28d0e0c669,
+        type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
+      objectReference: {fileID: 0}
+    - target: {fileID: -2058459681921210211, guid: 4272eb7ec91b6be41a6d3f28d0e0c669,
+        type: 3}
+      propertyPath: m_ReceiveGI
+      value: 2
+      objectReference: {fileID: 0}
     - target: {fileID: -2058459681921210211, guid: 4272eb7ec91b6be41a6d3f28d0e0c669,
         type: 3}
       propertyPath: 'm_Materials.Array.data[0]'
@@ -72,6 +92,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Slope_Medium_Full
+      objectReference: {fileID: 0}
+    - target: {fileID: 919132149155446097, guid: 4272eb7ec91b6be41a6d3f28d0e0c669,
+        type: 3}
+      propertyPath: m_StaticEditorFlags
+      value: 2147483647
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

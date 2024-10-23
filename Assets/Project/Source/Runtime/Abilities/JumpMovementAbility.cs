@@ -118,14 +118,14 @@ namespace Manatea.RootlingForest
 
             if (sim.ContactMove != Vector3.zero)
             {
-                Vector3 initialDir = sim.Movement.Rigidbody.velocity;
+                Vector3 initialDir = sim.Movement.Rigidbody.linearVelocity;
                 Vector3 targetDir = sim.ContactMove.FlattenY().WithMagnitude(initialDir.FlattenY().magnitude) + Vector3.up * initialDir.y;
-                sim.Movement.Rigidbody.velocity = Vector3.Slerp(initialDir, targetDir, sim.ContactMove.magnitude * m_JumpMoveAlignment);
+                sim.Movement.Rigidbody.linearVelocity = Vector3.Slerp(initialDir, targetDir, sim.ContactMove.magnitude * m_JumpMoveAlignment);
             }
 
             Vector3 jumpDir = -Physics.gravity.normalized;
             // TODO add a sliding jump here that is perpendicular to the slide normal
-            sim.Movement.Rigidbody.velocity = Vector3.ProjectOnPlane(sim.Movement.Rigidbody.velocity, jumpDir);
+            sim.Movement.Rigidbody.linearVelocity = Vector3.ProjectOnPlane(sim.Movement.Rigidbody.linearVelocity, jumpDir);
             Vector3 jumpForce = jumpDir * m_JumpForce;
             StartCoroutine(CO_Jump(sim, jumpForce, m_JumpIterations));
 

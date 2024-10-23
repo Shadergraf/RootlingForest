@@ -62,7 +62,7 @@ namespace Manatea.RootlingForest
                 m_SpawnObjects[i].SetActive(true);
                 m_SpawnObjects[i].transform.SetParent(transform.parent);
                 Rigidbody rigid = m_SpawnObjects[i].GetComponent<Rigidbody>();
-                rigid.velocity = sourceRigid.velocity;
+                rigid.linearVelocity = sourceRigid.linearVelocity;
                 rigid.angularVelocity = sourceRigid.angularVelocity;
 
                 Vector3 randomDir = Random.onUnitSphere;
@@ -73,7 +73,7 @@ namespace Manatea.RootlingForest
                 }
                 Vector3 forceDir = Vector3.Lerp(randomDir, radialDir, m_RadialForce).normalized;
                 //rigid.AddForce(force * m_Force, m_UseMass ? ForceMode.Impulse : ForceMode.VelocityChange);
-                rigid.velocity += forceDir * m_Force + impulse * m_ImpulseForceContribution;
+                rigid.linearVelocity += forceDir * m_Force + impulse * m_ImpulseForceContribution;
             }
 
             if (m_DestroyObject)

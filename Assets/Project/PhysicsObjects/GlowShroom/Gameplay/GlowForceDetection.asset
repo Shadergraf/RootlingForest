@@ -12,8 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e6f47289ef16c1d43bc3ba74ebdf2b2d, type: 3}
   m_Name: GlowForceDetection
   m_EditorClassIdentifier: 
-  m_ImpulseMagnitude: 15000
-  m_JerkInfluence: 1
+  m_ImpulseMagnitude: 4000
+  m_JerkInfluence: 0.1
   m_ContactImpulseInfluence: 1
   m_ContactVelocityInfluence: 0
   m_ImpulseTimeFalloff: 16

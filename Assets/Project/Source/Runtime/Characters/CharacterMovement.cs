@@ -130,7 +130,7 @@ namespace Manatea.RootlingForest
             public Vector3 ContactMove;
 
             public float SmoothMoveMagnitude;
-            public PhysicMaterial PhysicsMaterial;
+            public PhysicsMaterial PhysicsMaterial;
 
             public RaycastHit GroundLowerHit;
             public RaycastHit PreciseGroundLowerHit;
@@ -158,8 +158,8 @@ namespace Manatea.RootlingForest
 
             m_Sim = new MovementSimulationState(this);
 
-            m_Sim.PhysicsMaterial = new PhysicMaterial();
-            m_Sim.PhysicsMaterial.frictionCombine = PhysicMaterialCombine.Minimum;
+            m_Sim.PhysicsMaterial = new PhysicsMaterial();
+            m_Sim.PhysicsMaterial.frictionCombine = PhysicsMaterialCombine.Minimum;
             m_Collider.material = m_Sim.PhysicsMaterial;
         }
 
@@ -331,7 +331,7 @@ namespace Manatea.RootlingForest
                 // Air movement
                 else
                 {
-                    float airSpeedMult = MMath.InverseLerpClamped(0.707f, 0f, Vector3.Dot(m_Rigidbody.velocity.normalized, m_Sim.ContactMove.normalized));
+                    float airSpeedMult = MMath.InverseLerpClamped(0.707f, 0f, Vector3.Dot(m_Rigidbody.linearVelocity.normalized, m_Sim.ContactMove.normalized));
                     m_Rigidbody.AddForceAtPosition(m_Sim.ContactMove * m_AirMoveForce * airSpeedMult, FeetPos, ForceMode.Acceleration);
                 }
 
@@ -356,9 +356,9 @@ namespace Manatea.RootlingForest
                 }
                 m_Sim.TargetLookDir = Vector3.RotateTowards(m_Sim.TargetLookDir, m_Sim.ScheduledLookDir, targetRotationRate * MMath.Deg2Rad * Time.fixedDeltaTime, 1);
                 float targetRotationTorque = MMath.DeltaAngle((m_Rigidbody.rotation.eulerAngles.y + 90) * MMath.Deg2Rad, MMath.Atan2(m_Sim.TargetLookDir.z, -m_Sim.TargetLookDir.x)) * MMath.Rad2Deg;
-                if (!MMath.IsZero(Rigidbody.velocity))
+                if (!MMath.IsZero(Rigidbody.linearVelocity))
                 {
-                    targetRotationTorque *= MMath.RemapClamped(-0.5f, 0, 0.1f, 1, Vector3.Dot(m_Sim.ContactMove.normalized, Rigidbody.velocity.normalized));
+                    targetRotationTorque *= MMath.RemapClamped(-0.5f, 0, 0.1f, 1, Vector3.Dot(m_Sim.ContactMove.normalized, Rigidbody.linearVelocity.normalized));
                 }
                 targetRotationTorque *= m_CachedRotRateMult;
                 if (m_Sim.IsStableGrounded && !m_Sim.IsSliding)
@@ -398,10 +398,10 @@ namespace Manatea.RootlingForest
                  * In other words: Correctly walking up slopes is only possible because of the dampening applied here.
                  * That is weird and should not be the case, so walking up slopes needs a fix!
                 */
-                float lerpFactor = MMath.InverseLerpClamped(4f, 6f, MMath.Abs(m_Rigidbody.velocity.y));
+                float lerpFactor = MMath.InverseLerpClamped(4f, 6f, MMath.Abs(m_Rigidbody.linearVelocity.y));
 
                 float feetLinearResistance = Mathf.Clamp01(1 - m_FeetLinearResistance * dt);
-                m_Rigidbody.velocity = Vector3.Scale(m_Rigidbody.velocity, Vector3.Lerp(Vector3.one * feetLinearResistance, new Vector3(feetLinearResistance, 1, feetLinearResistance), lerpFactor));
+                m_Rigidbody.linearVelocity = Vector3.Scale(m_Rigidbody.linearVelocity, Vector3.Lerp(Vector3.one * feetLinearResistance, new Vector3(feetLinearResistance, 1, feetLinearResistance), lerpFactor));
 
                 float rotationDragMult = MMath.Clamp01(m_CachedRotRateMult);
                 m_Rigidbody.angularVelocity *= MMath.Clamp01(1 - m_FeetAngularResistance * rotationDragMult * dt);

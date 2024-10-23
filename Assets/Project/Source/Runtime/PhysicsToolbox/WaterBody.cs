@@ -37,7 +37,7 @@ namespace Manatea.RootlingForest
             other.attachedRigidbody.AddForceAtPosition(Vector3.up * (waterLine - other.attachedRigidbody.position.y) * m_WaterDensity, other.attachedRigidbody.position, ForceMode.Acceleration);
 
 
-            other.attachedRigidbody.velocity *= Mathf.Clamp01(1 - m_LinearDrag * Time.fixedDeltaTime);
+            other.attachedRigidbody.linearVelocity *= Mathf.Clamp01(1 - m_LinearDrag * Time.fixedDeltaTime);
             other.attachedRigidbody.angularVelocity *= Mathf.Clamp01(1 - m_AngularDrag * Time.fixedDeltaTime);
         }
     }

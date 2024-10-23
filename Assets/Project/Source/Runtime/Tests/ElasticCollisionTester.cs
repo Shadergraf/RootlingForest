@@ -14,8 +14,8 @@ namespace Manatea.RootlingForest
             Rigidbody selfRigid = GetComponent<Rigidbody>();
             Rigidbody otherRigid = collision.rigidbody;
 
-            Vector3 vel1 = selfRigid.velocity;
-            Vector3 vel2 = otherRigid.velocity;
+            Vector3 vel1 = selfRigid.linearVelocity;
+            Vector3 vel2 = otherRigid.linearVelocity;
 
             Debug.DrawLine(selfRigid.position, selfRigid.position + collision.impulse.normalized * 5, Color.grey, 10, false);
             Vector3 thresholdPos = selfRigid.position + collision.impulse.normalized * c_ForceThreshold;

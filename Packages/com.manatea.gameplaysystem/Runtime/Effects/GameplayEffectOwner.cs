@@ -9,17 +9,36 @@ namespace Manatea.GameplaySystem
     public class GameplayEffectOwner : MonoBehaviour
     {
         [SerializeField]
-        private GameplayTagOwner m_TagOwner;
+        private Optional<GameplayTagOwner> m_TagOwner;
         [SerializeField]
-        private GameplayAttributeOwner m_AttributeOwner;
+        private Optional<GameplayAttributeOwner> m_AttributeOwner;
+        [SerializeField]
+        private Optional<GameplayEventReceiver> m_EventReceiver;
 
-        public GameplayTagOwner TagOwner => m_TagOwner;
-        public GameplayAttributeOwner AttributeOwner => m_AttributeOwner;
+        public GameplayTagOwner TagOwner => m_TagOwner.value;
+        public GameplayAttributeOwner AttributeOwner => m_AttributeOwner.value;
+        public GameplayEventReceiver EventReceiver => m_EventReceiver.value;
 
         public List<GameplayEffectInstance> m_ActiveEffects;
 
         private List<GameplayEffectInstance> m_ScheduledForRemoval = new List<GameplayEffectInstance>(8);
 
+
+        private void Awake()
+        {
+            if (!m_TagOwner.hasValue)
+            {
+                m_TagOwner.value = GetComponentInParent<GameplayTagOwner>();
+            }
+            if (!m_AttributeOwner.hasValue)
+            {
+                m_AttributeOwner.value = GetComponentInParent<GameplayAttributeOwner>();
+            }
+            if (!m_EventReceiver.hasValue)
+            {
+                m_EventReceiver.value = GetComponentInParent<GameplayEventReceiver>();
+            }
+        }
 
         private void FixedUpdate()
         {

@@ -30,7 +30,7 @@ namespace Manatea.RootlingForest
         {
             Rigidbody selfRigid = GetComponent<Rigidbody>();
             Rigidbody spawnedRigid = go.GetComponent<Rigidbody>();
-            spawnedRigid.velocity += Vector3.ProjectOnPlane(selfRigid.velocity, Vector3.up);
+            spawnedRigid.linearVelocity += Vector3.ProjectOnPlane(selfRigid.linearVelocity, Vector3.up);
             selfRigid.AddForce(spawnedRigid.transform.forward * -1 * 200, ForceMode.Force);
         }
     }

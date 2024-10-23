@@ -24,16 +24,4 @@ MonoBehaviour:
   - Attribute: {fileID: 11400000, guid: 13efa8a8c038c3a47ae5293010294aa4, type: 2}
     Type: 1
     Value: 0.75
-  m_Field: 0
-  m_PostProcessor:
-    rid: 4516264047519465557
-  m_PostProcessors: []
-  m_PostProcessorsInts: []
-  references:
-    version: 2
-    RefIds:
-    - rid: 4516264047519465557
-      type: {class: ValuePostProcessor, ns: Manatea.GameplaySystem, asm: Manatea.GameplaySystem}
-      data:
-        Limiter: 0
-        Value: 0
+  m_Events: []

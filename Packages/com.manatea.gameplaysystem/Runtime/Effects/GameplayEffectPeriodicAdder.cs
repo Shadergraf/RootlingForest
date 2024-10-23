@@ -8,7 +8,7 @@ namespace Manatea.GameplaySystem
     public class GameplayEffectPeriodicAdder : MonoBehaviour
     {
         [SerializeField]
-        private GameplayEffectOwner m_EffectsOwner;
+        private Optional<GameplayEffectOwner> m_EffectsOwner;
         [SerializeField]
         private List<GameplayEffect> m_Effects;
         [SerializeField]
@@ -17,6 +17,14 @@ namespace Manatea.GameplaySystem
         [SerializeField]
         private PeriodicTriggerMode m_TriggerMode;
 
+
+        private void Awake()
+        {
+            if (!m_EffectsOwner.hasValue)
+            {
+                m_EffectsOwner.value = GetComponentInParent<GameplayEffectOwner>();
+            }
+        }
 
         private void OnEnable()
         {
@@ -45,7 +53,7 @@ namespace Manatea.GameplaySystem
         {
             for (int i = 0; i < m_Effects.Count; i++)
             {
-                m_EffectsOwner.AddEffect(m_Effects[i]);
+                m_EffectsOwner.value.AddEffect(m_Effects[i]);
             }
         }
     }

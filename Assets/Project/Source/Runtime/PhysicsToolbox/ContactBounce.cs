@@ -109,7 +109,7 @@ namespace Manatea.RootlingForest
         {
             float consecutivePerpendicularComponentMult = MMath.Pow(m_PreservePerpendicularComponent, 1f / amountOfTimes);
 
-            rb.velocity = Vector3.ProjectOnPlane(rb.velocity, velocity.normalized) * m_PreservePerpendicularComponent;
+            rb.linearVelocity = Vector3.ProjectOnPlane(rb.linearVelocity, velocity.normalized) * m_PreservePerpendicularComponent;
 
             for (int i = 0; i < amountOfTimes; i++)
             {
@@ -120,7 +120,7 @@ namespace Manatea.RootlingForest
 
                 if (!rb.isKinematic)
                 {
-                    rb.velocity += velocity / amountOfTimes;
+                    rb.linearVelocity += velocity / amountOfTimes;
                 }
 
                 yield return new WaitForFixedUpdate();

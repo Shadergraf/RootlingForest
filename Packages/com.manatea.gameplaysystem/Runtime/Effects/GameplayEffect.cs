@@ -1,6 +1,5 @@
 using System.Collections;
 using System.Collections.Generic;
-using UnityEditor.ShaderKeywordFilter;
 using UnityEngine;
 
 namespace Manatea.GameplaySystem
@@ -19,12 +18,15 @@ namespace Manatea.GameplaySystem
         private List<GameplayTag> m_TagsToAdd;
         [SerializeField]
         private GameplayAttributeModification[] m_AttributeModifications;
+        [SerializeField]
+        private GameplayEvent[] m_Events;
 
 
         public EffectLifetime Lifetime => m_Lifetime;
         public float Duration => m_Duration;
         public List<GameplayTag> TagsToAdd => m_TagsToAdd;
         public GameplayAttributeModification[] GameplayAttributeModifications => m_AttributeModifications;
+        public GameplayEvent[] Events => m_Events;
     }
 
     public enum EffectLifetime

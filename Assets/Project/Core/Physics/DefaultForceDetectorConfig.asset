@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e6f47289ef16c1d43bc3ba74ebdf2b2d, type: 3}
   m_Name: DefaultForceDetectorConfig
   m_EditorClassIdentifier: 
-  m_ImpulseMagnitude: 900
+  m_ImpulseMagnitude: 1200
   m_JerkInfluence: 0
   m_ContactImpulseInfluence: 0
   m_ContactVelocityInfluence: 1

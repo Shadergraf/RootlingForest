@@ -60,6 +60,7 @@ MeshRenderer:
   m_RayTraceProcedural: 0
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -228,6 +229,7 @@ MeshRenderer:
   m_RayTraceProcedural: 0
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -313,6 +315,7 @@ MeshRenderer:
   m_RayTraceProcedural: 0
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -398,6 +401,7 @@ MeshRenderer:
   m_RayTraceProcedural: 0
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -548,11 +552,6 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5171198309114388193, guid: bf0177a3809de3d49ac5dcdb1afa9084,
         type: 3}
-      propertyPath: m_InitialAttributes.Array.size
-      value: 6
-      objectReference: {fileID: 0}
-    - target: {fileID: 5171198309114388193, guid: bf0177a3809de3d49ac5dcdb1afa9084,
-        type: 3}
       propertyPath: m_AttributeInstances.Array.size
       value: 6
       objectReference: {fileID: 0}
@@ -569,17 +568,6 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5171198309114388193, guid: bf0177a3809de3d49ac5dcdb1afa9084,
         type: 3}
-      propertyPath: m_InitialAttributes.Array.data[5].Attribute
-      value: 
-      objectReference: {fileID: 11400000, guid: bdf1fcbd345381d4ba43a33e3773c7f8,
-        type: 2}
-    - target: {fileID: 5171198309114388193, guid: bf0177a3809de3d49ac5dcdb1afa9084,
-        type: 3}
-      propertyPath: m_InitialAttributes.Array.data[5].BaseValue
-      value: 0.3
-      objectReference: {fileID: 0}
-    - target: {fileID: 5171198309114388193, guid: bf0177a3809de3d49ac5dcdb1afa9084,
-        type: 3}
       propertyPath: m_AttributeInstances.Array.data[5].m_Attribute
       value: 
       objectReference: {fileID: 11400000, guid: bdf1fcbd345381d4ba43a33e3773c7f8,
@@ -588,6 +576,61 @@ PrefabInstance:
         type: 3}
       propertyPath: m_AttributeInstances.Array.data[5].m_BaseValue
       value: 0.3
+      objectReference: {fileID: 0}
+    - target: {fileID: 7783487702009225304, guid: bf0177a3809de3d49ac5dcdb1afa9084,
+        type: 3}
+      propertyPath: m_PropertySheet.m_Float.m_Array.Array.size
+      value: 3
+      objectReference: {fileID: 0}
+    - target: {fileID: 7783487702009225304, guid: bf0177a3809de3d49ac5dcdb1afa9084,
+        type: 3}
+      propertyPath: m_PropertySheet.m_Vector3f.m_Array.Array.size
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 7783487702009225304, guid: bf0177a3809de3d49ac5dcdb1afa9084,
+        type: 3}
+      propertyPath: m_PropertySheet.m_Float.m_Array.Array.data[2].m_Name
+      value: Scale
+      objectReference: {fileID: 0}
+    - target: {fileID: 7783487702009225304, guid: bf0177a3809de3d49ac5dcdb1afa9084,
+        type: 3}
+      propertyPath: m_PropertySheet.m_Float.m_Array.Array.data[2].m_Value
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 7783487702009225304, guid: bf0177a3809de3d49ac5dcdb1afa9084,
+        type: 3}
+      propertyPath: m_PropertySheet.m_Vector3f.m_Array.Array.data[0].m_Name
+      value: SpawnLine_start
+      objectReference: {fileID: 0}
+    - target: {fileID: 7783487702009225304, guid: bf0177a3809de3d49ac5dcdb1afa9084,
+        type: 3}
+      propertyPath: m_PropertySheet.m_Vector3f.m_Array.Array.data[1].m_Name
+      value: SpawnLine_end
+      objectReference: {fileID: 0}
+    - target: {fileID: 7783487702009225304, guid: bf0177a3809de3d49ac5dcdb1afa9084,
+        type: 3}
+      propertyPath: m_PropertySheet.m_Float.m_Array.Array.data[2].m_Overridden
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7783487702009225304, guid: bf0177a3809de3d49ac5dcdb1afa9084,
+        type: 3}
+      propertyPath: m_PropertySheet.m_Vector3f.m_Array.Array.data[0].m_Value.y
+      value: 0.6
+      objectReference: {fileID: 0}
+    - target: {fileID: 7783487702009225304, guid: bf0177a3809de3d49ac5dcdb1afa9084,
+        type: 3}
+      propertyPath: m_PropertySheet.m_Vector3f.m_Array.Array.data[1].m_Value.y
+      value: -0.6
+      objectReference: {fileID: 0}
+    - target: {fileID: 7783487702009225304, guid: bf0177a3809de3d49ac5dcdb1afa9084,
+        type: 3}
+      propertyPath: m_PropertySheet.m_Vector3f.m_Array.Array.data[0].m_Overridden
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 7783487702009225304, guid: bf0177a3809de3d49ac5dcdb1afa9084,
+        type: 3}
+      propertyPath: m_PropertySheet.m_Vector3f.m_Array.Array.data[1].m_Overridden
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []

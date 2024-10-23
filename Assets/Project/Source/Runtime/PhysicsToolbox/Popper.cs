@@ -38,7 +38,6 @@ namespace Manatea.RootlingForest
             Rigidbody rigid = GetComponent<Rigidbody>();
             for (int i = 0; i < m_PopCount; i++)
             {
-                Debug.Log("POP!");
                 m_PopResponse.Invoke();
 
                 rigid.AddForce(Random.insideUnitSphere * m_PopForce, ForceMode.Impulse);
