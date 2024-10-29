@@ -11,12 +11,24 @@ namespace Manatea.RootlingForest
 
     public class PhysicsDebugger : MonoBehaviour
     {
+        [SerializeField]
+        public Camera m_InventoryCam;
+        [SerializeField]
+        public float m_SpringForce = 100;
+        [SerializeField]
+        public float m_Damper = 40;
+        [SerializeField]
+        public float m_BreakForce = 1000;
+
         private Rigidbody m_GrabObject;
         private Vector3 m_GrabPosLocal;
         private Vector3 m_InitialGrabPosGlobal;
         private Vector3 m_CurrentGrabPosGlobal;
 
         private SpringJoint m_Spring;
+
+        private Camera m_CurrentCamera;
+
 
         private void Start()
         {
@@ -27,70 +39,87 @@ namespace Manatea.RootlingForest
         {
             if (Input.GetMouseButtonDown(2))
             {
-                Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-                if (Physics.Raycast(ray, out RaycastHit hit))
+                if (m_InventoryCam && !m_GrabObject)
                 {
-                    GameObject currentTestObj = hit.collider.gameObject;
-                    while (currentTestObj != null)
-                    {
-                        m_GrabObject = currentTestObj.GetComponentInParent<Rigidbody>();
-                        if (m_GrabObject != null && !m_GrabObject.isKinematic)
-                        {
-                            m_GrabPosLocal = m_GrabObject.transform.InverseTransformPoint(hit.point);
-                            m_InitialGrabPosGlobal = hit.point;
-                            m_CurrentGrabPosGlobal = m_InitialGrabPosGlobal;
-
-                            GameObject springGO = new GameObject("DebugPhysicsSpring");
-                            springGO.hideFlags = HideFlags.HideAndDontSave;
-
-                            springGO.transform.position = hit.point;
-                            m_Spring = springGO.AddComponent<SpringJoint>();
-                            m_Spring.connectedBody = m_GrabObject;
-                            m_Spring.autoConfigureConnectedAnchor = false;
-                            m_Spring.anchor = Vector3.zero;
-                            m_Spring.connectedAnchor = m_GrabPosLocal;
-
-                            m_Spring.spring = 100;
-                            m_Spring.damper = 40;
-
-                            m_Spring.GetComponent<Rigidbody>().isKinematic = true;
-                            break;
-                        }
-
-                        if (currentTestObj.transform.parent)
-                        {
-                            currentTestObj = currentTestObj.transform.parent.gameObject;
-                        }
-                        else
-                        {
-                            currentTestObj = null;
-                        }
-                        if (currentTestObj == null)
-                        {
-                            m_GrabObject = null;
-                            break;
-                        }
-                    }
+                    HandleKeyDown(m_InventoryCam);
+                    m_CurrentCamera = m_InventoryCam;
+                }
+                if (!m_GrabObject)
+                {
+                    HandleKeyDown(Camera.main);
+                    m_CurrentCamera = Camera.main;
                 }
             }
+
             if (Input.GetMouseButtonUp(2))
             {
-                if (m_Spring)
-                {
-                    Destroy(m_Spring.gameObject);
-                }
+                DestroyConnection();
+            }
+        }
 
-                m_GrabObject = null;
-                m_Spring = null;
+        private void HandleKeyDown(Camera cam)
+        {
+            Ray ray = cam.ScreenPointToRay(Input.mousePosition);
+            if (Physics.Raycast(ray, out RaycastHit hit))
+            {
+                GameObject currentTestObj = hit.collider.gameObject;
+                while (currentTestObj != null)
+                {
+                    m_GrabObject = currentTestObj.GetComponentInParent<Rigidbody>();
+                    if (m_GrabObject != null && !m_GrabObject.isKinematic)
+                    {
+                        m_GrabPosLocal = m_GrabObject.transform.InverseTransformPoint(hit.point);
+                        m_InitialGrabPosGlobal = hit.point;
+                        m_CurrentGrabPosGlobal = m_InitialGrabPosGlobal;
+
+                        GameObject springGO = new GameObject("DebugPhysicsSpring");
+                        //springGO.hideFlags = HideFlags.HideAndDontSave;
+
+                        springGO.transform.position = hit.point;
+                        m_Spring = springGO.AddComponent<SpringJoint>();
+                        m_Spring.connectedBody = m_GrabObject;
+                        m_Spring.autoConfigureConnectedAnchor = false;
+                        m_Spring.anchor = Vector3.zero;
+                        m_Spring.connectedAnchor = m_GrabPosLocal;
+
+                        m_Spring.spring = m_SpringForce;
+                        m_Spring.damper = m_Damper;
+                        m_Spring.breakForce = m_BreakForce;
+
+                        m_Spring.GetComponent<Rigidbody>().isKinematic = true;
+                        break;
+                    }
+
+                    if (currentTestObj.transform.parent)
+                    {
+                        currentTestObj = currentTestObj.transform.parent.gameObject;
+                    }
+                    else
+                    {
+                        currentTestObj = null;
+                    }
+                    if (currentTestObj == null)
+                    {
+                        m_GrabObject = null;
+                        break;
+                    }
+                }
             }
         }
 
         private void FixedUpdate()
         {
+            if (m_Spring)
+            {
+                m_Spring.spring = m_SpringForce;
+                m_Spring.damper = m_Damper;
+                m_Spring.breakForce = m_BreakForce;
+            }    
+
             if (Input.GetMouseButton(2) && m_GrabObject)
             {
-                Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-                Vector3 planeNormal = Camera.main.transform.forward.FlattenY().normalized;
+                Ray ray = m_CurrentCamera.ScreenPointToRay(Input.mousePosition);
+                Vector3 planeNormal = m_CurrentCamera.transform.forward.FlattenY().normalized;
                 if (Input.GetKey(KeyCode.LeftControl))
                     planeNormal = Vector3.up;
                 Plane plane = new Plane(planeNormal, m_CurrentGrabPosGlobal);
@@ -109,6 +138,17 @@ namespace Manatea.RootlingForest
 
                 // TODO use a spawned gameobject to create a spring joint
             }
+        }
+
+        public void DestroyConnection()
+        {
+            if (m_Spring)
+            {
+                Destroy(m_Spring.gameObject);
+            }
+
+            m_GrabObject = null;
+            m_Spring = null;
         }
     }
 

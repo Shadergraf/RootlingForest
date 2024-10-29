@@ -2,26 +2,40 @@ using Manatea.RootlingForest;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Rendering.Universal;
 
 public class AccessInventoryAbility : MonoBehaviour
 {
     [SerializeField]
-    private GrabAbility m_GrabAbility;
-    [SerializeField]
-    private Inventory m_Inventory;
+    private WorldBagInventory m_Inventory;
 
+    public WorldBagInventory Inventory => m_Inventory;
+
+
+    private void OnValidate()
+    {
+        enabled = false;
+    }
 
     private void OnEnable()
     {
-        if (m_GrabAbility.Target)
-        {
-            GameObject item = m_GrabAbility.Target.gameObject;
-            if (item && m_Inventory.AddItem(item))
-            {
-                m_GrabAbility.enabled = false;
-            }
-        }
+        Camera.main.GetUniversalAdditionalCameraData().cameraStack.Add(m_Inventory.WorldBag.Camera);
+        FindFirstObjectByType<PhysicsDebugger>().m_InventoryCam = m_Inventory.WorldBag.Camera;
 
-        enabled = false;
+        m_Inventory.WorldBag.OpenInventory();
+    }
+
+    private void OnDisable()
+    {
+        var camera = Camera.main;
+#if UNITY_EDITOR
+        // Exit playmode workaround
+        if (!camera)
+            return;
+#endif
+        camera.GetUniversalAdditionalCameraData().cameraStack.Remove(m_Inventory.WorldBag.Camera);
+        FindFirstObjectByType<PhysicsDebugger>().m_InventoryCam = null;
+
+        m_Inventory.WorldBag.CloseInventory();
     }
 }

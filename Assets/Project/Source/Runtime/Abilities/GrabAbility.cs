@@ -424,6 +424,12 @@ namespace Manatea.RootlingForest
 
         private void OnDisable()
         {
+#if UNITY_EDITOR
+            // Exit playmode error workaround
+            if (enabled)
+                return;
+#endif
+
             if (m_Joint)
             {
                 Destroy(m_Joint);

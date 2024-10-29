@@ -11,17 +11,15 @@ namespace Manatea.RootlingForest
         [SerializeField]
         private GrabAbility m_GrabAbility;
         [SerializeField]
-        private Inventory m_Inventory;
+        private WorldBagInventory m_Inventory;
 
         public void Update()
         {
             if (Keyboard.current.gKey.wasPressedThisFrame)
             {
-                GameObject item = m_GrabAbility.Target.gameObject;
-                if (m_Inventory.AddItem(item))
-                {
-                    m_GrabAbility.enabled = false;
-                }
+                GameObject item = m_GrabAbility.Target.gameObject; 
+                m_Inventory.AddItem(item);
+                m_GrabAbility.enabled = false;
             }
         }
     }

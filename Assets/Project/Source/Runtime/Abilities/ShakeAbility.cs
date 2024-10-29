@@ -1,4 +1,5 @@
 using Manatea;
+using Manatea.GameplaySystem;
 using Manatea.RootlingForest;
 using System.Collections;
 using System.Collections.Generic;
@@ -7,14 +8,34 @@ using UnityEngine;
 public class ShakeAbility : MonoBehaviour
 {
     [SerializeField]
+    private Optional<GameplayEffectOwner> m_EffectOwner;
+
+    [SerializeField]
     private GrabAbility m_GrabAbility;
     [SerializeField]
     private float m_Speed = 10;
     [SerializeField]
     private float m_Amount = 0.01f;
 
+    [SerializeField]
+    private GameplayEffect[] m_GrabberEffects;
+    [SerializeField]
+    private GameplayEffect[] m_GrabbedObjectEffects;
+
     private float m_Time;
 
+    private List<GameplayEffectInstance> m_GrabberEffectInstances = new List<GameplayEffectInstance>();
+    private GameplayEffectOwner m_TargetEffectOwner;
+    private List<GameplayEffectInstance> m_GrabbedObjectEffectInstances = new List<GameplayEffectInstance>();
+
+
+    private void Awake()
+    {
+        if (!m_EffectOwner.hasValue)
+        {
+            m_EffectOwner.value = GetComponentInParent<GameplayEffectOwner>();
+        }
+    }
 
     private void OnEnable()
     {
@@ -25,11 +46,44 @@ public class ShakeAbility : MonoBehaviour
         }
 
         m_Time = 0;
+
+        if (m_EffectOwner.value)
+        {
+            for (int i = 0; i < m_GrabberEffects.Length; i++)
+            {
+                m_GrabberEffectInstances.Add(m_EffectOwner.value.AddEffect(m_GrabberEffects[i]));
+            }
+        }
+
+        if (m_GrabAbility.Target.TryGetComponent(out m_TargetEffectOwner))
+        {
+            for (int i = 0; i < m_GrabbedObjectEffects.Length; i++)
+            {
+                m_GrabbedObjectEffectInstances.Add(m_TargetEffectOwner.AddEffect(m_GrabbedObjectEffects[i]));
+            }
+        }
     }
 
     private void OnDisable()
     {
-        
+        if (m_EffectOwner.value)
+        {
+            for (int i = 0; i < m_GrabberEffects.Length; i++)
+            {
+                m_EffectOwner.value.RemoveEffect(m_GrabberEffectInstances[i]);
+            }
+        }
+        m_GrabberEffectInstances.Clear();
+
+        if (m_TargetEffectOwner)
+        {
+            for (int i = 0; i < m_GrabbedObjectEffects.Length; i++)
+            {
+                m_TargetEffectOwner.RemoveEffect(m_GrabbedObjectEffectInstances[i]);
+            }
+        }
+        m_TargetEffectOwner = null;
+        m_GrabbedObjectEffectInstances.Clear();
     }
 
     private void FixedUpdate()

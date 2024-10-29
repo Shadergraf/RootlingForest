@@ -22,7 +22,7 @@ namespace Manatea.RootlingForest
         [SerializeField]
         private EatAbility m_EatAbility;
         [SerializeField]
-        private GameplayAttribute m_HealthAttribute;
+        private AccessInventoryAbility m_InventoryAbility;
 
         [SerializeField]
         private InputActionAsset m_InputAsset;
@@ -44,6 +44,7 @@ namespace Manatea.RootlingForest
         private InputAction m_JumpAction;
         private InputAction m_GrabAction;
         private InputAction m_EatAction;
+        private InputAction m_InventoryAction;
 
         private Vector2 m_LastInput;
 
@@ -92,6 +93,7 @@ namespace Manatea.RootlingForest
             m_JumpAction        = m_InputActions.actionMaps[0].actions[1];
             m_GrabAction        = m_InputActions.actionMaps[0].actions[2];
             m_EatAction         = m_InputActions.actionMaps[0].actions[3];
+            m_InventoryAction   = m_InputActions.actionMaps[0].actions[4];
         }
 
         private void Start()
@@ -104,6 +106,7 @@ namespace Manatea.RootlingForest
             m_JumpAction.performed += JumpAction;
             m_GrabAction.performed += GrabAction;
             m_EatAction.performed += EatAction;
+            m_InventoryAction.performed += AccessInventoryAction;
         }
 
         private void OnEnable()
@@ -112,6 +115,7 @@ namespace Manatea.RootlingForest
             m_JumpAction.Enable();
             m_GrabAction.Enable();
             m_EatAction.Enable();
+            m_InventoryAction.Enable();
         }
         private void OnDisable()
         {
@@ -124,6 +128,7 @@ namespace Manatea.RootlingForest
             m_JumpAction.Disable();
             m_GrabAction.Disable();
             m_EatAction.Disable();
+            m_InventoryAction.Disable();
         }
         private void OnDestroy()
         {
@@ -131,6 +136,7 @@ namespace Manatea.RootlingForest
             m_JumpAction.performed -= JumpAction;
             m_GrabAction.performed -= GrabAction;
             m_EatAction.performed -= EatAction;
+            m_InventoryAction.performed -= AccessInventoryAction;
         }
 
 
@@ -177,9 +183,6 @@ namespace Manatea.RootlingForest
             }
 
             m_LastInput = rawInput;
-
-            CharacterMovement.AttributeOwner.TryGetAttributeEvaluatedValue(m_HealthAttribute, out float health);
-            Debug.Log(health);
         }
 
 
@@ -224,13 +227,29 @@ namespace Manatea.RootlingForest
             }
             else
             {
-                if (m_MovementAction.ReadValue<Vector2>().magnitude > 0.3f)
+                if (m_InventoryAbility.enabled && m_GrabAbility.enabled)
                 {
-                    m_GrabAbility.Throw();
+                    GameObject item = m_GrabAbility.Target.gameObject;
+                    if (m_InventoryAbility.Inventory.CouldAddItem(item))
+                    {
+                        m_GrabAbility.enabled = false;
+                        m_InventoryAbility.Inventory.AddItem(item);
+                    }
+                    else
+                    {
+                        m_GrabAbility.Drop();
+                    }
                 }
                 else
                 {
-                    m_GrabAbility.Drop();
+                    if (m_MovementAction.ReadValue<Vector2>().magnitude > 0.3f)
+                    {
+                        m_GrabAbility.Throw();
+                    }
+                    else
+                    {
+                        m_GrabAbility.Drop();
+                    }
                 }
             }
         }
@@ -248,6 +267,24 @@ namespace Manatea.RootlingForest
 
             m_EatAbility.Target = m_GrabAbility.Target.gameObject;
             m_EatAbility.enabled = true;
+        }
+
+        private void AccessInventoryAction(InputAction.CallbackContext ctx)
+        {
+            if (!ctx.performed && ctx.ReadValue<float>() < 0.5f)
+                return;
+
+            if (!m_InventoryAbility)
+                return;
+
+            if (m_InventoryAbility.enabled)
+            {
+                m_InventoryAbility.enabled = false;
+            }
+            else
+            {
+                m_InventoryAbility.enabled = true;
+            }
         }
     }
 }

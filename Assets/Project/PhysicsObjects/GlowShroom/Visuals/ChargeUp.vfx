@@ -108,7 +108,7 @@ VisualEffectResource:
   m_Infos:
     m_RendererSettings:
       motionVectorGenerationMode: 0
-      shadowCastingMode: 1
+      shadowCastingMode: 0
       rayTracingMode: 0
       receiveShadows: 0
       reflectionProbeUsage: 0
@@ -3591,7 +3591,7 @@ MonoBehaviour:
   - {fileID: 8926484042661615136}
   m_ExposedName: Color
   m_Exposed: 1
-  m_Order: 1
+  m_Order: 0
   m_Category: 
   m_Min:
     m_Type:
@@ -4327,7 +4327,7 @@ MonoBehaviour:
   - {fileID: 8926484042661615164}
   m_ExposedName: Brightness
   m_Exposed: 1
-  m_Order: 2
+  m_Order: 1
   m_Category: 
   m_Min:
     m_Type:
