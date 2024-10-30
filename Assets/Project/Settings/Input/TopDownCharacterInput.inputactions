@@ -49,6 +49,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "Shake",
+                    "type": "PassThrough",
+                    "id": "73854f22-d8e8-44a5-8c04-55a1eee2a450",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -187,7 +196,7 @@
                 {
                     "name": "",
                     "id": "62f5984e-56b9-4f7f-ad99-acc2dbc8eb12",
-                    "path": "<Keyboard>/g",
+                    "path": "<Keyboard>/e",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
@@ -203,6 +212,28 @@
                     "processors": "",
                     "groups": "",
                     "action": "AccessInventory",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "61814507-9915-42c9-ac3a-e451b4ca7eb1",
+                    "path": "<Keyboard>/2",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Shake",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "7aca4958-6c22-4c4c-9925-6ca04e08877b",
+                    "path": "<Gamepad>/dpad/up",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Shake",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

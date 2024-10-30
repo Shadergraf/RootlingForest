@@ -10,14 +10,15 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 75004a18690c9e84cae824f20f9df0ae, type: 3}
-  m_Name: InventoryEffect
+  m_Name: BatteryCharge_Weak
   m_EditorClassIdentifier: 
   m_Description: 
-  m_Lifetime: 0
+  m_Lifetime: 1
   m_Duration: 0
   m_TagsToAdd: []
   m_AttributeModifications:
-  - Attribute: {fileID: 11400000, guid: bdf1fcbd345381d4ba43a33e3773c7f8, type: 2}
-    Type: 1
-    Value: 0
-  m_Events: []
+  - Attribute: {fileID: 11400000, guid: a6039d8934647754f912b8e0cdec79ac, type: 2}
+    Type: 0
+    Value: 5
+  m_Events:
+  - {fileID: 11400000, guid: 06e8baef72ad0ac4faf9f0771120055c, type: 2}

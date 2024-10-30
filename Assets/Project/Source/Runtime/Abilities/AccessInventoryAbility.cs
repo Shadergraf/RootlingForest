@@ -1,41 +1,78 @@
+using Manatea;
+using Manatea.GameplaySystem;
 using Manatea.RootlingForest;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering.Universal;
 
-public class AccessInventoryAbility : MonoBehaviour
+namespace Manatea.RootlingForest
 {
-    [SerializeField]
-    private WorldBagInventory m_Inventory;
-
-    public WorldBagInventory Inventory => m_Inventory;
-
-
-    private void OnValidate()
+    public class AccessInventoryAbility : MonoBehaviour
     {
-        enabled = false;
-    }
+        [SerializeField]
+        private Optional<GameplayEffectOwner> m_EffectOwner;
+        [SerializeField]
+        private WorldBagInventory m_Inventory;
+        [SerializeField]
+        private GameplayEffect m_InventoryEffect;
 
-    private void OnEnable()
-    {
-        Camera.main.GetUniversalAdditionalCameraData().cameraStack.Add(m_Inventory.WorldBag.Camera);
-        FindFirstObjectByType<PhysicsDebugger>().m_InventoryCam = m_Inventory.WorldBag.Camera;
+        public WorldBagInventory Inventory => m_Inventory;
 
-        m_Inventory.WorldBag.OpenInventory();
-    }
+        private GameplayEffectInstance m_InventoryEffectInst;
 
-    private void OnDisable()
-    {
-        var camera = Camera.main;
+
+        private void OnValidate()
+        {
+            enabled = false;
+        }
+
+        private void Awake()
+        {
+            if (!m_EffectOwner.hasValue)
+            {
+                m_EffectOwner.value = GetComponentInParent<GameplayEffectOwner>();
+            }
+        }
+
+        private void OnEnable()
+        {
+            Camera.main.GetUniversalAdditionalCameraData().cameraStack.Add(m_Inventory.WorldBag.Camera);
+            FindFirstObjectByType<PhysicsDebugger>().m_InventoryCam = m_Inventory.WorldBag.Camera;
+
+            m_Inventory.WorldBag.OpenInventory();
+
+            if (m_EffectOwner.value)
+            {
+                m_InventoryEffectInst = m_EffectOwner.value.AddEffect(m_InventoryEffect);
+            }
+        }
+
+        private void OnDisable()
+        {
+            var camera = Camera.main;
 #if UNITY_EDITOR
-        // Exit playmode workaround
-        if (!camera)
-            return;
+            // Exit playmode workaround
+            if (!camera)
+                return;
 #endif
-        camera.GetUniversalAdditionalCameraData().cameraStack.Remove(m_Inventory.WorldBag.Camera);
-        FindFirstObjectByType<PhysicsDebugger>().m_InventoryCam = null;
+            camera.GetUniversalAdditionalCameraData().cameraStack.Remove(m_Inventory.WorldBag.Camera);
 
-        m_Inventory.WorldBag.CloseInventory();
+            PhysicsDebugger physicsDebugger = FindFirstObjectByType<PhysicsDebugger>();
+#if UNITY_EDITOR
+            // Exit playmode workaround
+            if (!physicsDebugger)
+                return;
+#endif
+            physicsDebugger.m_InventoryCam = null;
+
+            m_Inventory.WorldBag.CloseInventory();
+
+            if (m_InventoryEffectInst != null)
+            {
+                m_EffectOwner.value.RemoveEffect(m_InventoryEffectInst);
+                m_InventoryEffectInst = null;
+            }
+        }
     }
 }

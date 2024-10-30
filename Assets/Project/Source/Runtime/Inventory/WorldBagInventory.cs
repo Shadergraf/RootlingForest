@@ -30,6 +30,7 @@ namespace Manatea.RootlingForest
         private List<GameplayEffectInstance> m_ItemEffects = new();
 
         public WorldBag WorldBag => m_CurrentBag;
+        public GameObject BagSpawnPoint => m_BagSpawnPoint;
 
         public static int GlobalBagCount
         { get; private set; }
@@ -50,7 +51,6 @@ namespace Manatea.RootlingForest
 
             GlobalBagCount--;
         }
-
 
         private void SpawnBag()
         {

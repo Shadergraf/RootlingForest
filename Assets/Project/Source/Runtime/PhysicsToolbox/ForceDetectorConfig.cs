@@ -1,6 +1,7 @@
 ﻿using Manatea.GameplaySystem;
 using System;
 using UnityEngine;
+using UnityEngine.Serialization;
 
 namespace Manatea.RootlingForest
 {
@@ -8,7 +9,10 @@ namespace Manatea.RootlingForest
     public class ForceDetectorConfig : ScriptableObject
     {
         [SerializeField]
-        private float m_ImpulseMagnitude = 5;
+        [FormerlySerializedAs("m_ImpulseMagnitude")]
+        private float m_MinImpulseMagnitude = 5;
+        [SerializeField]
+        private float m_MaxImpulseMagnitude = float.PositiveInfinity;
         [SerializeField]
         [Range(0f, 1f)]
         private float m_JerkInfluence = 1;
@@ -29,7 +33,8 @@ namespace Manatea.RootlingForest
         [SerializeField]
         private GameplayTag m_SoftTag;
 
-        public float ImpulseMagnitude => m_ImpulseMagnitude;
+        public float MinImpulseMagnitude => m_MinImpulseMagnitude;
+        public float MaxImpulseMagnitude => m_MaxImpulseMagnitude;
         public float JerkInfluence => m_JerkInfluence;
         public float ContactImpulseInfluence => m_ContactImpulseInfluence;
         public float ContactVelocityInfluence => m_ContactVelocityInfluence;

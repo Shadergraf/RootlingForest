@@ -10,9 +10,10 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e6f47289ef16c1d43bc3ba74ebdf2b2d, type: 3}
-  m_Name: GlowForceDetection
+  m_Name: GlowForceDetection_Strong
   m_EditorClassIdentifier: 
-  m_ImpulseMagnitude: 4000
+  m_MinImpulseMagnitude: 6000
+  m_MaxImpulseMagnitude: Infinity
   m_JerkInfluence: 0.1
   m_ContactImpulseInfluence: 1
   m_ContactVelocityInfluence: 0

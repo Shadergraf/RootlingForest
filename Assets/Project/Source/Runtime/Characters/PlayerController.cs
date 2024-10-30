@@ -23,6 +23,8 @@ namespace Manatea.RootlingForest
         private EatAbility m_EatAbility;
         [SerializeField]
         private AccessInventoryAbility m_InventoryAbility;
+        [SerializeField]
+        private ShakeAbility m_ShakeAbility;
 
         [SerializeField]
         private InputActionAsset m_InputAsset;
@@ -45,6 +47,7 @@ namespace Manatea.RootlingForest
         private InputAction m_GrabAction;
         private InputAction m_EatAction;
         private InputAction m_InventoryAction;
+        private InputAction m_ShakeAction;
 
         private Vector2 m_LastInput;
 
@@ -94,6 +97,7 @@ namespace Manatea.RootlingForest
             m_GrabAction        = m_InputActions.actionMaps[0].actions[2];
             m_EatAction         = m_InputActions.actionMaps[0].actions[3];
             m_InventoryAction   = m_InputActions.actionMaps[0].actions[4];
+            m_ShakeAction       = m_InputActions.actionMaps[0].actions[5];
         }
 
         private void Start()
@@ -107,6 +111,7 @@ namespace Manatea.RootlingForest
             m_GrabAction.performed += GrabAction;
             m_EatAction.performed += EatAction;
             m_InventoryAction.performed += AccessInventoryAction;
+            m_ShakeAction.performed += ShakeAction;
         }
 
         private void OnEnable()
@@ -116,6 +121,7 @@ namespace Manatea.RootlingForest
             m_GrabAction.Enable();
             m_EatAction.Enable();
             m_InventoryAction.Enable();
+            m_ShakeAction.Enable();
         }
         private void OnDisable()
         {
@@ -129,6 +135,7 @@ namespace Manatea.RootlingForest
             m_GrabAction.Disable();
             m_EatAction.Disable();
             m_InventoryAction.Disable();
+            m_ShakeAction.Disable();
         }
         private void OnDestroy()
         {
@@ -137,6 +144,7 @@ namespace Manatea.RootlingForest
             m_GrabAction.performed -= GrabAction;
             m_EatAction.performed -= EatAction;
             m_InventoryAction.performed -= AccessInventoryAction;
+            m_ShakeAction.performed -= ShakeAction;
         }
 
 
@@ -285,6 +293,11 @@ namespace Manatea.RootlingForest
             {
                 m_InventoryAbility.enabled = true;
             }
+        }
+
+        private void ShakeAction(InputAction.CallbackContext ctx)
+        {
+            m_ShakeAbility.enabled = ctx.ReadValue<float>() >= 0.5f;
         }
     }
 }

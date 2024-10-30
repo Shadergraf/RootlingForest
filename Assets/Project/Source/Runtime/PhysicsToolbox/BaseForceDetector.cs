@@ -110,7 +110,7 @@ namespace Manatea.RootlingForest
                 }
             }
 
-            if (!m_DisableDetection && m_FinalForce.magnitude > m_Config.ImpulseMagnitude)
+            if (!m_DisableDetection && m_FinalForce.magnitude >= m_Config.MinImpulseMagnitude && m_FinalForce.magnitude < m_Config.MaxImpulseMagnitude)
             {
                 HandleForceDetected(m_FinalForce);
             }

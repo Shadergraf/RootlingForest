@@ -1444,6 +1444,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 3529100216850845935}
+    - targetCorrespondingSourceObject: {fileID: 2820277903825203249, guid: 8262b2170c2f0da4387d50da78b2fc03,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 3883088725958487017}
   m_SourcePrefab: {fileID: 100100000, guid: 8262b2170c2f0da4387d50da78b2fc03, type: 3}
 --- !u!114 &4261976259643310952 stripped
 MonoBehaviour:
@@ -1520,6 +1524,25 @@ MonoBehaviour:
     value: {fileID: 0}
   m_EffectsToApply:
   - {fileID: 11400000, guid: e7c6d36e4dccd14428841a79df3e9854, type: 2}
+--- !u!114 &3883088725958487017
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6759324773164856008}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1a36332f988cca04299df81939a0dfa8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Config: {fileID: 11400000, guid: d73ff8c1911885d4babd911db1fad5e1, type: 2}
+  m_DisableDetection: 0
+  m_GameplayEffectOwner:
+    hasValue: 0
+    value: {fileID: 0}
+  m_EffectsToApply:
+  - {fileID: 11400000, guid: 06fc4bf57a34b014fbfb957b722c5663, type: 2}
 --- !u!4 &7164220365761873725 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 1838099394805908932, guid: 8262b2170c2f0da4387d50da78b2fc03,
