@@ -467,6 +467,7 @@ GameObject:
   - component: {fileID: 7881859843415676985}
   - component: {fileID: 8133648083292412229}
   - component: {fileID: 8407736400034424073}
+  - component: {fileID: 5191634212636291821}
   m_Layer: 0
   m_Name: ShineVFX
   m_TagString: Untagged
@@ -638,6 +639,24 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   ValueMode: 1
+--- !u!114 &5191634212636291821
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6836535347222151565}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c14fcc9b5ea24c34589e8cc37292fa61, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_VisualEffect: {fileID: 4433202230285962084}
+  VFXEventName: Burst
+  m_GameplayEventReceiver:
+    hasValue: 0
+    value: {fileID: 0}
+  m_GameplayEvent: {fileID: 11400000, guid: 75ce2890dbddb9548a33f2d4d72fb0bf, type: 2}
 --- !u!1 &8851878997373275321
 GameObject:
   m_ObjectHideFlags: 0

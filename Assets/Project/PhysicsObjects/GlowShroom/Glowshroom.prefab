@@ -949,6 +949,16 @@ PrefabInstance:
       propertyPath: m_Name
       value: GlowVisuals
       objectReference: {fileID: 0}
+    - target: {fileID: 3664731561979480022, guid: d55af714ff00af646af7bd8eeb1d3b22,
+        type: 3}
+      propertyPath: m_PropertySheet.m_Float.m_Array.Array.data[0].m_Overridden
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 4433202230285962084, guid: d55af714ff00af646af7bd8eeb1d3b22,
+        type: 3}
+      propertyPath: m_PropertySheet.m_Float.m_Array.Array.data[1].m_Value
+      value: 12
+      objectReference: {fileID: 0}
     - target: {fileID: 4688143408568654261, guid: d55af714ff00af646af7bd8eeb1d3b22,
         type: 3}
       propertyPath: m_LocalPosition.x
