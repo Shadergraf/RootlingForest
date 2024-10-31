@@ -86,7 +86,7 @@ MonoBehaviour:
   m_SpringStrength: 10
   m_InheritVelocityMultiplier: 3
   m_WobbleSpeed: 1
-  m_WobbleStrength: 7
+  m_WobbleStrength: 10
   m_BobbingSpeed: 6
   m_BobbingStrength: 22.5
 --- !u!1 &2619179651866053986

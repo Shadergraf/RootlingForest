@@ -112,7 +112,7 @@ namespace Manatea.RootlingForest
 
             if (!m_DisableDetection && m_FinalForce.magnitude >= m_Config.MinImpulseMagnitude && m_FinalForce.magnitude < m_Config.MaxImpulseMagnitude)
             {
-                HandleForceDetected(m_FinalForce);
+                HandleForceDetected(m_FinalForce, m_Config.Timeout);
             }
         }
 
@@ -167,13 +167,13 @@ namespace Manatea.RootlingForest
             }
         }
 
-        private void HandleForceDetected(Vector3 force)
+        private void HandleForceDetected(Vector3 force, float timeout)
         {
             if (m_DamageTimeout)
             {
                 return;
             }
-            StartCoroutine(CO_Timeout());
+            StartCoroutine(CO_Timeout(timeout));
 
             ForceDetected(force);
         }
@@ -183,10 +183,10 @@ namespace Manatea.RootlingForest
 
         }
 
-        private IEnumerator CO_Timeout()
+        private IEnumerator CO_Timeout(float timeout)
         {
             m_DamageTimeout = true;
-            yield return new WaitForSeconds(0.4f);
+            yield return new WaitForSeconds(timeout);
             m_DamageTimeout = false;
         }
     }

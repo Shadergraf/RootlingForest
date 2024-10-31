@@ -229,7 +229,7 @@
                 {
                     "name": "",
                     "id": "7aca4958-6c22-4c4c-9925-6ca04e08877b",
-                    "path": "<Gamepad>/dpad/up",
+                    "path": "<Gamepad>/dpad/right",
                     "interactions": "",
                     "processors": "",
                     "groups": "",

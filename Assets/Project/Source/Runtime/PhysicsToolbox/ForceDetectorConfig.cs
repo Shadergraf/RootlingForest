@@ -32,6 +32,8 @@ namespace Manatea.RootlingForest
         private GameplayTag m_ToughTag;
         [SerializeField]
         private GameplayTag m_SoftTag;
+        [SerializeField]
+        private float m_Timeout = 0.4f;
 
         public float MinImpulseMagnitude => m_MinImpulseMagnitude;
         public float MaxImpulseMagnitude => m_MaxImpulseMagnitude;
@@ -43,5 +45,6 @@ namespace Manatea.RootlingForest
         public GameplayAttribute HealthAttribute => m_HealthAttribute;
         public GameplayTag ToughTag => m_ToughTag;
         public GameplayTag SoftTag => m_SoftTag;
+        public float Timeout => m_Timeout;
     }
 }

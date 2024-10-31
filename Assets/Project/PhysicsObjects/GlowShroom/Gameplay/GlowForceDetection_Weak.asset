@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: GlowForceDetection_Weak
   m_EditorClassIdentifier: 
   m_MinImpulseMagnitude: 4000
-  m_MaxImpulseMagnitude: 6000
+  m_MaxImpulseMagnitude: 5000
   m_JerkInfluence: 0.1
   m_ContactImpulseInfluence: 1
   m_ContactVelocityInfluence: 0
@@ -23,3 +23,4 @@ MonoBehaviour:
   m_HealthAttribute: {fileID: 11400000, guid: a6039d8934647754f912b8e0cdec79ac, type: 2}
   m_ToughTag: {fileID: 11400000, guid: 866f3415c1a5a2441b06eb36e9a4b182, type: 2}
   m_SoftTag: {fileID: 11400000, guid: 1c18da10d3323594b984a916c6f91687, type: 2}
+  m_Timeout: 0.2

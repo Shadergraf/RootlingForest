@@ -267,6 +267,7 @@ GameObject:
   - component: {fileID: 7717493883051142377}
   - component: {fileID: 3041376328681149519}
   - component: {fileID: 7079727875737709243}
+  - component: {fileID: 2547198059240614759}
   m_Layer: 0
   m_Name: SparkleVFX
   m_TagString: Untagged
@@ -435,6 +436,24 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   ValueMode: 1
+--- !u!114 &2547198059240614759
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5029899954991614292}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c14fcc9b5ea24c34589e8cc37292fa61, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_VisualEffect: {fileID: 3664731561979480022}
+  VFXEventName: Burst
+  m_GameplayEventReceiver:
+    hasValue: 0
+    value: {fileID: 0}
+  m_GameplayEvent: {fileID: 11400000, guid: 75ce2890dbddb9548a33f2d4d72fb0bf, type: 2}
 --- !u!1 &6836535347222151565
 GameObject:
   m_ObjectHideFlags: 0

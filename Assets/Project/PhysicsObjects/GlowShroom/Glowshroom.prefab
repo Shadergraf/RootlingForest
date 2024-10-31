@@ -180,8 +180,9 @@ GameObject:
   - component: {fileID: 3526364873217680789}
   - component: {fileID: 9181156257994524823}
   - component: {fileID: 4039336262688940788}
+  - component: {fileID: 8190567123515878566}
   m_Layer: 0
-  m_Name: ChargeUpSound
+  m_Name: ChargeUpWeakSound
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -344,6 +345,37 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+--- !u!114 &8190567123515878566
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3680260414077194199}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: be2e71c53bccb0a48ac81f6b83e99217, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_EventReceiver:
+    hasValue: 0
+    value: {fileID: 0}
+  m_ListenToEvent: {fileID: 11400000, guid: 75ce2890dbddb9548a33f2d4d72fb0bf, type: 2}
+  m_Response:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 3526364873217680789}
+        m_TargetAssemblyTypeName: UnityEngine.AudioSource, UnityEngine
+        m_MethodName: Play
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &4897413705700749301
 GameObject:
   m_ObjectHideFlags: 0
@@ -401,8 +433,9 @@ GameObject:
   - component: {fileID: 594177781816084901}
   - component: {fileID: 8196192312987575221}
   - component: {fileID: 4693999147135948858}
+  - component: {fileID: 815310780578671567}
   m_Layer: 0
-  m_Name: ChargeUpVFX
+  m_Name: ChargeUpWeakVFX
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -476,7 +509,7 @@ VFXRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8114227140510172887}
   m_Enabled: 1
-  m_CastShadows: 1
+  m_CastShadows: 0
   m_ReceiveShadows: 0
   m_DynamicOccludee: 1
   m_StaticShadowCaster: 0
@@ -528,6 +561,24 @@ MonoBehaviour:
     hasValue: 0
     value: {fileID: 0}
   m_GameplayEvent: {fileID: 11400000, guid: 06e8baef72ad0ac4faf9f0771120055c, type: 2}
+--- !u!114 &815310780578671567
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8114227140510172887}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c14fcc9b5ea24c34589e8cc37292fa61, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_VisualEffect: {fileID: 594177781816084901}
+  VFXEventName: BigChargeUp
+  m_GameplayEventReceiver:
+    hasValue: 0
+    value: {fileID: 0}
+  m_GameplayEvent: {fileID: 11400000, guid: 75ce2890dbddb9548a33f2d4d72fb0bf, type: 2}
 --- !u!1001 &2655391790574617035
 PrefabInstance:
   m_ObjectHideFlags: 0
