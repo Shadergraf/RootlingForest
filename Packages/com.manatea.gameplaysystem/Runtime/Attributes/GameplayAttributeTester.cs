@@ -7,7 +7,7 @@ namespace Manatea.GameplaySystem
     public class GameplayAttributeTester : MonoBehaviour
     {
         [SerializeField]
-        private GameplayAttributeOwner m_AttributeOwner;
+        private Optional<GameplayAttributeOwner> m_AttributeOwner;
 
         [SerializeField]
         private GameplayAttributeComparison m_Comparison;
@@ -21,6 +21,15 @@ namespace Manatea.GameplaySystem
         [SerializeField]
         private UnityEvent m_Event;
 
+
+        private void Start()
+        {
+            if (!m_AttributeOwner.hasValue)
+            {
+                m_AttributeOwner.value = GetComponentInParent<GameplayAttributeOwner>();
+            }
+        }
+
         private void FixedUpdate()
         {
             Test();
@@ -28,12 +37,12 @@ namespace Manatea.GameplaySystem
 
         public void Test()
         {
-            if (m_AttributeOwner.TryGetAttributeEvaluatedValue(m_AttributeA, out float valueA))
+            if (m_AttributeOwner.value.TryGetAttributeEvaluatedValue(m_AttributeA, out float valueA))
             {
                 float valueB = m_ValueB;
                 if (m_AttributeB)
                 {
-                    m_AttributeOwner.TryGetAttributeEvaluatedValue(m_AttributeB, out valueB);
+                    m_AttributeOwner.value.TryGetAttributeEvaluatedValue(m_AttributeB, out valueB);
                 }
 
                 if (DoComparison(m_Comparison, valueA, valueB))

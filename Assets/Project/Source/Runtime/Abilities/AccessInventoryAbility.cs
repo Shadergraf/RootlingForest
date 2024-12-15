@@ -8,7 +8,7 @@ using UnityEngine.Rendering.Universal;
 
 namespace Manatea.RootlingForest
 {
-    public class AccessInventoryAbility : MonoBehaviour
+    public class AccessInventoryAbility : BaseAbility
     {
         [SerializeField]
         private Optional<GameplayEffectOwner> m_EffectOwner;
@@ -35,7 +35,7 @@ namespace Manatea.RootlingForest
             }
         }
 
-        private void OnEnable()
+        protected override void AbilityEnabled()
         {
             Camera.main.GetUniversalAdditionalCameraData().cameraStack.Add(m_Inventory.WorldBag.Camera);
             FindFirstObjectByType<PhysicsDebugger>().m_InventoryCam = m_Inventory.WorldBag.Camera;
@@ -48,7 +48,7 @@ namespace Manatea.RootlingForest
             }
         }
 
-        private void OnDisable()
+        protected override void AbilityDisabled()
         {
             var camera = Camera.main;
 #if UNITY_EDITOR

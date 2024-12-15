@@ -3,7 +3,7 @@ using UnityEngine.Serialization;
 
 namespace Manatea.RootlingForest
 {
-    public abstract class CharacterController : MonoBehaviour
+    public abstract class BaseCharacterController : MonoBehaviour
     {
         [FormerlySerializedAs("CharacterMovement")]
         [SerializeField]

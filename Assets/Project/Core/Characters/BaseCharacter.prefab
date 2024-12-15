@@ -16,6 +16,7 @@ GameObject:
   - component: {fileID: 9136856744536620587}
   - component: {fileID: 8182086880032516708}
   - component: {fileID: 30843199278676019}
+  - component: {fileID: 5527935580620574358}
   m_Layer: 6
   m_Name: BaseCharacter
   m_TagString: Untagged
@@ -37,6 +38,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1759774200340238835}
+  - {fileID: 3304626707154241548}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!54 &4146674922894845674
@@ -49,9 +51,9 @@ Rigidbody:
   serializedVersion: 4
   m_Mass: 1
   m_Drag: 0.5
-  m_AngularDrag: 8
+  m_AngularDrag: 2
   m_CenterOfMass: {x: 0, y: 0, z: 0}
-  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaTensor: {x: 0.4, y: 0.4, z: 0.4}
   m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
   m_IncludeLayers:
     serializedVersion: 2
@@ -64,7 +66,7 @@ Rigidbody:
   m_UseGravity: 1
   m_IsKinematic: 0
   m_Interpolate: 1
-  m_Constraints: 80
+  m_Constraints: 0
   m_CollisionDetection: 1
 --- !u!114 &5137507898606658623
 MonoBehaviour:
@@ -82,14 +84,15 @@ MonoBehaviour:
   m_AirMoveForce: 0.2
   m_StepHeight: 0.31
   m_FeetLinearResistance: 20
-  m_FeetAngularResistance: 50
+  m_FeetAngularResistance: 30
+  m_FeetLinearAirResistance: 0
+  m_FeetAngularAirResistance: 8
   m_StationaryFriction: 1
   m_MovementFriction: 0.1
-  m_GroundRotationRate: 1080
-  m_AirRotationRate: 360
-  m_GroundRotationForce: 8
-  m_AirRotationForce: 0.5
+  m_GroundRotationForce: 1
+  m_AirRotationForce: 0.05
   m_PushForce: 1
+  m_StandUpForce: 2000
   m_Collider: {fileID: 0}
   m_GroundDetectionDistance: 0.15
   m_MaxSlopeAngle: 46
@@ -97,8 +100,13 @@ MonoBehaviour:
     type: 2}
   m_RotationRateAttribute: {fileID: 11400000, guid: 13efa8a8c038c3a47ae5293010294aa4,
     type: 2}
+  m_StandUpForceMultiplierAttribute: {fileID: 11400000, guid: 699876e9697e39542b5661b6826a6bc8,
+    type: 2}
   m_NoStableGroundTag: {fileID: 11400000, guid: 942d62db9bc34ae499e56a855290abc6,
     type: 2}
+  m_BlockGroundMovementFilter:
+    RequireTags: []
+    IgnoreTags: []
   m_DebugLocomotion: 0
   m_DebugGroundDetection: 0
 --- !u!114 &6251875238489936929
@@ -157,6 +165,10 @@ MonoBehaviour:
     PostProcessors:
     - rid: 4516264319339200792
     - rid: 4516264319339200793
+  - Attribute: {fileID: 11400000, guid: 699876e9697e39542b5661b6826a6bc8, type: 2}
+    BaseValue: 1
+    PostProcessors:
+    - rid: 4516264319339200792
   references:
     version: 2
     RefIds:
@@ -254,6 +266,18 @@ MonoBehaviour:
   m_UseDropThrow: 0
   m_DropForce: {x: 0, y: 0, z: 0}
   m_DropTorque: 0
+--- !u!114 &5527935580620574358
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4226559076182182294}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 63b9b05be2c288e4f82c07a92e2c87c2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &4824895105632388978
 GameObject:
   m_ObjectHideFlags: 0
@@ -284,6 +308,37 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1193107230377472649}
+  m_Father: {fileID: 2459274439249617929}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &5085317386791078356
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 3304626707154241548}
+  m_Layer: 6
+  m_Name: Colliders
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &3304626707154241548
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5085317386791078356}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 1
+  m_Children: []
   m_Father: {fileID: 2459274439249617929}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &1322224042419901741

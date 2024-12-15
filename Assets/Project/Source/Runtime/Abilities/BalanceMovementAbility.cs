@@ -8,7 +8,7 @@ using static Manatea.RootlingForest.CharacterMovement;
 
 namespace Manatea.RootlingForest
 {
-    public class BalanceMovementAbility : MonoBehaviour, ICharacterMover
+    public class BalanceMovementAbility : BaseAbility, ICharacterMover
     {
         [SerializeField]
         private CharacterMovement m_CharacterMovement;
@@ -99,7 +99,7 @@ namespace Manatea.RootlingForest
             m_AttributeOwner = GetComponentInParent<GameplayAttributeOwner>();
         }
 
-        private void OnEnable()
+        protected override void AbilityEnabled()
         {
             m_CharacterMovement.RegisterMover(this);
 
@@ -108,7 +108,7 @@ namespace Manatea.RootlingForest
                 m_AttributeOwner.AddAttributeModifier(m_MoveSpeedAttribute, m_MovementModifier);
             }
         }
-        private void OnDisable()
+        protected override void AbilityDisabled()
         {
             if (m_MoveSpeedAttribute && m_AttributeOwner)
             {
@@ -118,7 +118,7 @@ namespace Manatea.RootlingForest
             m_CharacterMovement.UnregisterMover(this);
         }
 
-        public void PreMovement(MovementSimulationState sim)
+        void ICharacterMover.PreMovement(MovementSimulationState sim, float dt)
         {
             float targetMovementSpeedMult = 1;
             Vector3 targetAdditionalForce = Vector3.zero;

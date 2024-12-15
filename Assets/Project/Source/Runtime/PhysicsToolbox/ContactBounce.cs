@@ -84,8 +84,9 @@ namespace Manatea.RootlingForest
 
                 if (rb.TryGetComponent(out GrabAbility pullAbility) && pullAbility.Target)
                 {
-                    StartCoroutine(CO_ApplyVelocityRepeated(pullAbility.Target, targetVelocity, m_Iterations));
-                    StartCoroutine(CO_TimedBlock(pullAbility.Target, 0.1f));
+                    Rigidbody rigid = pullAbility.Target.GetComponent<Rigidbody>();
+                    StartCoroutine(CO_ApplyVelocityRepeated(rigid, targetVelocity, m_Iterations));
+                    StartCoroutine(CO_TimedBlock(rigid, 0.1f));
                 }
             }
         }

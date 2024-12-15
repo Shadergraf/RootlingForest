@@ -6,7 +6,7 @@ using UnityEngine.Serialization;
 
 namespace Manatea.RootlingForest
 {
-    public class TrajectoryAdjustmentMovementAbility : MonoBehaviour, ICharacterMover
+    public class TrajectoryAdjustmentMovementAbility : BaseAbility, ICharacterMover
     {
         [SerializeField]
         private CharacterMovement m_CharacterMovement;
@@ -41,19 +41,19 @@ namespace Manatea.RootlingForest
         }
 
 
-        private void OnEnable()
+        protected override void AbilityEnabled()
         {
             m_CharacterMovement.RegisterMover(this);
         }
 
 
-        private void OnDisable()
+        protected override void AbilityDisabled()
         {
             m_CharacterMovement.UnregisterMover(this);
         }
 
 
-        public void PreMovement(CharacterMovement.MovementSimulationState sim)
+        void ICharacterMover.PreMovement(CharacterMovement.MovementSimulationState sim, float dt)
         {
             bool groundMagnetFound = DetectGroundMagnetism(sim, out GroundMagnetismSample groundMagnet);
             if (groundMagnetFound && !sim.IsStableGrounded)

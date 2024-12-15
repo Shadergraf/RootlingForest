@@ -4,7 +4,7 @@ using static Manatea.RootlingForest.CharacterMovement;
 
 namespace Manatea.RootlingForest
 {
-    public class VaultMovementAbility : MonoBehaviour, ICharacterMover
+    public class VaultMovementAbility : BaseAbility, ICharacterMover
     {
         [SerializeField]
         private CharacterMovement m_CharacterMovement;
@@ -32,17 +32,17 @@ namespace Manatea.RootlingForest
         private static Collider[] m_Overlaps = new Collider[8];
 
 
-        private void OnEnable()
+        protected override void AbilityEnabled()
         {
             m_CharacterMovement.RegisterMover(this);
         }
-        private void OnDisable()
+        protected override void AbilityDisabled()
         {
             m_CharacterMovement.UnregisterMover(this);
         }
 
 
-        public void PreMovement(MovementSimulationState sim)
+        void ICharacterMover.PreMovement(MovementSimulationState sim, float dt)
         {
             bool vaultingValid = DetectVaulting(sim, out RaycastHit vaultingHit);
             if (vaultingValid)

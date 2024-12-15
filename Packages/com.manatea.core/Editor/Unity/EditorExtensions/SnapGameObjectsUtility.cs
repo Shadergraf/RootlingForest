@@ -150,7 +150,7 @@ namespace Manatea.Unity
             rigidbody.position = mouseRay.origin;
 
             Undo.RecordObject(gameObject.transform, k_Undo_RaycastToMouse);
-            if (rigidbody.SweepTest(mouseRay.direction, out RaycastHit hitInfo))
+            if (rigidbody.SweepTest(mouseRay.direction, out RaycastHit hitInfo, float.PositiveInfinity, QueryTriggerInteraction.Ignore))
             {
                 gameObject.transform.position = mouseRay.GetPoint(hitInfo.distance) + hitInfo.normal * k_SnapTolerance;
                 Physics.SyncTransforms();

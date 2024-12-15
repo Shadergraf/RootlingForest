@@ -11,7 +11,7 @@ using UnityEngine.InputSystem;
 
 namespace Manatea.RootlingForest
 {
-    public class ClimbAbility : MonoBehaviour
+    public class ClimbAbility : BaseAbility
     {
         public Rigidbody m_Self;
         public float m_ClimbSpeed = 1;
@@ -41,7 +41,7 @@ namespace Manatea.RootlingForest
         public Vector3 CurrentWallNormal => m_CurrentWallNormal;
 
 
-        private void OnEnable()
+        protected override void AbilityEnabled()
         {
             if (!m_GrabSurrogate)
             {
@@ -92,7 +92,7 @@ namespace Manatea.RootlingForest
             }
         }
 
-        private void OnDisable()
+        protected override void AbilityDisabled()
         {
             if (m_Joint)
             {
@@ -102,6 +102,7 @@ namespace Manatea.RootlingForest
 
             m_ClimbingTarget = null;
         }
+
         private void FixedUpdate()
         {
             if (m_Joint == null || m_Joint.connectedBody == null || m_ClimbingTarget == null)

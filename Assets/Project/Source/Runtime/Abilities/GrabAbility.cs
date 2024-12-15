@@ -9,7 +9,7 @@ using UnityEngine.Serialization;
 namespace Manatea.RootlingForest
 {
     // TODO cleanup this file
-    public class GrabAbility : MonoBehaviour
+    public class GrabAbility : BaseAbility
     {
         [FormerlySerializedAs("Self")]
         [SerializeField]
@@ -105,6 +105,12 @@ namespace Manatea.RootlingForest
         [FormerlySerializedAs("OverburdenedRotationMult")]
         [SerializeField]
         public float m_OverburdenedRotationMult = 0.5f;
+        [SerializeField]
+        public float m_OverburdenedStandUpMultiplier = 2;
+        [SerializeField]
+        public GameplayTag m_OverburdenedTag;
+        [SerializeField]
+        public GameplayTag m_PullingTag;
 
         [SerializeField]
         public LayerMask m_RaisingExcludeLayers;
@@ -128,6 +134,8 @@ namespace Manatea.RootlingForest
         [SerializeField]
         public GameplayAttribute m_ForceDetectionMultiplierAttribute;
         [SerializeField]
+        private GameplayAttribute m_StandUpForceMultiplierAttribute;
+        [SerializeField]
         public GameplayEffect m_SelfGrabEffect;
         [SerializeField]
         public GameplayEffect m_TargetGrabEffect;
@@ -149,22 +157,6 @@ namespace Manatea.RootlingForest
 
         public GrabState CurrentGrabState => m_GrabState;
         public ConfigurableJoint Joint => m_Joint;
-        public Rigidbody Target
-        {
-            get => m_Target;
-            set
-            {
-                if (enabled)
-                {
-                    Debug.Assert(false, "Target can only be set if the ability is disabled!");
-                    return;
-                }
-                m_Target = value;
-            }
-        }
-
-
-        private Rigidbody m_Target;
 
 
         private GrabState m_GrabState;
@@ -174,9 +166,11 @@ namespace Manatea.RootlingForest
         private GameplayAttributeOwner m_SelfAttributeOwner;
         private GameplayEffectOwner m_SelfEffectOwner;
         private GameplayEffectOwner m_TargetEffectOwner;
+        private GameplayTagOwner m_SelfTagOwner;
 
         private ConfigurableJoint m_Joint;
         private GrabPreferences m_Target_GrabPrefs;
+        private Rigidbody m_Target_Rigidbody;
 
         private Quaternion startRotation;
         private Quaternion targetRotation;
@@ -186,13 +180,17 @@ namespace Manatea.RootlingForest
         private GameplayAttributeModifierInstance m_WalkSpeedModifier;
         private GameplayAttributeModifierInstance m_RotationRateModifier;
         private GameplayAttributeModifierInstance m_ForceDetectionMultiplierModifier;
+        private GameplayAttributeModifierInstance m_StandUpForceMultiplierModifier;
         private GameplayEffectInstance m_SelfGrabEffectInst;
         private GameplayEffectInstance m_TargetGrabEffectInst;
 
         private Vector3 m_SmoothPullingForce;
 
-        private float m_HeavyLoad;
-        private float m_PullingLoad;
+        private float m_IsOverburdened;
+        private float m_IsPulling;
+
+        private bool m_HeavyLoadTagAdded;
+        private bool m_PullingTagAdded;
 
 
         public enum GrabState
@@ -205,9 +203,14 @@ namespace Manatea.RootlingForest
 
 
 
-        private void OnEnable()
+        protected override void AbilityEnabled()
         {
             if (!Target.TryGetComponent(out m_Target_GrabPrefs))
+            {
+                enabled = false;
+                return;
+            }
+            if (!Target.TryGetComponent(out m_Target_Rigidbody))
             {
                 enabled = false;
                 return;
@@ -222,10 +225,11 @@ namespace Manatea.RootlingForest
 
             m_SelfAttributeOwner = m_Self.GetComponent<GameplayAttributeOwner>();
             m_SelfEffectOwner = m_Self.GetComponent<GameplayEffectOwner>();
+            m_SelfTagOwner = m_Self.GetComponent<GameplayTagOwner>();
             m_TargetEffectOwner = Target.GetComponent<GameplayEffectOwner>();
 
             // HACK solves an issue with "enableCollision" property of the joint
-            Target.detectCollisions = false;
+            m_Target_Rigidbody.detectCollisions = false;
 
 
 
@@ -252,14 +256,14 @@ namespace Manatea.RootlingForest
                     targetLocalPosition = Target.transform.InverseTransformPoint(bestOrientationMatch.transform.position);
                     startRotation = transform.rotation;
                     Quaternion deltaQuat = startRotation * Quaternion.Inverse(bestOrientationMatch.transform.rotation);
-                    targetRotation = deltaQuat * Target.rotation;
+                    targetRotation = deltaQuat * m_Target_Rigidbody.rotation;
                 }
             }
 
 
 
             m_Joint = m_Self.gameObject.AddComponent<ConfigurableJoint>();
-            m_Joint.connectedBody = Target;
+            m_Joint.connectedBody = m_Target_Rigidbody;
             m_Joint.autoConfigureConnectedAnchor = false;
             //m_Joint.enableCollision = EnableCollision;
             m_Joint.breakForce = m_BreakForce;
@@ -360,7 +364,7 @@ namespace Manatea.RootlingForest
             m_Joint.slerpDrive = drive;
 
 
-            Target.detectCollisions = true;
+            m_Target_Rigidbody.detectCollisions = true;
 
             m_GrabTimer = 0;
 
@@ -378,6 +382,9 @@ namespace Manatea.RootlingForest
 
                 m_RotationRateModifier = new GameplayAttributeModifierInstance() { Type = GameplayAttributeModifierType.Multiplicative, Value = 1 };
                 m_SelfAttributeOwner.AddAttributeModifier(m_RotationRateAttribute, m_RotationRateModifier);
+
+                m_StandUpForceMultiplierModifier = new GameplayAttributeModifierInstance() { Type = GameplayAttributeModifierType.Multiplicative, Value = 1 };
+                m_SelfAttributeOwner.AddAttributeModifier(m_StandUpForceMultiplierAttribute, m_StandUpForceMultiplierModifier);
             }
 
             if (Target.TryGetComponent(out GameplayAttributeOwner targetAttOwner))
@@ -387,7 +394,7 @@ namespace Manatea.RootlingForest
             }
 
             m_HandBlocker.gameObject.SetActive(true);
-            Target.excludeLayers |= m_HandExcludeLayers;
+            m_Target_Rigidbody.excludeLayers |= m_HandExcludeLayers;
 
             m_GrabStarted.Invoke();
             m_GrabState = GrabState.EstablishGrab;
@@ -400,7 +407,7 @@ namespace Manatea.RootlingForest
             {
                 handPosWorld += m_Self.linearVelocity * 0.01f;
             }
-            Vector3 targetHandPos = Target.transform.InverseTransformPoint(Target.ClosestPointOnBounds(handPosWorld));
+            Vector3 targetHandPos = Target.transform.InverseTransformPoint(m_Target_Rigidbody.ClosestPointOnBounds(handPosWorld));
             switch (m_Target_GrabPrefs.LocationRule)
             {
                 case LocationRule.Center:
@@ -422,7 +429,7 @@ namespace Manatea.RootlingForest
             m_Joint.connectedAnchor += targetLocalPosition;
         }
 
-        private void OnDisable()
+        protected override void AbilityDisabled()
         {
 #if UNITY_EDITOR
             // Exit playmode error workaround
@@ -440,17 +447,17 @@ namespace Manatea.RootlingForest
             {
                 if (!m_Target_GrabPrefs.AllowOverlapAfterDrop)
                 {
-                    bool cached_detectCollisions = Target.detectCollisions;
-                    Target.detectCollisions = false;
-                    Target.detectCollisions = cached_detectCollisions;
+                    bool cached_detectCollisions = m_Target_Rigidbody.detectCollisions;
+                    m_Target_Rigidbody.detectCollisions = false;
+                    m_Target_Rigidbody.detectCollisions = cached_detectCollisions;
                 }
 
-                Target.excludeLayers = new LayerMask();
+                m_Target_Rigidbody.excludeLayers = new LayerMask();
 
-                StartCoroutine(CO_RemoveAttributesDelayed(m_Target));
+                StartCoroutine(CO_RemoveAttributesDelayed(m_Target_Rigidbody));
             }
 
-            m_Target = null;
+            m_Target_Rigidbody = null;
             m_Target_GrabPrefs = null;
 
             m_HandBlocker.gameObject.SetActive(false);
@@ -459,11 +466,31 @@ namespace Manatea.RootlingForest
             if (m_SelfAttributeOwner)
             {
                 m_SelfAttributeOwner.RemoveAttributeModifier(m_WalkSpeedAttribute, m_WalkSpeedModifier);
-                m_SelfAttributeOwner.RemoveAttributeModifier(m_RotationRateAttribute, m_RotationRateModifier);
                 m_WalkSpeedModifier = null;
+
+                m_SelfAttributeOwner.RemoveAttributeModifier(m_RotationRateAttribute, m_RotationRateModifier);
                 m_RotationRateModifier = null;
+                
+                m_SelfAttributeOwner.RemoveAttributeModifier(m_StandUpForceMultiplierAttribute, m_StandUpForceMultiplierModifier);
+                m_StandUpForceMultiplierModifier = null;
             }
             m_SelfAttributeOwner = null;
+
+            // Remove tags
+            if (m_SelfTagOwner)
+            {
+                if (m_HeavyLoadTagAdded)
+                {
+                    m_SelfTagOwner.RemoveManaged(m_OverburdenedTag);
+                    m_HeavyLoadTagAdded = false;
+                }
+                if (m_PullingTagAdded)
+                {
+                    m_SelfTagOwner.RemoveManaged(m_PullingTag);
+                    m_PullingTagAdded = false;
+                }
+            }
+            m_SelfTagOwner = null;
 
             // Remove Self effects
             if (m_SelfEffectOwner && m_SelfGrabEffectInst != null)
@@ -658,9 +685,9 @@ namespace Manatea.RootlingForest
             // TODO ignore other physics items!
 
             // Try to raise the rigidbody if its touching the ground, by raising the anchor up
-            Target.position = Target.position + Vector3.up * 0.02f;            // Skin offset to prevent sweeps not registering
-            bool sweepTest = Target.SweepTest(Vector3.down, out RaycastHit hit, 0.22f);
-            Target.position = Target.position - Vector3.up * 0.02f;            // Revert skin offset
+            m_Target_Rigidbody.position = m_Target_Rigidbody.position + Vector3.up * 0.02f;            // Skin offset to prevent sweeps not registering
+            bool sweepTest = m_Target_Rigidbody.SweepTest(Vector3.down, out RaycastHit hit, 0.22f);
+            m_Target_Rigidbody.position = m_Target_Rigidbody.position - Vector3.up * 0.02f;            // Revert skin offset
 
             int raiseOperation = 0;
             // TODO this might cause problems
@@ -815,26 +842,53 @@ namespace Manatea.RootlingForest
             Vector3 forwardDir = transform.forward;
             float moveMult = 1;
             float rotMult = 1;
+            float standupMult = 1;
 
             // Heavy load
-            m_HeavyLoad = MMath.InverseLerpClamped(m_OverburdenedThresholdMin, m_OverburdenedThresholdMax, m_SmoothPullingForce.magnitude);
-            moveMult = MMath.Lerp(moveMult, m_OverburdenedMovementMult, m_HeavyLoad);
-            rotMult = MMath.Lerp(rotMult, m_OverburdenedRotationMult, m_HeavyLoad);
+            m_IsOverburdened = MMath.InverseLerpClamped(m_OverburdenedThresholdMin, m_OverburdenedThresholdMax, m_SmoothPullingForce.magnitude);
+            moveMult = MMath.Lerp(moveMult, m_OverburdenedMovementMult, m_IsOverburdened);
+            rotMult = MMath.Lerp(rotMult, m_OverburdenedRotationMult, m_IsOverburdened);
 
             // Pulling load
             float totalPullingForce = MMath.InverseLerpClamped(30, 70, m_SmoothPullingForce.magnitude);
             float linearPullingForce = MMath.Pow(MMath.InverseLerpClamped(0.9f, 1, Vector3.Dot(forwardDir, m_SmoothPullingForce)), 2) * 0 + 1;
-            m_PullingLoad = totalPullingForce * linearPullingForce;
-            moveMult = MMath.Lerp(moveMult, MMath.RemapClamped(0.5f, 0, 1, 1.5f, m_Self.linearVelocity.magnitude), m_PullingLoad);
-            rotMult = MMath.Lerp(rotMult, 0, m_PullingLoad);
+            m_IsPulling = totalPullingForce * linearPullingForce;
+            moveMult = MMath.Lerp(moveMult, MMath.RemapClamped(0.5f, 0, 1, 1.5f, m_Self.linearVelocity.magnitude), m_IsPulling);
+            rotMult = MMath.Lerp(rotMult, 0, m_IsPulling);
 
-            // TODO rotMult for pulling load is wrong!
+            standupMult = MMath.Lerp(standupMult, m_OverburdenedStandUpMultiplier, MMath.Max(m_IsOverburdened, m_IsPulling));
+
+            if (m_SelfTagOwner)
+            {
+                if (m_IsOverburdened > 0.95 && !m_HeavyLoadTagAdded)
+                {
+                    m_SelfTagOwner.AddManaged(m_OverburdenedTag);
+                    m_HeavyLoadTagAdded = true;
+                }
+                if (m_IsOverburdened <= 0.95 && m_HeavyLoadTagAdded)
+                {
+                    m_SelfTagOwner.RemoveManaged(m_OverburdenedTag);
+                    m_HeavyLoadTagAdded = false;
+                }
+
+                if (m_IsPulling > 0.95 && !m_PullingTagAdded)
+                {
+                    m_SelfTagOwner.AddManaged(m_PullingTag);
+                    m_PullingTagAdded = true;
+                }
+                if (m_IsPulling <= 0.95 && m_PullingTagAdded)
+                {
+                    m_SelfTagOwner.RemoveManaged(m_PullingTag);
+                    m_PullingTagAdded = false;
+                }
+            }
 
             // Lerp to final grab walk/rotation modifiers
             if (m_SelfAttributeOwner)
             {
                 m_WalkSpeedModifier.Value = MMath.Damp(m_WalkSpeedModifier.Value, moveMult, 10, Time.fixedDeltaTime);
                 m_RotationRateModifier.Value = MMath.Damp(m_RotationRateModifier.Value, rotMult, 10, Time.fixedDeltaTime);
+                m_StandUpForceMultiplierModifier.Value = MMath.Damp(m_StandUpForceMultiplierModifier.Value, standupMult, 10, Time.fixedDeltaTime);
             }
         }
 
@@ -843,8 +897,8 @@ namespace Manatea.RootlingForest
         {
             if (!m_Debug)
                 return;
-            MGUI.DrawWorldProgressBar(transform.position, new Rect(10, 10, 50, 9), m_HeavyLoad);
-            MGUI.DrawWorldProgressBar(transform.position, new Rect(10, 20, 50, 9), m_PullingLoad);
+            MGUI.DrawWorldProgressBar(transform.position, new Rect(10, 10, 50, 9), m_IsOverburdened);
+            MGUI.DrawWorldProgressBar(transform.position, new Rect(10, 20, 50, 9), m_IsPulling);
         }
 
 
@@ -852,7 +906,7 @@ namespace Manatea.RootlingForest
         {
             Debug.Assert(enabled, "Ability is not active!", gameObject);
 
-            float throwForce = m_ThrowForce / MMath.Max(Target.mass, 1);
+            float throwForce = m_ThrowForce / MMath.Max(m_Target_Rigidbody.mass, 1);
             float throwRotation = m_ThrowRotation;
             if (m_Target_GrabPrefs.UseCustomThrow)
             {
@@ -882,7 +936,7 @@ namespace Manatea.RootlingForest
         private void ThrowInternal(Vector3 velocity, float torque)
         {
             Vector3 v = transform.right * velocity.x + transform.up * velocity.y + transform.forward * velocity.z;
-            StartCoroutine(CO_Throw(4, Target, v, torque));
+            StartCoroutine(CO_Throw(4, m_Target_Rigidbody, v, torque));
         }
 
         private IEnumerator CO_Throw(int sampleCount, Rigidbody rb, Vector3 velocity, float torque)

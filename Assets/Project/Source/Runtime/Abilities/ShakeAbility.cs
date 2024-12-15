@@ -5,7 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ShakeAbility : MonoBehaviour
+public class ShakeAbility : BaseAbility
 {
     [SerializeField]
     private Optional<GameplayEffectOwner> m_EffectOwner;
@@ -37,7 +37,7 @@ public class ShakeAbility : MonoBehaviour
         }
     }
 
-    private void OnEnable()
+    protected override void AbilityEnabled()
     {
         if (!m_GrabAbility.enabled)
         {
@@ -64,7 +64,7 @@ public class ShakeAbility : MonoBehaviour
         }
     }
 
-    private void OnDisable()
+    protected override void AbilityDisabled()
     {
         if (m_EffectOwner.value)
         {

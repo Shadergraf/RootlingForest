@@ -31,7 +31,8 @@ Transform:
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 1
-  m_Children: []
+  m_Children:
+  - {fileID: 477676459112180970}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &7164267408176990070
@@ -67,7 +68,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 2df63c8174209e44dbe9ef244d032783, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_AttributeOwner: {fileID: 0}
+  m_AttributeOwner:
+    hasValue: 0
+    value: {fileID: 0}
   m_Comparison: 4
   m_AttributeA: {fileID: 11400000, guid: b7ffadb105f275840a83b855145b86f9, type: 2}
   m_ValueB: 0
@@ -100,3 +103,86 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   objectToDestroy: {fileID: 0}
+--- !u!1 &8590733156987472440
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 477676459112180970}
+  - component: {fileID: 6497833640913246579}
+  - component: {fileID: 8573132834784908589}
+  m_Layer: 3
+  m_Name: CrumbSpawner
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &477676459112180970
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8590733156987472440}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 1
+  m_Children: []
+  m_Father: {fileID: 8021763637775216634}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &6497833640913246579
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8590733156987472440}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ac2fbc07a453e464b91414da9d597343, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_SpawnTransform: {fileID: 0}
+  m_MinSpawn: 0
+  m_MaxSpawn: 3
+  m_Prefab: {fileID: 2029351086593763331, guid: 395d7a44b0270804dbdba7b6e0bd0694,
+    type: 3}
+  m_ForwardVsSpherical: 1
+  m_Speed: 5
+--- !u!114 &8573132834784908589
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8590733156987472440}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: be2e71c53bccb0a48ac81f6b83e99217, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_EventReceiver:
+    hasValue: 0
+    value: {fileID: 0}
+  m_ListenToEvent: {fileID: 11400000, guid: 2231a5ce82663754da0bfaca81620319, type: 2}
+  m_Response:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 6497833640913246579}
+        m_TargetAssemblyTypeName: Manatea.RootlingForest.ObjectSpawner, Manatea.RootlingForest.Runtime
+        m_MethodName: SpawnSilent
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2

@@ -60,7 +60,7 @@ namespace Manatea.RootlingForest
         private void HandleKeyDown(Camera cam)
         {
             Ray ray = cam.ScreenPointToRay(Input.mousePosition);
-            if (Physics.Raycast(ray, out RaycastHit hit))
+            if (Physics.Raycast(ray, out RaycastHit hit, float.PositiveInfinity, -1, QueryTriggerInteraction.Ignore))
             {
                 GameObject currentTestObj = hit.collider.gameObject;
                 while (currentTestObj != null)

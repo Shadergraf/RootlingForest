@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: GlowForceDetection_Weak
   m_EditorClassIdentifier: 
   m_MinImpulseMagnitude: 4000
-  m_MaxImpulseMagnitude: 5000
+  m_MaxImpulseMagnitude: 4750
   m_JerkInfluence: 0.1
   m_ContactImpulseInfluence: 1
   m_ContactVelocityInfluence: 0

@@ -7,7 +7,7 @@ using UnityEngine.Serialization;
 
 namespace Manatea.RootlingForest
 {
-    public class PlayerController : CharacterController
+    public class PlayerController : BaseCharacterController
     {
         [SerializeField]
         private JumpMovementAbility m_JumpAbility;
@@ -199,11 +199,11 @@ namespace Manatea.RootlingForest
             // TODO add jump buffering if not currently grounded
             if (ctx.ReadValue<float>() > 0.5f)
             {
-                m_JumpAbility.Jump();
+                m_JumpAbility.enabled = true;
             }
             else
             {
-                m_JumpAbility.ReleaseJump();
+                m_JumpAbility.enabled = false;
             }
         }
         private void GrabAction(InputAction.CallbackContext ctx)
@@ -216,7 +216,7 @@ namespace Manatea.RootlingForest
             // TODO capsule cast to find nearest collider
             if (!m_GrabAbility.enabled)
             {
-                m_TriggerCollider.GetGlobalParams(out Vector3 p1, out Vector3 p2, out float radius);
+                m_TriggerCollider.GetWorldPoints(out Vector3 p1, out Vector3 p2, out float radius);
                 OverlapCount = Physics.OverlapCapsuleNonAlloc(p1, p2, radius, Colliders, m_GrabLayerMask);
 
                 for (int i = 0; i < OverlapCount; i++)
@@ -228,7 +228,7 @@ namespace Manatea.RootlingForest
                         continue;
                     if (!rigid.GetComponent<GrabPreferences>())
                         continue;
-                    m_GrabAbility.Target = rigid;
+                    m_GrabAbility.Target = rigid.gameObject;
                     m_GrabAbility.enabled = true;
                     break;
                 }

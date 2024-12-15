@@ -9,22 +9,40 @@ namespace Manatea.RootlingForest
         [SerializeField]
         private Transform m_SpawnTransform;
         [SerializeField]
+        private int m_MinSpawn = 1;
+        [SerializeField]
+        private int m_MaxSpawn = 1;
+        [SerializeField]
         private GameObject m_Prefab;
+        [SerializeField]
+        [Range(0, 1)]
+        private float m_ForwardVsSpherical;
+        [SerializeField]
+        private float m_Speed = 1;
 
-
-        public GameObject Spawn()
-        {
-            GameObject go = Instantiate(m_Prefab, m_SpawnTransform.position, m_SpawnTransform.rotation);
-            Shoot(go);
-            return go;
-        }
 
         public void SpawnSilent()
         {
-            GameObject go = Instantiate(m_Prefab, m_SpawnTransform.position, m_SpawnTransform.rotation);
-            Shoot(go);
+            Spawn();
         }
 
+        public List<GameObject> Spawn()
+        {
+            List<GameObject> list = new List<GameObject>();
+            int spawnCount = Random.Range(m_MinSpawn, m_MaxSpawn);
+            for (int i = 0; i < spawnCount; i++)
+            {
+                Transform spawnTransform = m_SpawnTransform ? m_SpawnTransform : transform;
+                GameObject go = Instantiate(m_Prefab, spawnTransform.position, spawnTransform.rotation);
+                Rigidbody rigid = go.GetComponent<Rigidbody>();
+                if (rigid)
+                {
+                    rigid.linearVelocity = Vector3.Slerp(spawnTransform.forward, Random.onUnitSphere, m_ForwardVsSpherical) * m_Speed;
+                }
+                list.Add(go);
+            }
+            return list;
+        }
 
         private void Shoot(GameObject go)
         {

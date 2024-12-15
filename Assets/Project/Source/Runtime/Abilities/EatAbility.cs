@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class EatAbility : MonoBehaviour
+public class EatAbility : BaseAbility
 {
     [SerializeField]
     private GameObject m_Self;
@@ -14,8 +14,6 @@ public class EatAbility : MonoBehaviour
     [SerializeField]
     private GameplayEffect[] m_EffectsForDuration;
 
-    public GameObject Target;
-
     private GameplayTagOwner m_SelfTagOwner;
     private GameplayEffectOwner m_SelfEffectOwner;
     private GameplayEffectOwner m_TargetEffectOwner;
@@ -23,7 +21,7 @@ public class EatAbility : MonoBehaviour
     private List<GameplayEffectInstance> m_Effects = new();
 
 
-    private void OnEnable()
+    protected override void AbilityEnabled()
     {
         m_SelfTagOwner = m_Self.GetComponentInChildren<GameplayTagOwner>();
         m_SelfEffectOwner = m_Self.GetComponentInChildren<GameplayEffectOwner>();
@@ -31,7 +29,7 @@ public class EatAbility : MonoBehaviour
         var eatPrefList = Target.GetComponentsInChildren<EatPreferences>();
 
         for (int i = 0; i < eatPrefList.Length; i++)
-        {
+        { 
             var eatPref = eatPrefList[i];
             if ((!m_TargetEatPrefs || eatPref.Priority > m_TargetEatPrefs.Priority) && m_SelfTagOwner.SatisfiesTagFilter(eatPref.EaterRequirements))
             {
@@ -47,7 +45,7 @@ public class EatAbility : MonoBehaviour
 
         StartCoroutine(ExecuteAbility());
     }
-    private void OnDisable()
+    protected override void AbilityDisabled()
     {
         StopAllCoroutines();
 

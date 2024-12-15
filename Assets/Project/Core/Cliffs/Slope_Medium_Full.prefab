@@ -106,10 +106,18 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 1433362417764671698}
+    - targetCorrespondingSourceObject: {fileID: -4737395807898423603, guid: 4272eb7ec91b6be41a6d3f28d0e0c669,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 5583626466251824439}
     - targetCorrespondingSourceObject: {fileID: -8778871801483706898, guid: 4272eb7ec91b6be41a6d3f28d0e0c669,
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 6191177488381632735}
+    - targetCorrespondingSourceObject: {fileID: -8778871801483706898, guid: 4272eb7ec91b6be41a6d3f28d0e0c669,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4262297327731482590}
   m_SourcePrefab: {fileID: 100100000, guid: 4272eb7ec91b6be41a6d3f28d0e0c669, type: 3}
 --- !u!1 &5159093184064629546 stripped
 GameObject:
@@ -139,6 +147,20 @@ MeshCollider:
   m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: 3308456670569087595, guid: 4272eb7ec91b6be41a6d3f28d0e0c669, type: 3}
+--- !u!114 &4262297327731482590
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5159093184064629546}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6de6ed62cf3a79d47ac7cbfcb42fad7b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Area: 0
+  m_Collider: {fileID: 6191177488381632735}
 --- !u!1 &9219584140332709897 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: -4737395807898423603, guid: 4272eb7ec91b6be41a6d3f28d0e0c669,
@@ -167,3 +189,17 @@ MeshCollider:
   m_Convex: 1
   m_CookingOptions: 30
   m_Mesh: {fileID: 824202347420794534, guid: 4272eb7ec91b6be41a6d3f28d0e0c669, type: 3}
+--- !u!114 &5583626466251824439
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9219584140332709897}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6de6ed62cf3a79d47ac7cbfcb42fad7b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Area: 0
+  m_Collider: {fileID: 1433362417764671698}

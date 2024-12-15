@@ -8,7 +8,8 @@ using static Manatea.RootlingForest.CharacterMovement;
 
 namespace Manatea.RootlingForest
 {
-    public class JumpMovementAbility : MonoBehaviour, ICharacterMover
+    [DefaultExecutionOrder(-10)]
+    public class JumpMovementAbility : BaseAbility, ICharacterMover
     {
         [SerializeField]
         private CharacterMovement m_CharacterMovement;
@@ -35,42 +36,67 @@ namespace Manatea.RootlingForest
         /// The amount of time after dropping off a cliff we are still allowed to jump
         /// </summary>
         public const float COYOTE_TIME = 0.1f;
+        /// <summary>
+        /// The maximum wiggle before we are not allowed to jump anymore
+        /// </summary>
+        public const float WIGGLE_THRESHOLD = 1f;
 
-        private bool m_ScheduledJump;
-        private bool m_HasJumped;
+        private bool m_JumpInitialized;
         private float m_JumpTimer;
         private float m_ForceAirborneTimer;
         private float m_JumpCooldownTimer;
 
 
-        private void OnEnable()
+        protected override void AbilityEnabled()
         {
-            m_ScheduledJump = false;
-            m_HasJumped = false;
+            m_JumpInitialized = false;
             m_JumpTimer = 0;
             m_JumpCooldownTimer = 0;
             m_ForceAirborneTimer = 0;
 
             m_CharacterMovement.RegisterMover(this);
         }
-        private void OnDisable()
+        protected override void AbilityDisabled()
         {
             m_CharacterMovement.UnregisterMover(this);
+
+            StopAllCoroutines();
+
+            m_JumpTimer = 0;
         }
 
-        public void Jump()
-        {
-            m_ScheduledJump = true;
-        }
-        public void ReleaseJump()
-        {
-            m_ScheduledJump = false;
-        }
 
-        public void ModifyState(MovementSimulationState sim)
+        void ICharacterMover.ModifyState(MovementSimulationState sim, float dt)
         {
+            if (!enabled)
+                return;
+
+            if (!m_JumpInitialized)
+            {
+
+                // Dont allow jumping if the player is wiggling too much
+                if (sim.Movement.Rigidbody.angularVelocity.XZ().magnitude > WIGGLE_THRESHOLD)
+                {
+                    enabled = false;
+                    return;
+                }
+                if (m_JumpCooldownTime.hasValue && m_JumpCooldownTimer > 0)
+                {
+                    enabled = false;
+                    return;
+                }
+
+                bool validGroundJump = m_AllowGroundJump && sim.AirborneTimer <= COYOTE_TIME;
+                bool validAirJump = m_AllowAirJump && !sim.IsStableGrounded;
+                if (!validGroundJump && !validAirJump)
+                {
+                    enabled = false;
+                    return;
+                }
+            }
+
             // Guarantee airborne when jumping just occured
-            if (m_HasJumped && m_JumpTimer <= MIN_JUMP_TIME)
+            if (m_JumpTimer <= MIN_JUMP_TIME)
             {
                 sim.IsStableGrounded = false;
                 sim.IsSliding = false;
@@ -78,42 +104,31 @@ namespace Manatea.RootlingForest
             // Stop jump
             if (sim.IsStableGrounded)
             {
-                m_HasJumped = false;
-                m_JumpTimer = 0;
+                enabled = false;
             }
 
             sim.IsStableGrounded &= m_ForceAirborneTimer <= 0;
         }
 
-        public void UpdateTimers(MovementSimulationState sim)
+        void ICharacterMover.UpdateTimers(MovementSimulationState sim, float dt)
         {
-            m_ForceAirborneTimer = MMath.Max(m_ForceAirborneTimer - Time.fixedDeltaTime, 0);
-            if (m_HasJumped)
-            {
-                m_JumpTimer += Time.fixedDeltaTime;
-            }
+            if (!enabled)
+                return;
+            if (m_JumpInitialized)
+                return;
 
-            m_JumpCooldownTimer = MMath.Max(m_JumpCooldownTimer - Time.fixedDeltaTime, 0);
+            m_ForceAirborneTimer = MMath.Max(m_ForceAirborneTimer - dt, 0);
+            m_JumpTimer += dt;
+            m_JumpCooldownTimer = MMath.Max(m_JumpCooldownTimer - dt, 0);
         }
 
-        public void PreMovement(MovementSimulationState sim)
+        void ICharacterMover.PreMovement(MovementSimulationState sim, float dt)
         {
-            // No jump input
-            if (!m_ScheduledJump)
+            if (!enabled)
                 return;
-            if (m_JumpCooldownTime.hasValue && m_JumpCooldownTimer > 0)
-                return;
-
-            bool validGroundJump = m_AllowGroundJump && sim.AirborneTimer <= COYOTE_TIME;
-            bool validAirJump = m_AllowAirJump && !sim.IsStableGrounded;
-            if (!validGroundJump && !validAirJump)
+            if (m_JumpInitialized)
                 return;
 
-            // Ground jump has precedence
-            if (validGroundJump && validAirJump)
-                validAirJump = false;
-
-            m_ScheduledJump = false;
             m_ForceAirborneTimer = 0.05f;
 
             if (sim.ContactMove != Vector3.zero)
@@ -130,7 +145,11 @@ namespace Manatea.RootlingForest
             StartCoroutine(CO_Jump(sim, jumpForce, m_JumpIterations));
 
             m_JumpCooldownTimer = m_JumpCooldownTime.value;
-            m_HasJumped = true;
+
+            sim.IsStableGrounded = false;
+            sim.IsSliding = false;
+
+            m_JumpInitialized = true;
         }
 
         private IEnumerator CO_Jump(MovementSimulationState sim, Vector3 velocity, int iterations)

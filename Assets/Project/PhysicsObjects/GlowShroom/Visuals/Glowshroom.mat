@@ -50,16 +50,12 @@ Material:
         m_Texture: {fileID: 2800000, guid: e4fe5c8eb31666541b53690f37313ed1, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
-    - _EmissionMap:
-        m_Texture: {fileID: 2800000, guid: e4fe5c8eb31666541b53690f37313ed1, type: 3}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
     m_Ints: []
     m_Floats:
     - _QueueControl: 0
     - _UseEmission: 1
     m_Colors:
-    - _EmissionColor: {r: 4, g: 4, b: 4, a: 1}
+    - _EmissionColor: {r: 5.992157, g: 5.992157, b: 5.992157, a: 1}
     - _Emission_Tint: {r: 4, g: 4, b: 4, a: 1}
   m_BuildTextureStacks: []
   m_AllowLocking: 1

@@ -173,22 +173,22 @@ namespace Manatea.GameplaySystem
         /// </summary>
         /// <param name="tags">The Tags to check for.</param>
         /// <returns>True if <b>all</b> Tags are present.</returns>
-        public bool HasAllTags(List<GameplayTag> tags)
+        public bool HasAllTags(List<GameplayTag> tags, bool emptyResponse = true)
         {
             List<GameplayTag> mergedTags = new List<GameplayTag>(m_UnmanagedTags);
             mergedTags.AddRange(m_ManagedTags);
-            return HasAllTags(mergedTags, tags);
+            return HasAllTags(mergedTags, tags, emptyResponse);
         }
         /// <summary>
         /// Checks if <b>none</b> GameplayTags are present on the entity.
         /// </summary>
         /// <param name="tags">The Tags to check for.</param>
         /// <returns>True if <b>none</b> of the Tags are present</returns>
-        public bool HasNoneTags(List<GameplayTag> tags)
+        public bool HasNoneTags(List<GameplayTag> tags, bool emptyResponse = true)
         {
             List<GameplayTag> mergedTags = new List<GameplayTag>(m_UnmanagedTags);
             mergedTags.AddRange(m_ManagedTags);
-            return HasNoneTags(mergedTags, tags);
+            return HasNoneTags(mergedTags, tags, emptyResponse);
         }
         /// <summary>
         /// Chechs if <b>all</b> of the required filter tags and <b>none</b> of the ignore filter tags are present in the collection.
@@ -196,11 +196,11 @@ namespace Manatea.GameplaySystem
         /// <param name="tagFilter">The filter to check for</param>
         /// <param name="emptyResponse">What to return if the filter is empty</param>
         /// <returns>True if the tag collection passed the filter</returns>
-        public bool SatisfiesTagFilter(GameplayTagFilter container)
+        public bool SatisfiesTagFilter(GameplayTagFilter container, bool emptyResponse = true)
         {
             List<GameplayTag> mergedTags = new List<GameplayTag>(m_UnmanagedTags);
             mergedTags.AddRange(m_ManagedTags);
-            return SatisfiesTagFilter(mergedTags, container);
+            return SatisfiesTagFilter(mergedTags, container, emptyResponse);
         }
 
 
@@ -224,8 +224,11 @@ namespace Manatea.GameplaySystem
             }
             return false;
         }
-        public static bool HasAllTags(List<GameplayTag> tagList, List<GameplayTag> tagsToCheck)
+        public static bool HasAllTags(List<GameplayTag> tagList, List<GameplayTag> tagsToCheck, bool emptyResponse = true)
         {
+            if (tagsToCheck.Count == 0)
+                return emptyResponse;
+
             for (int i = 0; i < tagsToCheck.Count; i++)
             {
                 GameplayTag t = tagsToCheck[i];
@@ -236,8 +239,11 @@ namespace Manatea.GameplaySystem
             }
             return true;
         }
-        public static bool HasNoneTags(List<GameplayTag> tagList, List<GameplayTag> tagsToCheck)
+        public static bool HasNoneTags(List<GameplayTag> tagList, List<GameplayTag> tagsToCheck, bool emptyResponse = true)
         {
+            if (tagsToCheck.Count == 0)
+                return emptyResponse;
+
             for (int i = 0; i < tagsToCheck.Count; i++)
             {
                 GameplayTag t = tagsToCheck[i];
@@ -249,8 +255,11 @@ namespace Manatea.GameplaySystem
             return true;
         }
 
-        public static bool SatisfiesTagFilter(List<GameplayTag> tagList, GameplayTagFilter container)
+        public static bool SatisfiesTagFilter(List<GameplayTag> tagList, GameplayTagFilter container, bool emptyResponse = true)
         {
+            if (container.IsEmpty)
+                return emptyResponse;
+
             return HasAllTags(tagList, container.RequireTags) &&
                    HasNoneTags(tagList, container.IgnoreTags);
         }

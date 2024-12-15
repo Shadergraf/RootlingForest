@@ -586,11 +586,14 @@ namespace Manatea
 		/// <summary>Repeats the given value in the interval specified by length</summary>
 		[MethodImpl(INLINE)] public static float Repeat(float value, float length) => Clamp(value - Floor(value / length) * length, 0.0f, length);
 
-		/// <summary>Modulo, but, behaves the way you want with negative values, for stuff like array[(n+1)%length] etc.</summary>
-		[MethodImpl(INLINE)] public static int Mod(int value, int length) => (value % length + length) % length;
+        /// <summary>Repeats the given value in the interval specified by length</summary>
+        [MethodImpl(INLINE)] public static float RepeatInInterval(float value, float intervalMin, float intervalMax) => Lerp(intervalMin, intervalMax, Repeat(InverseLerp(intervalMin, intervalMax, value), 1));
 
-		/// <summary>Repeats a value within a range, going back and forth</summary>
-		[MethodImpl(INLINE)] public static float PingPong(float t, float length) => length - Abs(Repeat(t, length * 2f) - length);
+        /// <summary>Modulo, but, behaves the way you want with negative values, for stuff like array[(n+1)%length] etc.</summary>
+        [MethodImpl(INLINE)] public static int Mod(int value, int length) => (value % length + length) % length;
+
+        /// <summary>Repeats a value within a range, going back and forth</summary>
+        [MethodImpl(INLINE)] public static float PingPong(float t, float length) => length - Abs(Repeat(t, length * 2f) - length);
 
 		#endregion
 
@@ -813,7 +816,7 @@ namespace Manatea
 		/// The function can be used to smooth any kind of value, positions, colors, scalars</summary>
 		/// <param name="current">The current value</param>
 		/// <param name="target">The value we are trying to reach</param>
-		/// <param name="smoothTime">Approximately the time it will take to reach the target. A smaller value will reach the target faster</param>
+		/// <param name="smoothTime">Approximately the speed with wich to reach the target. A bigger value will reach the target faster</param>
 		/// <param name="deltaTime">The time since the last call to this function. By default Time.deltaTime</param>
 		public static float Damp(float current, float target, [Uei.DefaultValue("Mathf.Infinity")] float smoothTime, [Uei.DefaultValue("Time.deltaTime")] float deltaTime)
 			=> Lerp(current, target, 1 - Exp(-smoothTime * deltaTime));

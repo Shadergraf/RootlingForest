@@ -132,7 +132,7 @@ namespace Manatea.RootlingForest
             m_Items.RemoveAt(id);
 
             m_GrabAbility.enabled = false;
-            m_GrabAbility.Target = item.GetComponent<Rigidbody>();
+            m_GrabAbility.Target = item;
             m_GrabAbility.enabled = true;
         }
 

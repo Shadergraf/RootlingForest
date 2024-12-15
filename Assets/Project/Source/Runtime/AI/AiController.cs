@@ -11,7 +11,7 @@ using static UnityEngine.GraphicsBuffer;
 
 namespace Manatea.RootlingForest
 {
-    public class AiController : CharacterController
+    public class AiController : BaseCharacterController
     {
         public Vector3 m_MoveDir;
 

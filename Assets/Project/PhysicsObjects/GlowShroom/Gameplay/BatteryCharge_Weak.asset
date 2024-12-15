@@ -19,6 +19,6 @@ MonoBehaviour:
   m_AttributeModifications:
   - Attribute: {fileID: 11400000, guid: a6039d8934647754f912b8e0cdec79ac, type: 2}
     Type: 0
-    Value: 5
+    Value: 1
   m_Events:
   - {fileID: 11400000, guid: 06e8baef72ad0ac4faf9f0771120055c, type: 2}
