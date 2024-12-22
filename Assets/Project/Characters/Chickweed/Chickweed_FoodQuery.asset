@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a7e0d6d7dbd0abe4fb48067b51b63b8b, type: 3}
+  m_Name: Chickweed_FoodQuery
+  m_EditorClassIdentifier: 
+  m_TagFilter:
+    RequireTags:
+    - {fileID: 11400000, guid: 1c18da10d3323594b984a916c6f91687, type: 2}
+    - {fileID: 11400000, guid: 3a80bd0ee6cade7428a6a1ff50027a18, type: 2}
+    IgnoreTags: []

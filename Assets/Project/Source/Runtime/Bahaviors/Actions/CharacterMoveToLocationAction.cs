@@ -71,6 +71,10 @@ public partial class CharacterMoveToObjectAction : Action
         {
             m_CornerIndex++;
         }
+        if (Vector3.Distance(Character.Value.transform.position, Object.Value.transform.position) < 0.7f)
+        {
+            return Status.Success;
+        }
 
         m_Movement.Move((m_Corners[m_CornerIndex + 1] - Character.Value.transform.position).FlattenY().normalized);
 

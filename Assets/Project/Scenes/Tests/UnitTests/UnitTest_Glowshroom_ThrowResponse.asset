@@ -10,7 +10,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5c02bb70996b49eba31d0c206e28da24, type: 3}
-  m_Name: UnitTest_Glowshroom_ThrowResponse Blackboard Editor
+  m_Name: UnitTest_Glowshroom_ThrowResponse Blackboard
   m_EditorClassIdentifier: 
   VersionTimestamp: 638661667206598052
   AssetID:
@@ -107,7 +107,7 @@ MonoBehaviour:
   m_CodeBreakPointsList: []
 --- !u!114 &-2204572472776907019
 MonoBehaviour:
-  m_ObjectHideFlags: 0
+  m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
@@ -115,7 +115,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2dd922ae02c94c87a66e46a10a7319b9, type: 3}
-  m_Name: UnitTest_Glowshroom_ThrowResponse Blackboard Editor
+  m_Name: UnitTest_Glowshroom_ThrowResponse Blackboard
   m_EditorClassIdentifier: 
   AssetID:
     m_Value0: 2662923804821524968
@@ -253,6 +253,7 @@ MonoBehaviour:
   - rid: 4516264524492046659
   m_VersionTimestamp: 638661667205730377
   m_DebugInfo: {fileID: -2681753897777180734}
+  m_RuntimeGraph: {fileID: 0}
   AssetID:
     m_Value0: 2662923804821524968
     m_Value1: 13955146630087059482
@@ -281,8 +282,8 @@ MonoBehaviour:
       Tooltip: 
     - Name: Ability
       Type:
-        m_SerializableType: Manatea.RootlingForest.GrabAbility, Manatea.RootlingForest.Runtime,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+        m_SerializableType: BaseAbility, Manatea.RootlingForest.Runtime, Version=0.0.0.0,
+          Culture=neutral, PublicKeyToken=null
       Tooltip: 
     NamedChildren: []
   - Name: SetAbilityTarget
@@ -293,8 +294,8 @@ MonoBehaviour:
     Variables:
     - Name: Ability
       Type:
-        m_SerializableType: Manatea.RootlingForest.GrabAbility, Manatea.RootlingForest.Runtime,
-          Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
+        m_SerializableType: BaseAbility, Manatea.RootlingForest.Runtime, Version=0.0.0.0,
+          Culture=neutral, PublicKeyToken=null
       Tooltip: 
     - Name: Target
       Type:
@@ -403,6 +404,7 @@ MonoBehaviour:
       Tooltip: 
     NamedChildren: []
   m_Blackboards: []
+  m_MainBlackboardAuthoringAsset: {fileID: -2204572472776907019}
   m_CommandBuffer:
     m_Commands: []
   references:
@@ -418,17 +420,6 @@ MonoBehaviour:
           m_Value0: 1
           m_Value1: 0
         Name: Character
-        IsExposed: 1
-        m_IsShared: 0
-        m_Value: {fileID: 0}
-    - rid: 1705121593236389889
-      type: {class: 'TypedVariableModel`1[[Manatea.RootlingForest.GrabAbility, Manatea.RootlingForest.Runtime]]',
-        ns: Unity.Behavior.GraphFramework, asm: Unity.Behavior.GraphFramework}
-      data:
-        ID:
-          m_Value0: 4203207679874501141
-          m_Value1: 14506031498012658138
-        Name: Grab Ability
         IsExposed: 1
         m_IsShared: 0
         m_Value: {fileID: 0}
@@ -513,7 +504,7 @@ MonoBehaviour:
           m_Value1: 542415245101179961
         m_FieldValues:
         - rid: 4516264521266364513
-        - rid: 4516264521266364514
+        - rid: 7730649175572874060
     - rid: 4516264521266364511
       type: {class: PortModel, ns: Unity.Behavior.GraphFramework, asm: Unity.Behavior.GraphFramework}
       data:
@@ -543,28 +534,8 @@ MonoBehaviour:
           rid: 4516264521266364515
         LinkedVariable:
           rid: 1705121593236389888
-    - rid: 4516264521266364514
-      type: {class: BehaviorGraphNodeModel/FieldModel, ns: Unity.Behavior, asm: Unity.Behavior.Authoring}
-      data:
-        FieldName: Ability
-        Type:
-          m_SerializableType: Manatea.RootlingForest.GrabAbility, Manatea.RootlingForest.Runtime,
-            Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-        LocalValue:
-          rid: 4516264521266364516
-        LinkedVariable:
-          rid: 1705121593236389889
     - rid: 4516264521266364515
       type: {class: 'BlackboardVariable`1[[UnityEngine.GameObject, UnityEngine.CoreModule]]',
-        ns: Unity.Behavior, asm: Unity.Behavior}
-      data:
-        GUID:
-          m_Value0: 0
-          m_Value1: 0
-        Name: 
-        m_Value: {fileID: 0}
-    - rid: 4516264521266364516
-      type: {class: 'BlackboardVariable`1[[Manatea.RootlingForest.GrabAbility, Manatea.RootlingForest.Runtime]]',
         ns: Unity.Behavior, asm: Unity.Behavior}
       data:
         GUID:
@@ -591,7 +562,7 @@ MonoBehaviour:
           m_Value0: 4067582331279689516
           m_Value1: 7409176207638240927
         m_FieldValues:
-        - rid: 4516264521266364599
+        - rid: 7730649175572874061
         - rid: 4516264521266364600
     - rid: 4516264521266364597
       type: {class: PortModel, ns: Unity.Behavior.GraphFramework, asm: Unity.Behavior.GraphFramework}
@@ -611,17 +582,6 @@ MonoBehaviour:
         m_NodeModel:
           rid: 4516264521266364596
         m_Connections: []
-    - rid: 4516264521266364599
-      type: {class: BehaviorGraphNodeModel/FieldModel, ns: Unity.Behavior, asm: Unity.Behavior.Authoring}
-      data:
-        FieldName: Ability
-        Type:
-          m_SerializableType: Manatea.RootlingForest.GrabAbility, Manatea.RootlingForest.Runtime,
-            Version=0.0.0.0, Culture=neutral, PublicKeyToken=null
-        LocalValue:
-          rid: 4516264521266364601
-        LinkedVariable:
-          rid: 1705121593236389889
     - rid: 4516264521266364600
       type: {class: BehaviorGraphNodeModel/FieldModel, ns: Unity.Behavior, asm: Unity.Behavior.Authoring}
       data:
@@ -633,15 +593,6 @@ MonoBehaviour:
           rid: 4516264521266364602
         LinkedVariable:
           rid: 1705121593236389890
-    - rid: 4516264521266364601
-      type: {class: 'BlackboardVariable`1[[Manatea.RootlingForest.GrabAbility, Manatea.RootlingForest.Runtime]]',
-        ns: Unity.Behavior, asm: Unity.Behavior}
-      data:
-        GUID:
-          m_Value0: 0
-          m_Value1: 0
-        Name: 
-        m_Value: {fileID: 0}
     - rid: 4516264521266364602
       type: {class: 'BlackboardVariable`1[[UnityEngine.GameObject, UnityEngine.CoreModule]]',
         ns: Unity.Behavior, asm: Unity.Behavior}
@@ -1892,6 +1843,46 @@ MonoBehaviour:
           rid: 4516264524492046659
         m_Connections:
         - rid: 4516264521266365011
+    - rid: 7730649175572874060
+      type: {class: BehaviorGraphNodeModel/FieldModel, ns: Unity.Behavior, asm: Unity.Behavior.Authoring}
+      data:
+        FieldName: Ability
+        Type:
+          m_SerializableType: BaseAbility, Manatea.RootlingForest.Runtime, Version=0.0.0.0,
+            Culture=neutral, PublicKeyToken=null
+        LocalValue:
+          rid: 7730649175572874062
+        LinkedVariable:
+          rid: -2
+    - rid: 7730649175572874061
+      type: {class: BehaviorGraphNodeModel/FieldModel, ns: Unity.Behavior, asm: Unity.Behavior.Authoring}
+      data:
+        FieldName: Ability
+        Type:
+          m_SerializableType: BaseAbility, Manatea.RootlingForest.Runtime, Version=0.0.0.0,
+            Culture=neutral, PublicKeyToken=null
+        LocalValue:
+          rid: 7730649175572874063
+        LinkedVariable:
+          rid: -2
+    - rid: 7730649175572874062
+      type: {class: 'BlackboardVariable`1[[BaseAbility, Manatea.RootlingForest.Runtime]]',
+        ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 0
+          m_Value1: 0
+        Name: 
+        m_Value: {fileID: 0}
+    - rid: 7730649175572874063
+      type: {class: 'BlackboardVariable`1[[BaseAbility, Manatea.RootlingForest.Runtime]]',
+        ns: Unity.Behavior, asm: Unity.Behavior}
+      data:
+        GUID:
+          m_Value0: 0
+          m_Value1: 0
+        Name: 
+        m_Value: {fileID: 0}
 --- !u!114 &5982848265554257396
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2019,7 +2010,7 @@ MonoBehaviour:
         AuthoringAssetID:
           m_Value0: 2662923804821524968
           m_Value1: 13955146630087059482
-        m_DebugInfo: {fileID: 0}
+        m_DebugInfo: {fileID: -2681753897777180734}
         Root:
           rid: 1705121593236390006
         BlackboardReference:

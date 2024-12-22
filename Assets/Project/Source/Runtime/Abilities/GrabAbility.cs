@@ -205,17 +205,18 @@ namespace Manatea.RootlingForest
 
         protected override void AbilityEnabled()
         {
-            if (!Target.TryGetComponent(out m_Target_GrabPrefs))
-            {
-                enabled = false;
-                return;
-            }
             if (!Target.TryGetComponent(out m_Target_Rigidbody))
             {
                 enabled = false;
                 return;
             }
             if (Target == m_Self || Target.transform.IsChildOf(m_Self.transform))
+            {
+                enabled = false;
+                return;
+            }
+            m_Target_GrabPrefs = Target.GetComponentInChildren<GrabPreferences>();
+            if (!m_Target_GrabPrefs)
             {
                 enabled = false;
                 return;

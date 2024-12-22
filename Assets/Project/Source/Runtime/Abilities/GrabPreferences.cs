@@ -1,13 +1,15 @@
 using Manatea;
+using Manatea.RootlingForest.Abilities;
 using UnityEngine;
 
 namespace Manatea.RootlingForest
 {
-    [RequireComponent(typeof(Rigidbody))]
     public class GrabPreferences : MonoBehaviour
     {
         [SerializeField]
         private bool m_CollisionEnabled;
+        [SerializeField]
+        private AbilityPriority m_Priority = AbilityPriority.Default;
         [SerializeField]
         private LocationRule m_LocationRule;
         [SerializeField]
@@ -34,6 +36,7 @@ namespace Manatea.RootlingForest
         private float m_DropTorque;
 
         public bool CollisionEnabled => m_CollisionEnabled;
+        public AbilityPriority Priority => m_Priority;
         public LocationRule LocationRule => m_LocationRule;
         public RotationRule RotationRule => m_RotationRule;
         public float RotationLimit => m_RotationLimit;

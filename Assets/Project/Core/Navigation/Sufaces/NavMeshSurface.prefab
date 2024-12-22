@@ -85,4 +85,4 @@ MonoBehaviour:
   m_AutoUpdateBounds: 0
   m_LayerMask:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 4097

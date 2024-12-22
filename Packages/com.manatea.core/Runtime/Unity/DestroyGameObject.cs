@@ -10,6 +10,8 @@ namespace Manatea
 
         public void Destroy()
         {
+            if (!objectToDestroy)
+                Debug.LogWarning("No object was set up for destruction.", gameObject);
             Destroy(objectToDestroy);
         }
     }

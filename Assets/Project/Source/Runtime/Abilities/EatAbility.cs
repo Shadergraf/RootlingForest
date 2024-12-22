@@ -13,10 +13,16 @@ public class EatAbility : BaseAbility
     private float m_EatTiming = 0.6f;
     [SerializeField]
     private GameplayEffect[] m_EffectsForDuration;
+    [SerializeField]
+    private GameplayEvent m_BiteConfirmedEvent;
+
+    private GameplayEvent m_AbilityActivated;
+    private GameplayEvent m_AbilityEnded;
 
     private GameplayTagOwner m_SelfTagOwner;
     private GameplayEffectOwner m_SelfEffectOwner;
     private GameplayEffectOwner m_TargetEffectOwner;
+    private GameplayEventReceiver m_SelfEventReceiver;
     private EatPreferences m_TargetEatPrefs;
     private List<GameplayEffectInstance> m_Effects = new();
 
@@ -25,6 +31,7 @@ public class EatAbility : BaseAbility
     {
         m_SelfTagOwner = m_Self.GetComponentInChildren<GameplayTagOwner>();
         m_SelfEffectOwner = m_Self.GetComponentInChildren<GameplayEffectOwner>();
+        m_SelfEventReceiver = m_Self.GetComponentInChildren<GameplayEventReceiver>();
         m_TargetEffectOwner = Target.GetComponentInChildren<GameplayEffectOwner>();
         var eatPrefList = Target.GetComponentsInChildren<EatPreferences>();
 
@@ -77,6 +84,12 @@ public class EatAbility : BaseAbility
 
     private void Bite()
     {
+        if (m_BiteConfirmedEvent)
+        {
+            Debug.Assert(m_SelfEventReceiver, "Tries to send event with no EventReceiver present!", this);
+            m_SelfEventReceiver.SendEventDelayed(m_BiteConfirmedEvent, this);
+        }
+
         for (int i = 0; i < m_TargetEatPrefs.EaterEffects.Length; i++)
         {
             m_SelfEffectOwner.AddEffect(new GameplayEffectInstance(m_TargetEatPrefs.EaterEffects[i]));

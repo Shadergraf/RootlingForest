@@ -138,7 +138,10 @@ namespace Manatea.GameplaySystem
         public bool TryGetAttributeEvaluatedValue(GameplayAttribute attribute, out float evaluatedValue)
         {
             Debug.Assert(m_Initialized, "Attribute owner was not initialized!", gameObject);
-
+            if (!m_Initialized)
+            {
+                System.Diagnostics.Debugger.Break();
+            }
             evaluatedValue = 0;
             for (int i = 0; i < m_AttributeInstances.Count; i++)
             {

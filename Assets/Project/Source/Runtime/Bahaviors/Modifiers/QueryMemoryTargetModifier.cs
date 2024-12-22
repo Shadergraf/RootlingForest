@@ -58,20 +58,15 @@ public partial class QueryMemoryTargetModifier : Modifier
     private bool TestQuery()
     {
         if (!Self.Value)
-        {
             return false;
-        }
+
         MemoryComponent memory = Self.Value.GetComponentInChildren<MemoryComponent>();
         if (!memory)
-        {
             return false;
-        }
 
         bool success = memory.Query(Query.Value, out MemoryMemento memento);
         if (!success || !memento.AssociatedObject)
-        {
             return false;
-        }
 
         Target.Value = memento.AssociatedObject;
 

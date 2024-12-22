@@ -10,17 +10,16 @@ using Unity.Properties;
 public partial class EnableAbilityAction : Action
 {
     [SerializeReference] public BlackboardVariable<GameObject> Agent;
-    [SerializeReference] public BlackboardVariable<GrabAbility> Ability;
+    [SerializeReference] public BlackboardVariable<BaseAbility> Ability;
 
     protected override Status OnStart()
     {
-        var ability = Agent.Value.GetComponentInChildren<GrabAbility>();
-        if (!ability)
+        if (!Ability.Value)
             return Status.Failure;
 
-        ability.enabled = true;
+        Ability.Value.enabled = true;
 
-        if (ability.enabled)
+        if (Ability.Value.enabled)
             return Status.Success;
         else
             return Status.Failure;

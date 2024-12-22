@@ -1,0 +1,55 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &4903281484717423024
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 409718415537582948}
+  - component: {fileID: 8302849191015439351}
+  m_Layer: 0
+  m_Name: EdibleObjectPrefs_Normal
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &409718415537582948
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4903281484717423024}
+  serializedVersion: 2
+  m_LocalRotation: {x: 5.8207654e-11, y: 5.8207654e-11, z: -0.0000000074505797, w: 1}
+  m_LocalPosition: {x: -1.0000045, y: -0.49999997, z: -1.9999962}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 1
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8302849191015439351
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4903281484717423024}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3e64d5848c8b81a4686bf162d0adfb5e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_EaterRequirements:
+    RequireTags:
+    - {fileID: 11400000, guid: f6b338c151abbc44b89d5979ad5e938f, type: 2}
+    - {fileID: 11400000, guid: 51d6ee927f39f5e48aa6f8196961d653, type: 2}
+    IgnoreTags: []
+  m_Priority: 2
+  m_EaterEffects: []
+  m_SelfEffects:
+  - {fileID: 11400000, guid: 3098c8769be330045b6742cc11890d97, type: 2}

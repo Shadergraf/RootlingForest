@@ -219,6 +219,8 @@ namespace Manatea.RootlingForest
                 m_TriggerCollider.GetWorldPoints(out Vector3 p1, out Vector3 p2, out float radius);
                 OverlapCount = Physics.OverlapCapsuleNonAlloc(p1, p2, radius, Colliders, m_GrabLayerMask);
 
+                Rigidbody bestFitRigid = null;
+                GrabPreferences bestFitPrefs = null;
                 for (int i = 0; i < OverlapCount; i++)
                 {
                     if (Colliders[i].gameObject == CharacterMovement.gameObject)
@@ -226,11 +228,19 @@ namespace Manatea.RootlingForest
                     Rigidbody rigid = Colliders[i].attachedRigidbody;
                     if (rigid == null)
                         continue;
-                    if (!rigid.GetComponent<GrabPreferences>())
+                    GrabPreferences prefs = rigid.GetComponentInChildren<GrabPreferences>();
+                    if (!prefs)
                         continue;
-                    m_GrabAbility.Target = rigid.gameObject;
+                    if (bestFitPrefs && prefs.Priority < bestFitPrefs.Priority)
+                        continue;
+                    bestFitRigid = rigid;
+                    bestFitPrefs = prefs;
+                }
+
+                if (bestFitRigid != null)
+                {
+                    m_GrabAbility.Target = bestFitRigid.gameObject;
                     m_GrabAbility.enabled = true;
-                    break;
                 }
             }
             else

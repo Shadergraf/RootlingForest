@@ -15,7 +15,7 @@ MonoBehaviour:
   m_CodeBreakPointsList: []
 --- !u!114 &-786909511096392325
 MonoBehaviour:
-  m_ObjectHideFlags: 0
+  m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
@@ -23,7 +23,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 2dd922ae02c94c87a66e46a10a7319b9, type: 3}
-  m_Name: Behavior Graph Blackboard Editor
+  m_Name: Behavior Graph Blackboard
   m_EditorClassIdentifier: 
   AssetID:
     m_Value0: 11822995536155569909
@@ -85,6 +85,7 @@ MonoBehaviour:
   - rid: 4516264319339200647
   m_VersionTimestamp: 638652321820951484
   m_DebugInfo: {fileID: -3212321746965777901}
+  m_RuntimeGraph: {fileID: 0}
   AssetID:
     m_Value0: 11822995536155569909
     m_Value1: 9554987409136382713
@@ -132,6 +133,7 @@ MonoBehaviour:
     Variables: []
     NamedChildren: []
   m_Blackboards: []
+  m_MainBlackboardAuthoringAsset: {fileID: -786909511096392325}
   m_CommandBuffer:
     m_Commands: []
   references:
@@ -520,7 +522,7 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 5c02bb70996b49eba31d0c206e28da24, type: 3}
-  m_Name: Behavior Graph Blackboard Editor
+  m_Name: Behavior Graph Blackboard
   m_EditorClassIdentifier: 
   VersionTimestamp: 638652321294458361
   AssetID:
@@ -616,7 +618,7 @@ MonoBehaviour:
         AuthoringAssetID:
           m_Value0: 11822995536155569909
           m_Value1: 9554987409136382713
-        m_DebugInfo: {fileID: 0}
+        m_DebugInfo: {fileID: -3212321746965777901}
         Root:
           rid: 4516264319339200681
         BlackboardReference:

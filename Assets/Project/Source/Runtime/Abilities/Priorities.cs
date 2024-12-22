@@ -8,10 +8,10 @@ namespace Manatea.RootlingForest.Abilities
 {
     public enum AbilityPriority
     {
-        Last = 0,
-        Low = 1,
-        Default = 2,
-        High = 3,
-        First = 4,
+        Last = -2,
+        Low = -1,
+        Default = 0,
+        High = 1,
+        First = 2,
     }
 }

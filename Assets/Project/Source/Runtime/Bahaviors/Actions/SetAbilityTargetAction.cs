@@ -9,12 +9,12 @@ using Unity.Properties;
 [NodeDescription(name: "SetAbilityTarget", story: "Set [Ability] [Target]", category: "Action", id: "2cc7944e94f472389f9e8d5e81aed266")]
 public partial class SetAbilityTargetAction : Action
 {
-    [SerializeReference] public BlackboardVariable<GrabAbility> Ability;
+    [SerializeReference] public BlackboardVariable<BaseAbility> Ability;
     [SerializeReference] public BlackboardVariable<GameObject> Target;
 
     protected override Status OnStart()
     {
-        var ability = Ability.Value.GetComponentInChildren<GrabAbility>();
+        var ability = Ability.Value.GetComponentInChildren<BaseAbility>();
         if (!ability)
             return Status.Failure;
 

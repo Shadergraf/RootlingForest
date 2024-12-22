@@ -1,16 +1,24 @@
 using UnityEngine;
+using UnityEngine.AI;
 
-public class NavMeshCharacterMover : MonoBehaviour
+namespace Manatea.RootlingForest.Navigation
 {
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    public class NavMeshCharacterMover : MonoBehaviour
     {
-        
-    }
+        [SerializeField]
+        private int agentTypeID = 0;
 
-    // Update is called once per frame
-    void Update()
-    {
-        
+
+
+
+        private void FixedUpdate()
+        {
+            
+        }
+
+        public void SetTargetPosition(Vector3 position)
+        {
+
+        }
     }
 }

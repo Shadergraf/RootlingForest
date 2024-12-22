@@ -22,4 +22,5 @@ MonoBehaviour:
   m_SaveFolderCondition: Project/Source/Runtime/Behaviors/Conditions
   m_SaveFolderEventChannels: 
   m_SaveFolderEnum: Project/Source/Runtime/Behaviors/Enums
+  m_AutoOpenNodeScriptsInExternalEditor: 1
   m_Namespace: 

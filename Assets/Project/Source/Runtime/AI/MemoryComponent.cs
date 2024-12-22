@@ -1,3 +1,4 @@
+using Manatea.GameplaySystem;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -63,14 +64,20 @@ namespace Manatea.RootlingForest
             }
         }
 
-        internal bool Query(MemoryQuery value, out MemoryMemento memento)
+        internal bool Query(MemoryQuery query, out MemoryMemento memento)
         {
             memento = null;
 
-            if (m_Mementos.Count > 0)
+            foreach (MemoryMemento mem in m_Mementos)
             {
-                memento = m_Mementos[0];
-                return true;
+                if (!mem.AssociatedObject)
+                    continue;
+
+                if (mem.AssociatedObject.TryGetComponent(out GameplayTagOwner tagOwner) && tagOwner.SatisfiesTagFilter(query.TagFilter))
+                {
+                    memento = mem;
+                    return true;
+                }
             }
 
             return false;

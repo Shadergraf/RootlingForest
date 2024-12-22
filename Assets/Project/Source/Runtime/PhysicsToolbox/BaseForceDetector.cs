@@ -57,9 +57,9 @@ namespace Manatea.RootlingForest
 
         protected virtual void Awake()
         {
-            m_Rigidbody = GetComponent<Rigidbody>();
-            m_AttributeOwner = GetComponent<GameplayAttributeOwner>();
-            m_TagOwner = GetComponent<GameplayTagOwner>();
+            m_Rigidbody = GetComponentInParent<Rigidbody>();
+            m_AttributeOwner = GetComponentInParent<GameplayAttributeOwner>();
+            m_TagOwner = GetComponentInParent<GameplayTagOwner>();
         }
         protected virtual void OnEnable()
         {

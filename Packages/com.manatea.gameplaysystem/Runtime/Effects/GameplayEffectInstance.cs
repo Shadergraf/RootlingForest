@@ -114,9 +114,9 @@ namespace Manatea.GameplaySystem
 
             if (m_EffectOwner.EventReceiver)
             {
-                for (int i = 0; i < Effect.Events.Length; i++)
+                for (int i = 0; i < Effect.ApplicationEvents.Length; i++)
                 {
-                    m_EffectOwner.EventReceiver.SendEventImmediate(Effect.Events[i], null);
+                    m_EffectOwner.EventReceiver.SendEventImmediate(Effect.ApplicationEvents[i], null);
                 }
             }
 
@@ -140,6 +140,14 @@ namespace Manatea.GameplaySystem
                         m_EffectOwner.AttributeOwner.RemoveAttributeModifier(addedModification.Attribute, addedModification.ModifierInst);
                     }
                     m_AddedModifications.Clear();
+                }
+            }
+
+            if (m_EffectOwner.EventReceiver)
+            {
+                for (int i = 0; i < Effect.RemovalEvents.Length; i++)
+                {
+                    m_EffectOwner.EventReceiver.SendEventImmediate(Effect.RemovalEvents[i], null);
                 }
             }
 
