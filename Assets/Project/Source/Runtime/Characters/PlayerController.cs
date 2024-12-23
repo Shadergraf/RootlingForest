@@ -233,6 +233,8 @@ namespace Manatea.RootlingForest
                         continue;
                     if (bestFitPrefs && prefs.Priority < bestFitPrefs.Priority)
                         continue;
+                    if (!m_GrabAbility.CouldActivateAbilityWithTarget(rigid.gameObject))
+                        continue;
                     bestFitRigid = rigid;
                     bestFitPrefs = prefs;
                 }

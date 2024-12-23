@@ -3197,7 +3197,7 @@ MonoBehaviour:
   - link:
     - context: {fileID: 8926484042661615148}
       slotIndex: 0
-  eventName: ChargeUp
+  eventName: ChargeUp_Weak
 --- !u!114 &8926484042661615134
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4827,7 +4827,7 @@ MonoBehaviour:
   - link:
     - context: {fileID: 8926484042661615224}
       slotIndex: 0
-  eventName: BigChargeUp
+  eventName: ChargeUp_Strong
 --- !u!114 &8926484042661615237
 MonoBehaviour:
   m_ObjectHideFlags: 0

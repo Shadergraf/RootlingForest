@@ -49,7 +49,7 @@ namespace Manatea.GameplaySystem
         /// Add multiple managed tags.
         /// </summary>
         /// <remarks>Managed tags are managed by someone and should not be removed by anyone else.</remarks>
-        public void AddManagedRange(List<GameplayTag> tags)
+        public void AddManagedRange(IList<GameplayTag> tags)
         {
             m_ManagedTags.AddRange(tags);
         }
@@ -57,7 +57,7 @@ namespace Manatea.GameplaySystem
         /// Remove multiple managed tags.
         /// </summary>
         /// <remarks>Managed tags are managed by someone and should not be removed by anyone else.</remarks>
-        public void RemoveManagedRange(List<GameplayTag> tags)
+        public void RemoveManagedRange(IList<GameplayTag> tags)
         {
             for (int i = 0; i < tags.Count; i++)
             {

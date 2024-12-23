@@ -173,6 +173,10 @@ MonoBehaviour:
   m_EnableAbilityFilter:
     RequireTags: []
     IgnoreTags: []
+  m_RequireTarget: 0
+  m_EnableAbilityTargetFilter:
+    RequireTags: []
+    IgnoreTags: []
   m_StayActiveAbilityFilter:
     RequireTags:
     - {fileID: 11400000, guid: 942d62db9bc34ae499e56a855290abc6, type: 2}
@@ -476,7 +480,7 @@ PrefabInstance:
     - target: {fileID: 2171703461037526104, guid: 6389f7dc5bd582f44affd90e3f3c4f7f,
         type: 3}
       propertyPath: m_Radius
-      value: 0.3
+      value: 0.333
       objectReference: {fileID: 0}
     - target: {fileID: 2480916211495745248, guid: 6389f7dc5bd582f44affd90e3f3c4f7f,
         type: 3}
@@ -705,6 +709,8 @@ MonoBehaviour:
   m_BlackboardVariableOverridesList:
   - rid: 1705121955613769930
   - rid: 7730649021510058670
+  m_IsInitialised: 0
+  m_IsStarted: 0
   references:
     version: 2
     RefIds:
@@ -1191,7 +1197,7 @@ PrefabInstance:
     - target: {fileID: -8679921383154817045, guid: 6ac4719b4533ecc48ab90c9703421894,
         type: 3}
       propertyPath: m_LocalPosition.y
-      value: -0.3
+      value: -0.333
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 6ac4719b4533ecc48ab90c9703421894,
         type: 3}

@@ -12,8 +12,6 @@ public class NavMeshSurfaceTester : MonoBehaviour
     private Transform m_TargetTransform;
     [SerializeField]
     private Collider[] m_Collider;
-    [SerializeField]
-    private int m_TileSize = -1;
 
     NavMeshData m_NavMeshData;
     NavMeshBuildSettings m_BuildSettigns;

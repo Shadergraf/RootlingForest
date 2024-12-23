@@ -5,8 +5,8 @@ namespace Manatea.RootlingForest.Navigation
 {
     public class NavMeshCharacterMover : MonoBehaviour
     {
-        [SerializeField]
-        private int agentTypeID = 0;
+        //[SerializeField]
+        //private int agentTypeID = 0;
 
 
 

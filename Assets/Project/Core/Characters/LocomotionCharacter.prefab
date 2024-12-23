@@ -51,6 +51,10 @@ MonoBehaviour:
   m_EnableAbilityFilter:
     RequireTags: []
     IgnoreTags: []
+  m_RequireTarget: 0
+  m_EnableAbilityTargetFilter:
+    RequireTags: []
+    IgnoreTags: []
   m_StayActiveAbilityFilter:
     RequireTags: []
     IgnoreTags: []
@@ -110,6 +114,10 @@ MonoBehaviour:
     RequireTags: []
     IgnoreTags: []
   m_EnableAbilityFilter:
+    RequireTags: []
+    IgnoreTags: []
+  m_RequireTarget: 0
+  m_EnableAbilityTargetFilter:
     RequireTags: []
     IgnoreTags: []
   m_StayActiveAbilityFilter:
@@ -214,6 +222,10 @@ MonoBehaviour:
     RequireTags: []
     IgnoreTags: []
   m_EnableAbilityFilter:
+    RequireTags: []
+    IgnoreTags: []
+  m_RequireTarget: 0
+  m_EnableAbilityTargetFilter:
     RequireTags: []
     IgnoreTags: []
   m_StayActiveAbilityFilter:
@@ -388,6 +400,10 @@ MonoBehaviour:
     - {fileID: 11400000, guid: d27bb983f87fc094c8f3fd38c5cba335, type: 2}
     - {fileID: 11400000, guid: 54071d642edc0fa499c44ab97a97d69b, type: 2}
     - {fileID: 11400000, guid: 086c83ca62522e7488fd6dfa750c5615, type: 2}
+  m_RequireTarget: 0
+  m_EnableAbilityTargetFilter:
+    RequireTags: []
+    IgnoreTags: []
   m_StayActiveAbilityFilter:
     RequireTags: []
     IgnoreTags: []
@@ -540,6 +556,10 @@ MonoBehaviour:
   m_EnableAbilityFilter:
     RequireTags: []
     IgnoreTags: []
+  m_RequireTarget: 0
+  m_EnableAbilityTargetFilter:
+    RequireTags: []
+    IgnoreTags: []
   m_StayActiveAbilityFilter:
     RequireTags: []
     IgnoreTags: []
@@ -630,6 +650,11 @@ MonoBehaviour:
     IgnoreTags: []
   m_EnableAbilityFilter:
     RequireTags: []
+    IgnoreTags: []
+  m_RequireTarget: 1
+  m_EnableAbilityTargetFilter:
+    RequireTags:
+    - {fileID: 11400000, guid: b8e34c61a8930ac4da92aeda3bf5ad5e, type: 2}
     IgnoreTags: []
   m_StayActiveAbilityFilter:
     RequireTags: []

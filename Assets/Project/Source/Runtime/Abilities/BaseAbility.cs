@@ -11,7 +11,12 @@ public abstract class BaseAbility : MonoBehaviour
     [SerializeField]
     private GameplayTagFilter m_EnableAbilityFilter;
     [SerializeField]
+    private bool m_RequireTarget;
+    [SerializeField]
+    private GameplayTagFilter m_EnableAbilityTargetFilter;
+    [SerializeField]
     private GameplayTagFilter m_StayActiveAbilityFilter;
+
 
     public GameObject Target
     {
@@ -69,6 +74,20 @@ public abstract class BaseAbility : MonoBehaviour
         }
     }
 
+
+    public bool CouldActivateAbilityWithTarget(GameObject target)
+    {
+        if (m_RequireTarget && target == null)
+            return false;
+
+        if (!m_EnableAbilityTargetFilter.IsEmpty)
+        {
+            GameplayTagOwner tagOwner = target.GetComponent<GameplayTagOwner>();
+            return tagOwner && tagOwner.SatisfiesTagFilter(m_EnableAbilityTargetFilter);
+        }
+
+        return true;
+    }
 
     private IEnumerator CheckAutoActivation()
     {

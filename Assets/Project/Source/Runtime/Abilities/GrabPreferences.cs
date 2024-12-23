@@ -1,10 +1,11 @@
 using Manatea;
+using Manatea.GameplaySystem;
 using Manatea.RootlingForest.Abilities;
 using UnityEngine;
 
 namespace Manatea.RootlingForest
 {
-    public class GrabPreferences : MonoBehaviour
+    public class GrabPreferences : GameplayFeaturePreference
     {
         [SerializeField]
         private bool m_CollisionEnabled;

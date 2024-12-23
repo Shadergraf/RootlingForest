@@ -4,7 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class EatPreferences : MonoBehaviour
+public class EatPreferences : GameplayFeaturePreference
 {
     [SerializeField]
     private GameplayTagFilter m_EaterRequirements;

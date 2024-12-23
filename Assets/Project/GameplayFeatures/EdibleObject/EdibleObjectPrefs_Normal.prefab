@@ -44,6 +44,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3e64d5848c8b81a4686bf162d0adfb5e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_TagOwner:
+    hasValue: 0
+    value: {fileID: 0}
+  m_TagsToAdd:
+  - {fileID: 11400000, guid: 378d131c8f80de1448523e7740c31948, type: 2}
   m_EaterRequirements:
     RequireTags:
     - {fileID: 11400000, guid: f6b338c151abbc44b89d5979ad5e938f, type: 2}

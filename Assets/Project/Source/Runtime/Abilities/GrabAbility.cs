@@ -13,147 +13,129 @@ namespace Manatea.RootlingForest
     {
         [FormerlySerializedAs("Self")]
         [SerializeField]
-        public Rigidbody m_Self;
+        private Rigidbody m_Self;
         [SerializeField]
-        public bool m_UseTargetPosition;
+        private bool m_UseTargetPosition;
         [SerializeField]
-        public bool m_UseDrivers;
+        private bool m_UseDrivers;
         [FormerlySerializedAs("StartSpring")]
         [SerializeField]
-        public float m_StartSpring = 10;
+        private float m_StartSpring = 10;
         [FormerlySerializedAs("EndSpring")]
         [SerializeField]
-        public float m_EndSpring = 500;
+        private float m_EndSpring = 500;
         [FormerlySerializedAs("StartDamper")]
         [SerializeField]
-        public float m_StartDamper = 50;
+        private float m_StartDamper = 50;
         [FormerlySerializedAs("EndDamper")]
         [SerializeField]
-        public float m_EndDamper = 2;
+        private float m_EndDamper = 2;
         [FormerlySerializedAs("SnapPositionThreshold")]
         [SerializeField]
-        public float m_SnapPositionThreshold = 0.15f;
+        private float m_SnapPositionThreshold = 0.15f;
         [FormerlySerializedAs("SnapRotationThreshold")]
         [SerializeField]
-        public float m_SnapRotationThreshold = 10f;
-        [FormerlySerializedAs("StartDriveSpring")]
-        [SerializeField]
-        public float m_StartDriveSpring = 10;
-        [FormerlySerializedAs("EndDriveSpring")]
-        [SerializeField]
-        public float m_EndDriveSpring = 500;
-        [FormerlySerializedAs("StartDriveDamper")]
-        [SerializeField]
-        public float m_StartDriveDamper = 50;
-        [FormerlySerializedAs("EndDriveDamper")]
-        [SerializeField]
-        public float m_EndDriveDamper = 2;
-        [FormerlySerializedAs("DamperSpeed")]
-        [SerializeField]
-        public float m_DamperSpeed = 2;
+        private float m_SnapRotationThreshold = 10f;
         [FormerlySerializedAs("HandTransform")]
         [SerializeField]
-        public Transform m_HandTransform;
+        private Transform m_HandTransform;
         [FormerlySerializedAs("TargetPosition")]
         [SerializeField]
-        public Vector3 m_TargetPosition = new Vector3(0, 0, 0);
+        private Vector3 m_TargetPosition = new Vector3(0, 0, 0);
         [FormerlySerializedAs("AutoTargetPosition")]
         [SerializeField]
-        public bool m_AutoTargetPosition;
+        private bool m_AutoTargetPosition;
         [FormerlySerializedAs("ThrowForce")]
         [SerializeField]
-        public float m_ThrowForce = 5;
+        private float m_ThrowForce = 5;
         [FormerlySerializedAs("ThrowRotation")]
         [SerializeField]
-        public float m_ThrowRotation = 5;
+        private float m_ThrowRotation = 5;
         [FormerlySerializedAs("ThrowDir")]
         [SerializeField]
-        public Vector3 m_ThrowDir = new Vector3(0, 1, 1);
+        private Vector3 m_ThrowDir = new Vector3(0, 1, 1);
         [FormerlySerializedAs("BreakForce")]
         [SerializeField]
-        public float m_BreakForce = 10;
+        private float m_BreakForce = 10;
         [FormerlySerializedAs("BreakTorque")]
         [SerializeField]
-        public float m_BreakTorque = 10;
+        private float m_BreakTorque = 10;
         [FormerlySerializedAs("LinearLimit")]
         [SerializeField]
-        public float m_LinearLimit = 0;
-        [FormerlySerializedAs("EnableCollision")]
-        [SerializeField]
-        public bool m_EnableCollision = true;
+        private float m_LinearLimit = 0;
         [FormerlySerializedAs("rotationAngle")]
         [SerializeField]
-        public Vector3 m_RotationAngle;
+        private Vector3 m_RotationAngle;
         [FormerlySerializedAs("DriverSpring")]
         [SerializeField]
-        public float m_DriverSpring = 1000;
+        private float m_DriverSpring = 1000;
         [FormerlySerializedAs("DriverDamper")]
         [SerializeField]
-        public float m_DriverDamper = 10;
+        private float m_DriverDamper = 10;
 
         [FormerlySerializedAs("MinMovementForce")]
         [FormerlySerializedAs("OverburdenedThresholdMin")]
         [SerializeField]
-        public float m_OverburdenedThresholdMin = 10;
+        private float m_OverburdenedThresholdMin = 10;
         [FormerlySerializedAs("MaxMovementForce")]
         [FormerlySerializedAs("OverburdenedThresholdMax")]
         [SerializeField]
-        public float m_OverburdenedThresholdMax = 20;
+        private float m_OverburdenedThresholdMax = 20;
         [FormerlySerializedAs("OverburdenedMovementMult")]
         [SerializeField]
-        public float m_OverburdenedMovementMult = 0.5f;
+        private float m_OverburdenedMovementMult = 0.5f;
         [FormerlySerializedAs("OverburdenedRotationMult")]
         [SerializeField]
-        public float m_OverburdenedRotationMult = 0.5f;
+        private float m_OverburdenedRotationMult = 0.5f;
         [SerializeField]
-        public float m_OverburdenedStandUpMultiplier = 2;
+        private float m_OverburdenedStandUpMultiplier = 2;
         [SerializeField]
-        public GameplayTag m_OverburdenedTag;
+        private GameplayTag m_OverburdenedTag;
         [SerializeField]
-        public GameplayTag m_PullingTag;
+        private GameplayTag m_PullingTag;
 
         [SerializeField]
-        public LayerMask m_RaisingExcludeLayers;
+        private LayerMask m_RaisingExcludeLayers;
         [SerializeField]
-        public LayerMask m_HandExcludeLayers;
+        private LayerMask m_HandExcludeLayers;
 
         [FormerlySerializedAs("GrabTime")]
         [SerializeField]
-        public float m_GrabTime = 0.25f;
+        private float m_GrabTime = 0.25f;
         [FormerlySerializedAs("GrabTimeLeeway")]
         [SerializeField]
-        public float m_GrabTimeLeeway = 0.2f;
+        private float m_GrabTimeLeeway = 0.2f;
 
         [SerializeField]
-        public Collider m_HandBlocker;
+        private Collider m_HandBlocker;
 
         [SerializeField]
-        public GameplayAttribute m_WalkSpeedAttribute;
+        private GameplayAttribute m_WalkSpeedAttribute;
         [SerializeField]
-        public GameplayAttribute m_RotationRateAttribute;
+        private GameplayAttribute m_RotationRateAttribute;
         [SerializeField]
-        public GameplayAttribute m_ForceDetectionMultiplierAttribute;
+        private GameplayAttribute m_ForceDetectionMultiplierAttribute;
         [SerializeField]
         private GameplayAttribute m_StandUpForceMultiplierAttribute;
         [SerializeField]
-        public GameplayEffect m_SelfGrabEffect;
+        private GameplayEffect m_SelfGrabEffect;
         [SerializeField]
-        public GameplayEffect m_TargetGrabEffect;
+        private GameplayEffect m_TargetGrabEffect;
         [SerializeField]
-        public float m_ForceDetectionMultiplier = 0.3f;
+        private float m_ForceDetectionMultiplier = 0.3f;
 
         [SerializeField]
-        public UnityEvent m_GrabStarted;
+        private UnityEvent m_GrabStarted;
         [SerializeField]
-        public UnityEvent m_GrabEnded;
+        private UnityEvent m_GrabEnded;
 
         [SerializeField]
-        public bool m_DisableHandVerticalState;
+        private bool m_DisableHandVerticalState;
         [SerializeField]
-        public bool m_DisableHandRaise;
+        private bool m_DisableHandRaise;
 
         [SerializeField]
-        public bool m_Debug;
+        private bool m_Debug;
 
         public GrabState CurrentGrabState => m_GrabState;
         public ConfigurableJoint Joint => m_Joint;
