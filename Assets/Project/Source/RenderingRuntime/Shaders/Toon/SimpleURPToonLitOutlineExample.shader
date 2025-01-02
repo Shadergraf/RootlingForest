@@ -233,6 +233,10 @@ Shader "SimpleURPToonLitExample(With Outline)"
         [NoScaleOffset] _OutlineZOffsetMaskTex("    Mask (black is apply ZOffset)", 2D) = "black" {}
         _OutlineZOffsetMaskRemapStart("    RemapStart", Range(0,1)) = 0
         _OutlineZOffsetMaskRemapEnd("    RemapEnd", Range(0,1)) = 1
+        
+        [Header(Per Object)]
+        _GameplayGlowIntensity("Gameplay Glow Intensity", Range(0,1)) = 0
+        [HDR] _GameplayGlowColor("Gameplay Glow Color", Color) = (1,1,1)
     }
     SubShader
     {       

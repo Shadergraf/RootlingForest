@@ -31,6 +31,16 @@ namespace Manatea.GameplaySystem
             return true;
         }
 
+        public void SendEventImmediate(GameplayEvent gameplayEvent)
+        {
+            if (!m_EventListeners.ContainsKey(gameplayEvent))
+                return;
+
+            for (int i = 0; i < m_EventListeners[gameplayEvent].Count; i++)
+            {
+                m_EventListeners[gameplayEvent][i].Invoke(null);
+            }
+        }
         public void SendEventImmediate(GameplayEvent gameplayEvent, object payload)
         {
             if (!m_EventListeners.ContainsKey(gameplayEvent))
@@ -40,6 +50,10 @@ namespace Manatea.GameplaySystem
             {
                 m_EventListeners[gameplayEvent][i].Invoke(payload);
             }
+        }
+        public void SendEventDelayed(GameplayEvent gameplayEvent)
+        {
+            StartCoroutine(DelayedSendEvent(gameplayEvent, null));
         }
         public void SendEventDelayed(GameplayEvent gameplayEvent, object payload)
         {

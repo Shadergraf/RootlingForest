@@ -17,6 +17,9 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Project/Core/Scenes/PersistentTopDownGameMode.unity
     guid: c2210434459964b458df38e0752699f1
+  - enabled: 1
+    path: Assets/Project/Scenes/Tests/ItemShowroom.unity
+    guid: d9d5e14a5185bd946a7cae1d8b3c0061
   m_configObjects:
     com.unity.addressableassets: {fileID: 11400000, guid: d6e0833b05d588d42b365ae860f11ccf,
       type: 2}

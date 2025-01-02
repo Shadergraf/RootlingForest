@@ -10,8 +10,10 @@ using Manatea.RootlingForest;
 public partial class MoveInDirectionAction : Action
 {
     [SerializeReference] public BlackboardVariable<GameObject> Agent;
-    [SerializeReference] public BlackboardVariable<Vector3> Direction;
-    [SerializeReference] public BlackboardVariable<float> Seconds;
+    [SerializeReference] public BlackboardVariable<Vector3> Direction = new BlackboardVariable<Vector3>(Vector3.forward);
+    [SerializeReference] public BlackboardVariable<float> Seconds = new BlackboardVariable<float>(1);
+    [SerializeReference] public BlackboardVariable<bool> RotateTowardsMove = new BlackboardVariable<bool>(true);
+    [SerializeReference] public BlackboardVariable<bool> Relative = new BlackboardVariable<bool>(false);
 
     private CharacterMovement m_CharacterMovement;
     private float m_Timer;
@@ -33,12 +35,15 @@ public partial class MoveInDirectionAction : Action
 
     protected override Status OnUpdate()
     {
-        m_CharacterMovement.Move(Direction.Value);
+        Vector3 direction = Direction.Value;
+        if (Relative.Value)
+            direction = m_CharacterMovement.transform.TransformDirection(direction);
+        m_CharacterMovement.Move(direction, RotateTowardsMove.Value);
 
         m_Timer -= Time.deltaTime;
         if (m_Timer <= 0)
         {
-            m_CharacterMovement.Move(Vector3.zero);
+            m_CharacterMovement.Move(Vector3.zero, RotateTowardsMove.Value);
             return Status.Success;
         }
 
@@ -47,7 +52,7 @@ public partial class MoveInDirectionAction : Action
 
     protected override void OnEnd()
     {
-        m_CharacterMovement.Move(Vector3.zero);
+        m_CharacterMovement.Move(Vector3.zero, RotateTowardsMove.Value);
     }
 }
 

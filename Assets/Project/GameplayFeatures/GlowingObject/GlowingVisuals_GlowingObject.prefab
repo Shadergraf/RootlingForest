@@ -35,6 +35,7 @@ Transform:
   - {fileID: 5241373376782144537}
   - {fileID: 653679944130659029}
   - {fileID: 7845305767331538780}
+  - {fileID: 5229978338952270375}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2072840433965896797
@@ -1051,6 +1052,113 @@ MonoBehaviour:
     hasValue: 0
     value: {fileID: 0}
   m_GameplayEvent: {fileID: 11400000, guid: 75ce2890dbddb9548a33f2d4d72fb0bf, type: 2}
+--- !u!1 &7486391463481686740
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5229978338952270375}
+  - component: {fileID: 4295547864189654715}
+  - component: {fileID: 8944713007915424095}
+  m_Layer: 0
+  m_Name: MeshGlow
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5229978338952270375
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7486391463481686740}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 1
+  m_Children: []
+  m_Father: {fileID: 4688143408568654261}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &4295547864189654715
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7486391463481686740}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3273398c944a2b7489407706fa9c20cd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_MaterialPropertyName: _GameplayGlowIntensity
+  m_BlendMode: 0
+  m_BlendFactor: 1
+  m_Value: 0
+--- !u!114 &8944713007915424095
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7486391463481686740}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8906aedc5ed631c43b3a6f4644b00b1f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_AttributeOwner:
+    hasValue: 0
+    value: {fileID: 0}
+  m_Attribute: {fileID: 11400000, guid: a6039d8934647754f912b8e0cdec79ac, type: 2}
+  m_ValueMode: 1
+  m_ValueSmoothing: 20
+  m_Mappings:
+  - MappingCurve:
+      serializedVersion: 2
+      m_Curve:
+      - serializedVersion: 3
+        time: 0
+        value: 0
+        inSlope: 0
+        outSlope: 0.1
+        tangentMode: 69
+        weightedMode: 0
+        inWeight: 0
+        outWeight: 0.13740972
+      - serializedVersion: 3
+        time: 10
+        value: 1
+        inSlope: 0.1
+        outSlope: 0.54527324
+        tangentMode: 69
+        weightedMode: 1
+        inWeight: 0.13638553
+        outWeight: 0
+      m_PreInfinity: 2
+      m_PostInfinity: 2
+      m_RotationOrder: 4
+    Event:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 4295547864189654715}
+          m_TargetAssemblyTypeName: MaterialPropertyBlockFloatLayer, Manatea.RootlingForest.Runtime
+          m_MethodName: set_Value
+          m_Mode: 0
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
 --- !u!1 &8851878997373275321
 GameObject:
   m_ObjectHideFlags: 0

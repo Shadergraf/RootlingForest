@@ -127,6 +127,15 @@ CBUFFER_START(UnityPerMaterial)
 
 CBUFFER_END
 
+
+CBUFFER_START(UnityPerObject)
+    
+    // high level settings
+    float _GameplayGlowIntensity;
+    half3 _GameplayGlowColor;
+
+CBUFFER_END
+
 //a special uniform for applyShadowBiasFixToHClipPos() only, it is not a per material uniform, 
 //so it is fine to write it outside our UnityPerMaterial CBUFFER
 float3 _LightDirection;
@@ -252,7 +261,9 @@ half3 GetFinalEmissionColor(Varyings input)
     {
         result = tex2D(_EmissionMap, input.uv).rgb * _EmissionMapChannelMask * _EmissionColor.rgb;
     }
-
+    
+    result += _GameplayGlowIntensity * _GameplayGlowColor;
+    
     return result;
 }
 half GetFinalOcculsion(Varyings input)

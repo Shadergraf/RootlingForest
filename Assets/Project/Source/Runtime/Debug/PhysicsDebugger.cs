@@ -7,8 +7,6 @@ using UnityEngine.InputSystem;
 namespace Manatea.RootlingForest
 {
 
-#if DEBUG
-
     public class PhysicsDebugger : MonoBehaviour
     {
         [SerializeField]
@@ -151,6 +149,4 @@ namespace Manatea.RootlingForest
             m_Spring = null;
         }
     }
-
-#endif
 }

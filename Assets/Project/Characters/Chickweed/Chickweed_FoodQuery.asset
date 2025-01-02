@@ -14,6 +14,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_TagFilter:
     RequireTags:
-    - {fileID: 11400000, guid: 1c18da10d3323594b984a916c6f91687, type: 2}
     - {fileID: 11400000, guid: 3a80bd0ee6cade7428a6a1ff50027a18, type: 2}
-    IgnoreTags: []
+    IgnoreTags:
+    - {fileID: 11400000, guid: 866f3415c1a5a2441b06eb36e9a4b182, type: 2}
+    AnyTags:
+    - {fileID: 11400000, guid: 1c18da10d3323594b984a916c6f91687, type: 2}
+    - {fileID: 11400000, guid: 536b4bf5e7acc5d4e9e543608986983a, type: 2}

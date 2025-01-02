@@ -35,6 +35,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4281727057934391580, guid: fd6f6d957f5d17a4a9f6acff80727663,
         type: 3}
+      propertyPath: m_ValueSmoothing
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 4281727057934391580, guid: fd6f6d957f5d17a4a9f6acff80727663,
+        type: 3}
       propertyPath: m_Mappings.Array.data[0].MappingCurve.m_Curve.Array.data[0].value
       value: 0
       objectReference: {fileID: 0}
@@ -115,6 +120,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 6253444712829367814, guid: fd6f6d957f5d17a4a9f6acff80727663,
         type: 3}
+      propertyPath: m_ValueSmoothing
+      value: 2
+      objectReference: {fileID: 0}
+    - target: {fileID: 6253444712829367814, guid: fd6f6d957f5d17a4a9f6acff80727663,
+        type: 3}
       propertyPath: m_Mappings.Array.data[0].MappingCurve.m_Curve.Array.data[0].value
       value: 0
       objectReference: {fileID: 0}
@@ -137,6 +147,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Mappings.Array.data[0].MappingCurve.m_Curve.Array.data[1].outSlope
       value: 0.9
+      objectReference: {fileID: 0}
+    - target: {fileID: 9168621052954167174, guid: fd6f6d957f5d17a4a9f6acff80727663,
+        type: 3}
+      propertyPath: m_ValueSmoothing
+      value: 2
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects:

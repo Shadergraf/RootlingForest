@@ -67,20 +67,29 @@ namespace Manatea.RootlingForest
         internal bool Query(MemoryQuery query, out MemoryMemento memento)
         {
             memento = null;
+            float closestDist = float.PositiveInfinity;
+
+            Vector3 agentPos = transform.position;
 
             foreach (MemoryMemento mem in m_Mementos)
             {
                 if (!mem.AssociatedObject)
                     continue;
 
-                if (mem.AssociatedObject.TryGetComponent(out GameplayTagOwner tagOwner) && tagOwner.SatisfiesTagFilter(query.TagFilter))
-                {
-                    memento = mem;
-                    return true;
-                }
+                if (!mem.AssociatedObject.TryGetComponent(out GameplayTagOwner tagOwner) || !tagOwner.SatisfiesTagFilter(query.TagFilter))
+                    continue;
+
+                if (!mem.AssociatedObject)
+                    continue;
+                float dist = Vector3.Distance(transform.position, mem.AssociatedObject.transform.position);
+                if (dist > closestDist)
+                    continue;
+
+                memento = mem;
+                closestDist = dist;
             }
 
-            return false;
+            return memento != null;
         }
     }
 

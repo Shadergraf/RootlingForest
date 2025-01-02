@@ -18,8 +18,18 @@ MonoBehaviour:
   m_PlatformId: 4e3c793746204150860bf175a9a41a05
   m_PlatformBuildProfile:
     rid: 4516264204421562598
-  m_OverrideGlobalSceneList: 0
-  m_Scenes: []
+  m_OverrideGlobalSceneList: 1
+  m_Scenes:
+  - m_enabled: 1
+    m_path: Assets/Project/Scenes/Menus/MainMenu/MainMenu.unity
+  - m_enabled: 1
+    m_path: Assets/Project/Scenes/Tests/ItemShowroom.unity
+  - m_enabled: 1
+    m_path: Assets/Project/Scenes/Tests/SampleScene/SampleScene.unity
+  - m_enabled: 1
+    m_path: Assets/Project/Core/Scenes/PersistentOverworld.unity
+  - m_enabled: 1
+    m_path: Assets/Project/Core/Scenes/PersistentTopDownGameMode.unity
   m_ScriptingDefines: []
   m_PlayerSettingsYaml:
     m_Settings: []

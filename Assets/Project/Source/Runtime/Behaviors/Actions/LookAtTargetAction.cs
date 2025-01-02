@@ -6,7 +6,7 @@ using Unity.Properties;
 using Manatea.RootlingForest;
 
 [Serializable, GeneratePropertyBag]
-[NodeDescription(name: "Agent looks at Target", story: "[Agent] looks at [Target]", category: "Action", id: "6626458aabdce4ee6f092372616cd11e")]
+[NodeDescription(name: "Look at Target", story: "[Agent] looks at [Target]", category: "Action", id: "6626458aabdce4ee6f092372616cd11e")]
 public partial class LookAtTargetAction : Action
 {
     [SerializeReference] public BlackboardVariable<GameObject> Agent;

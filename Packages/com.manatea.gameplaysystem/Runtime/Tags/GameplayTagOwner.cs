@@ -160,7 +160,7 @@ namespace Manatea.GameplaySystem
         /// <returns>True if the specified Tag or any of its parents is present.</returns>
         public bool HasTag(GameplayTag tag)
         {
-            return HasTag(m_UnmanagedTags, tag) || HasTag(m_ManagedTags, tag);
+            return GameplayTagUtility.HasTag(m_UnmanagedTags, tag) || GameplayTagUtility.HasTag(m_ManagedTags, tag);
         }
         public bool HasExplicitTag(GameplayTag tag)
         {
@@ -177,7 +177,7 @@ namespace Manatea.GameplaySystem
         {
             List<GameplayTag> mergedTags = new List<GameplayTag>(m_UnmanagedTags);
             mergedTags.AddRange(m_ManagedTags);
-            return HasAllTags(mergedTags, tags, emptyResponse);
+            return GameplayTagUtility.HasAllTags(mergedTags, tags, emptyResponse);
         }
         /// <summary>
         /// Checks if <b>none</b> GameplayTags are present on the entity.
@@ -188,7 +188,7 @@ namespace Manatea.GameplaySystem
         {
             List<GameplayTag> mergedTags = new List<GameplayTag>(m_UnmanagedTags);
             mergedTags.AddRange(m_ManagedTags);
-            return HasNoneTags(mergedTags, tags, emptyResponse);
+            return GameplayTagUtility.HasNoneTags(mergedTags, tags, emptyResponse);
         }
         /// <summary>
         /// Chechs if <b>all</b> of the required filter tags and <b>none</b> of the ignore filter tags are present in the collection.
@@ -200,68 +200,10 @@ namespace Manatea.GameplaySystem
         {
             List<GameplayTag> mergedTags = new List<GameplayTag>(m_UnmanagedTags);
             mergedTags.AddRange(m_ManagedTags);
-            return SatisfiesTagFilter(mergedTags, container, emptyResponse);
+            return GameplayTagUtility.SatisfiesTagFilter(mergedTags, container, emptyResponse);
         }
 
 
-        public bool HasExplicitTag(List<GameplayTag> tagList, GameplayTag tag) => tagList.Contains(tag);
-        public static bool HasTag(List<GameplayTag> tagList, GameplayTag tag)
-        {
-            for (int i = 0; i < tagList.Count; i++)
-            {
-                GameplayTag t = tagList[i];
-                if (t == tag)
-                    return true;
-                if (!t)
-                    continue;
-                GameplayTag gt = t;
-                while (gt.Parent)
-                {
-                    if (gt.Parent == tag)
-                        return true;
-                    gt = gt.Parent;
-                }
-            }
-            return false;
-        }
-        public static bool HasAllTags(List<GameplayTag> tagList, List<GameplayTag> tagsToCheck, bool emptyResponse = true)
-        {
-            if (tagsToCheck.Count == 0)
-                return emptyResponse;
-
-            for (int i = 0; i < tagsToCheck.Count; i++)
-            {
-                GameplayTag t = tagsToCheck[i];
-                if (!t)
-                    continue;
-                if (!HasTag(tagList, t))
-                    return false;
-            }
-            return true;
-        }
-        public static bool HasNoneTags(List<GameplayTag> tagList, List<GameplayTag> tagsToCheck, bool emptyResponse = true)
-        {
-            if (tagsToCheck.Count == 0)
-                return emptyResponse;
-
-            for (int i = 0; i < tagsToCheck.Count; i++)
-            {
-                GameplayTag t = tagsToCheck[i];
-                if (!t)
-                    continue;
-                if (HasTag(tagList, t))
-                    return false;
-            }
-            return true;
-        }
-
-        public static bool SatisfiesTagFilter(List<GameplayTag> tagList, GameplayTagFilter container, bool emptyResponse = true)
-        {
-            if (container.IsEmpty)
-                return emptyResponse;
-
-            return HasAllTags(tagList, container.RequireTags) &&
-                   HasNoneTags(tagList, container.IgnoreTags);
-        }
+        public bool HasExplicitTag(List<GameplayTag> tagList, GameplayTag tag) => GameplayTagUtility.HasExplicitTag(tagList, tag);
     }
 }

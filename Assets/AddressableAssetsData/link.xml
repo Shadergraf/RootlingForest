@@ -1,0 +1,112 @@
+<linker>
+  <assembly fullname="Manatea.Core, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="Manatea.AutoDestroy" preserve="all" />
+    <type fullname="Manatea.DestroyGameObject" preserve="all" />
+    <type fullname="Manatea.Optional`1" preserve="nothing" serialized="true" />
+    <type fullname="Manatea.RangeFloat" preserve="nothing" serialized="true" />
+  </assembly>
+  <assembly fullname="Manatea.GameplaySystem, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="Manatea.GameplaySystem.GameplayAttribute" preserve="all" />
+    <type fullname="Manatea.GameplaySystem.GameplayAttributeMapper" preserve="all" />
+    <type fullname="Manatea.GameplaySystem.GameplayAttributeOwner" preserve="all" />
+    <type fullname="Manatea.GameplaySystem.GameplayAttributeRangeTester" preserve="all" />
+    <type fullname="Manatea.GameplaySystem.GameplayAttributeTester" preserve="all" />
+    <type fullname="Manatea.GameplaySystem.GameplayEffect" preserve="all" />
+    <type fullname="Manatea.GameplaySystem.GameplayEffectOwner" preserve="all" />
+    <type fullname="Manatea.GameplaySystem.GameplayEffectPeriodicAdder" preserve="all" />
+    <type fullname="Manatea.GameplaySystem.GameplayEvent" preserve="all" />
+    <type fullname="Manatea.GameplaySystem.GameplayEventListener" preserve="all" />
+    <type fullname="Manatea.GameplaySystem.GameplayEventReceiver" preserve="all" />
+    <type fullname="Manatea.GameplaySystem.GameplayEventSender" preserve="all" />
+    <type fullname="Manatea.GameplaySystem.GameplayTag" preserve="all" />
+    <type fullname="Manatea.GameplaySystem.GameplayTagOwner" preserve="all" />
+    <type fullname="Manatea.GameplaySystem.GameplayAttributeDefinition" preserve="nothing" serialized="true" />
+    <type fullname="Manatea.GameplaySystem.GameplayAttributeModification" preserve="nothing" serialized="true" />
+    <type fullname="Manatea.GameplaySystem.GameplayAttributeValueMapping" preserve="nothing" serialized="true" />
+    <type fullname="Manatea.GameplaySystem.GameplayTagFilter" preserve="nothing" serialized="true" />
+    <type fullname="Manatea.GameplaySystem.ValuePostProcessor" preserve="nothing" serialized="true" />
+  </assembly>
+  <assembly fullname="Manatea.RootlingForest.Runtime, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="Assets.Project.Source.Runtime.Utility.InstanciateAndTrigger" preserve="all" />
+    <type fullname="EatPreferences" preserve="all" />
+    <type fullname="Manatea.GameplaySystem.StorableItemPreferences" preserve="all" />
+    <type fullname="Manatea.RootlingForest.ForceDetectorConfig" preserve="all" />
+    <type fullname="Manatea.RootlingForest.GenericForceDetector" preserve="all" />
+    <type fullname="Manatea.RootlingForest.GrabOrientation" preserve="all" />
+    <type fullname="Manatea.RootlingForest.GrabPreferences" preserve="all" />
+    <type fullname="Manatea.RootlingForest.ObjectSpawner" preserve="all" />
+    <type fullname="Manatea.RootlingForest.TopDownAudioSpatializer" preserve="all" />
+    <type fullname="MaterialPropertyBlockFloatLayer" preserve="all" />
+    <type fullname="MaterialPropertyBlockLayerStack" preserve="all" />
+    <type fullname="UnityEngine.VFX.Utility.VFXGameplayAttributeBinder" preserve="all" />
+    <type fullname="UnityEngine.VFX.Utility.VFXGameplayEventBinder" preserve="all" />
+  </assembly>
+  <assembly fullname="Unity.Addressables, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null" preserve="all">
+    <type fullname="UnityEngine.AddressableAssets.Addressables" preserve="all" />
+  </assembly>
+  <assembly fullname="Unity.AI.Navigation, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="Unity.AI.Navigation.NavMeshModifierVolume" preserve="all" />
+  </assembly>
+  <assembly fullname="Unity.Localization, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="UnityEngine.Localization.Locale" preserve="all" />
+    <type fullname="UnityEngine.Localization.Tables.SharedTableData" preserve="all" />
+    <type fullname="UnityEngine.Localization.Tables.StringTable" preserve="all" />
+    <type fullname="UnityEngine.Localization.LocaleIdentifier" preserve="nothing" serialized="true" />
+    <type fullname="UnityEngine.Localization.Metadata.MetadataCollection" preserve="nothing" serialized="true" />
+    <type fullname="UnityEngine.Localization.Tables.TableEntryData" preserve="nothing" serialized="true" />
+    <type fullname="UnityEngine.Localization.Tables.DistributedUIDGenerator" preserve="nothing" serialized="true" />
+    <type fullname="UnityEngine.Localization.Tables.SharedTableData/SharedTableEntry" preserve="nothing" serialized="true" />
+  </assembly>
+  <assembly fullname="Unity.RenderPipelines.Universal.Runtime, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="UnityEngine.Rendering.Universal.UniversalAdditionalLightData" preserve="all" />
+  </assembly>
+  <assembly fullname="Unity.ResourceManager, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null" preserve="all">
+    <type fullname="UnityEngine.ResourceManagement.ResourceProviders.AssetBundleProvider" preserve="all" />
+    <type fullname="UnityEngine.ResourceManagement.ResourceProviders.BundledAssetProvider" preserve="all" />
+    <type fullname="UnityEngine.ResourceManagement.ResourceProviders.InstanceProvider" preserve="all" />
+    <type fullname="UnityEngine.ResourceManagement.ResourceProviders.SceneProvider" preserve="all" />
+  </assembly>
+  <assembly fullname="Unity.VisualEffectGraph.Runtime, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="UnityEngine.VFX.Utility.VFXPropertyBinder" preserve="all" />
+    <type fullname="UnityEngine.VFX.Utility.ExposedProperty" preserve="nothing" serialized="true" />
+  </assembly>
+  <assembly fullname="UnityEditor.CoreModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="UnityEditor.Audio.AudioMixerSnapshotController" preserve="all" />
+  </assembly>
+  <assembly fullname="UnityEngine.AudioModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="UnityEngine.Audio.AudioContainerElement" preserve="all" />
+    <type fullname="UnityEngine.Audio.AudioMixer" preserve="all" />
+    <type fullname="UnityEngine.Audio.AudioMixerGroup" preserve="all" />
+    <type fullname="UnityEngine.Audio.AudioRandomContainer" preserve="all" />
+    <type fullname="UnityEngine.AudioClip" preserve="all" />
+    <type fullname="UnityEngine.AudioSource" preserve="all" />
+  </assembly>
+  <assembly fullname="UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="UnityEngine.ComputeShader" preserve="all" />
+    <type fullname="UnityEngine.GameObject" preserve="all" />
+    <type fullname="UnityEngine.Light" preserve="all" />
+    <type fullname="UnityEngine.Material" preserve="all" />
+    <type fullname="UnityEngine.Mesh" preserve="all" />
+    <type fullname="UnityEngine.MeshFilter" preserve="all" />
+    <type fullname="UnityEngine.MeshRenderer" preserve="all" />
+    <type fullname="UnityEngine.Object" preserve="all" />
+    <type fullname="UnityEngine.Shader" preserve="all" />
+    <type fullname="UnityEngine.Texture2D" preserve="all" />
+    <type fullname="UnityEngine.Transform" preserve="all" />
+    <type fullname="UnityEngine.Events.ArgumentCache" preserve="nothing" serialized="true" />
+    <type fullname="UnityEngine.Events.PersistentCallGroup" preserve="nothing" serialized="true" />
+    <type fullname="UnityEngine.Events.PersistentListenerMode" preserve="nothing" serialized="true" />
+    <type fullname="UnityEngine.Events.UnityEvent" preserve="nothing" serialized="true" />
+    <type fullname="UnityEngine.Events.UnityEvent`1" preserve="nothing" serialized="true" />
+  </assembly>
+  <assembly fullname="UnityEngine.PhysicsModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="UnityEngine.MeshCollider" preserve="all" />
+    <type fullname="UnityEngine.PhysicsMaterial" preserve="all" />
+    <type fullname="UnityEngine.Rigidbody" preserve="all" />
+  </assembly>
+  <assembly fullname="UnityEngine.VFXModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null">
+    <type fullname="UnityEngine.VFX.VFXRenderer" preserve="all" />
+    <type fullname="UnityEngine.VFX.VisualEffect" preserve="all" />
+    <type fullname="UnityEngine.VFX.VisualEffectAsset" preserve="all" />
+  </assembly>
+</linker>
