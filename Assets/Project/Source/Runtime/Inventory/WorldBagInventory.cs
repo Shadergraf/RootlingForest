@@ -1,5 +1,4 @@
 ﻿using Manatea.GameplaySystem;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -78,10 +77,14 @@ namespace Manatea.RootlingForest
         {
             if (!CouldAddItem(item))
                 return;
+            
+            StorableItemPreferences storablePrefs = item.GetComponentInChildren<StorableItemPreferences>();
 
             item.transform.SetParent(m_CurrentBag.ItemContainer);
             item.transform.position = m_CurrentBag.transform.position;
             item.transform.rotation = Quaternion.identity;
+            if (storablePrefs && storablePrefs.Orientation)
+                item.transform.rotation = Quaternion.Inverse(storablePrefs.Orientation.localRotation);
 
             Rigidbody itemRigid = item.GetComponent<Rigidbody>();
             itemRigid.linearVelocity = Vector3.zero;
