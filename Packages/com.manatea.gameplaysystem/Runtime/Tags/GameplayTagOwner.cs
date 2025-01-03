@@ -196,11 +196,11 @@ namespace Manatea.GameplaySystem
         /// <param name="tagFilter">The filter to check for</param>
         /// <param name="emptyResponse">What to return if the filter is empty</param>
         /// <returns>True if the tag collection passed the filter</returns>
-        public bool SatisfiesTagFilter(GameplayTagFilter container, bool emptyResponse = true)
+        public bool SatisfiesTagFilter(GameplayTagFilter filter, bool emptyResponse = true)
         {
             List<GameplayTag> mergedTags = new List<GameplayTag>(m_UnmanagedTags);
             mergedTags.AddRange(m_ManagedTags);
-            return GameplayTagUtility.SatisfiesTagFilter(mergedTags, container, emptyResponse);
+            return GameplayTagUtility.SatisfiesTagFilter(mergedTags, filter, emptyResponse);
         }
 
 

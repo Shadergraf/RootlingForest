@@ -9,14 +9,8 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 75004a18690c9e84cae824f20f9df0ae, type: 3}
-  m_Name: ItemInInventoryEffect
+  m_Script: {fileID: 11500000, guid: 28493bec6fc8b3a4faeb6b84d0e39869, type: 3}
+  m_Name: Inert
   m_EditorClassIdentifier: 
   m_Description: 
-  m_Lifetime: 0
-  m_Duration: 0
-  m_TagsToAdd:
-  - {fileID: 11400000, guid: 6011460e8ec5fc243adc8f8387720db9, type: 2}
-  m_AttributeModifications: []
-  m_ApplicationEvents: []
-  m_RemovalEvents: []
+  m_Parent: {fileID: 11400000, guid: ee11b8a38db08aa44892be926cc527a9, type: 2}

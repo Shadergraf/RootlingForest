@@ -2251,7 +2251,19 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 2477153309223106300, guid: 8262b2170c2f0da4387d50da78b2fc03,
         type: 3}
       insertIndex: -1
+      addedObject: {fileID: 4978632326683365175}
+    - targetCorrespondingSourceObject: {fileID: 2477153309223106300, guid: 8262b2170c2f0da4387d50da78b2fc03,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 4080771812679237405}
+    - targetCorrespondingSourceObject: {fileID: 2477153309223106300, guid: 8262b2170c2f0da4387d50da78b2fc03,
+        type: 3}
+      insertIndex: -1
       addedObject: {fileID: 7079324665855931738}
+    - targetCorrespondingSourceObject: {fileID: 2477153309223106300, guid: 8262b2170c2f0da4387d50da78b2fc03,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 544787744994854560}
     - targetCorrespondingSourceObject: {fileID: 2477153309223106300, guid: 8262b2170c2f0da4387d50da78b2fc03,
         type: 3}
       insertIndex: -1
@@ -2264,18 +2276,6 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 3101643700983290764}
-    - targetCorrespondingSourceObject: {fileID: 2477153309223106300, guid: 8262b2170c2f0da4387d50da78b2fc03,
-        type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 4080771812679237405}
-    - targetCorrespondingSourceObject: {fileID: 2477153309223106300, guid: 8262b2170c2f0da4387d50da78b2fc03,
-        type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 4978632326683365175}
-    - targetCorrespondingSourceObject: {fileID: 2477153309223106300, guid: 8262b2170c2f0da4387d50da78b2fc03,
-        type: 3}
-      insertIndex: -1
-      addedObject: {fileID: 544787744994854560}
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 2820277903825203249, guid: 8262b2170c2f0da4387d50da78b2fc03,
         type: 3}
@@ -2324,6 +2324,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Config: {fileID: 11400000, guid: 974b51a2908da5843ad86e632a03f6fd, type: 2}
   m_DisableDetection: 0
+  m_Filter:
+    RequireTags: []
+    IgnoreTags:
+    - {fileID: 11400000, guid: 6011460e8ec5fc243adc8f8387720db9, type: 2}
+    AnyTags: []
   m_GameplayEffectOwner:
     hasValue: 0
     value: {fileID: 0}
@@ -2343,6 +2348,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Config: {fileID: 11400000, guid: d73ff8c1911885d4babd911db1fad5e1, type: 2}
   m_DisableDetection: 0
+  m_Filter:
+    RequireTags: []
+    IgnoreTags:
+    - {fileID: 11400000, guid: 6011460e8ec5fc243adc8f8387720db9, type: 2}
+    AnyTags: []
   m_GameplayEffectOwner:
     hasValue: 0
     value: {fileID: 0}

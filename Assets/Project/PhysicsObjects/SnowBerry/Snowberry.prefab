@@ -6584,6 +6584,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Config: {fileID: 11400000, guid: e69def2551f5f4247af59dba60b80891, type: 2}
   m_DisableDetection: 0
+  m_Filter:
+    RequireTags: []
+    IgnoreTags:
+    - {fileID: 11400000, guid: 6011460e8ec5fc243adc8f8387720db9, type: 2}
+    AnyTags: []
   m_SpawnObjects: []
   m_DestroyObject: 0
   m_Force: 0

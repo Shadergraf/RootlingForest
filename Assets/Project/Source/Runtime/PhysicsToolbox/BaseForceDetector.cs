@@ -13,6 +13,8 @@ namespace Manatea.RootlingForest
         private ForceDetectorConfig m_Config;
         [SerializeField]
         private bool m_DisableDetection = false;
+        [SerializeField]
+        private GameplayTagFilter m_Filter;
 
         #endregion
 
@@ -170,11 +172,12 @@ namespace Manatea.RootlingForest
         private void HandleForceDetected(Vector3 force, float timeout)
         {
             if (m_DamageTimeout)
-            {
                 return;
-            }
-            StartCoroutine(CO_Timeout(timeout));
 
+            if (!m_Filter.IsEmpty && !m_TagOwner.SatisfiesTagFilter(m_Filter))
+                return;
+
+            StartCoroutine(CO_Timeout(timeout));
             ForceDetected(force);
         }
 

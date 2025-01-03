@@ -36,7 +36,6 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 3304626707154241548}
   - {fileID: 7394309906144528099}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -106,6 +105,7 @@ MonoBehaviour:
   m_BlockGroundMovementFilter:
     RequireTags: []
     IgnoreTags: []
+    AnyTags: []
   m_DebugLocomotion: 0
   m_DebugGroundDetection: 0
 --- !u!114 &6251875238489936929
@@ -252,38 +252,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 63b9b05be2c288e4f82c07a92e2c87c2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  agentTypeID: 0
---- !u!1 &5085317386791078356
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 3304626707154241548}
-  m_Layer: 6
-  m_Name: Colliders
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &3304626707154241548
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 5085317386791078356}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 1
-  m_Children: []
-  m_Father: {fileID: 2459274439249617929}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1001 &3590047375980083673
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -347,16 +315,6 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 7676766411220162277, guid: c46d570666e361e46b76092bfaf08df8,
-        type: 3}
-      propertyPath: AttributeOwner.value
-      value: 
-      objectReference: {fileID: 5171198309114388193}
-    - target: {fileID: 8964172251809651031, guid: c46d570666e361e46b76092bfaf08df8,
-        type: 3}
-      propertyPath: AttributeOwner.value
-      value: 
-      objectReference: {fileID: 5171198309114388193}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
