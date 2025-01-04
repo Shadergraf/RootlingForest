@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6118340bc55d5fc4b88ef6970b16d122, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_GraphOwnerName: Owner
+  m_GraphOwnerName: GraphOwner
   m_AutoSaveLastSaveLocation: 0
   m_SaveFolder: 
   m_UseSeparateSaveFolders: 1

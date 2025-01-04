@@ -470,6 +470,11 @@ PrefabInstance:
       propertyPath: m_PropertySheet.m_Vector4f.m_Array.Array.data[0].m_Value.z
       value: 0.9259861
       objectReference: {fileID: 0}
+    - target: {fileID: 3392604205839849588, guid: 6389f7dc5bd582f44affd90e3f3c4f7f,
+        type: 3}
+      propertyPath: TagOwner.value
+      value: 
+      objectReference: {fileID: 6185527522133877277}
     - target: {fileID: 3490569723215449986, guid: 6389f7dc5bd582f44affd90e3f3c4f7f,
         type: 3}
       propertyPath: m_LocationRule
@@ -685,6 +690,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: e2ee4c4e098bbcd459201c714bd9c614, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &6185527522133877277 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 7412487885632349072, guid: 6389f7dc5bd582f44affd90e3f3c4f7f,
+    type: 3}
+  m_PrefabInstance: {fileID: 3677500219625406861}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4157868038562725802}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 87a03fefa4dbd7348b64c2e534204576, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!1001 &4620072689859825878

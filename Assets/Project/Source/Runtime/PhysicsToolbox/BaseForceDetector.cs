@@ -36,6 +36,8 @@ namespace Manatea.RootlingForest
         #region Private Vars
 
         private Rigidbody m_Rigidbody;
+        private CollisionEventSender m_CollisionEventSender;
+
         private GameplayAttributeOwner m_AttributeOwner;
         private GameplayTagOwner m_TagOwner;
 
@@ -60,6 +62,7 @@ namespace Manatea.RootlingForest
         protected virtual void Awake()
         {
             m_Rigidbody = GetComponentInParent<Rigidbody>();
+            m_CollisionEventSender = GetComponentInParent<CollisionEventSender>();
             m_AttributeOwner = GetComponentInParent<GameplayAttributeOwner>();
             m_TagOwner = GetComponentInParent<GameplayTagOwner>();
         }
@@ -67,10 +70,18 @@ namespace Manatea.RootlingForest
         {
             m_LastVelocity = m_Rigidbody.linearVelocity;
             m_Acceleration = Vector3.zero;
+
+            Debug.Assert(m_CollisionEventSender, "CollisionEventSender needs to be present in parent!", gameObject);
+            m_CollisionEventSender.OnCollisionEnterEvent += OnCollisionEnterEvent;
+        }
+        protected virtual void OnDisable()
+        {
+            if (m_CollisionEventSender)
+                m_CollisionEventSender.OnCollisionEnterEvent -= OnCollisionEnterEvent;
         }
 
 
-        protected virtual void OnCollisionEnter(Collision collision)
+        protected virtual void OnCollisionEnterEvent(Collision collision)
         {
             ContactResponse(collision);
         }

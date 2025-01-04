@@ -13,4 +13,4 @@ MonoBehaviour:
   m_Name: StoringBlocked
   m_EditorClassIdentifier: 
   m_Description: 
-  m_Parent: {fileID: 0}
+  m_Parent: {fileID: 11400000, guid: ee11b8a38db08aa44892be926cc527a9, type: 2}
