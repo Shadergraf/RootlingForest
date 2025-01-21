@@ -27,7 +27,7 @@ namespace Manatea.RootlingForest
 
         private void OnEnable()
         {
-            m_Rigidbody = GetComponent<Rigidbody>();
+            m_Rigidbody = GetComponentInParent<Rigidbody>();
 
             if (m_Strength != 0)
             {

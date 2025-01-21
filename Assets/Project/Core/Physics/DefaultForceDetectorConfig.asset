@@ -12,7 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e6f47289ef16c1d43bc3ba74ebdf2b2d, type: 3}
   m_Name: DefaultForceDetectorConfig
   m_EditorClassIdentifier: 
-  m_ImpulseMagnitude: 1200
+  m_MinImpulseMagnitude: 1200
+  m_MaxImpulseMagnitude: Infinity
   m_JerkInfluence: 0
   m_ContactImpulseInfluence: 0
   m_ContactVelocityInfluence: 1
@@ -22,3 +23,5 @@ MonoBehaviour:
   m_HealthAttribute: {fileID: 11400000, guid: 544fa5972763a11478e613bc7b419079, type: 2}
   m_ToughTag: {fileID: 11400000, guid: 866f3415c1a5a2441b06eb36e9a4b182, type: 2}
   m_SoftTag: {fileID: 11400000, guid: 1c18da10d3323594b984a916c6f91687, type: 2}
+  m_Timeout: 0.4
+  m_OnlyTriggerOnCollision: 1

@@ -7,7 +7,7 @@ namespace Manatea.GameplaySystem
     public class GameplayAttributeTester : MonoBehaviour
     {
         [SerializeField]
-        private Optional<GameplayAttributeOwner> m_AttributeOwner;
+        private Fetched<GameplayAttributeOwner> m_AttributeOwner = new(FetchingType.InParents);
 
         [SerializeField]
         private GameplayAttributeComparison m_Comparison;
@@ -22,12 +22,9 @@ namespace Manatea.GameplaySystem
         private UnityEvent m_Event;
 
 
-        private void Start()
+        private void Awake()
         {
-            if (!m_AttributeOwner.hasValue)
-            {
-                m_AttributeOwner.value = GetComponentInParent<GameplayAttributeOwner>();
-            }
+            m_AttributeOwner.FetchFrom(gameObject);
         }
 
         private void FixedUpdate()

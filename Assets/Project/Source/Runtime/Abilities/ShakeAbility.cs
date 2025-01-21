@@ -8,7 +8,7 @@ using UnityEngine;
 public class ShakeAbility : BaseAbility
 {
     [SerializeField]
-    private Optional<GameplayEffectOwner> m_EffectOwner;
+    private Fetched<GameplayEffectOwner> m_EffectOwner = new(FetchingType.InParents);
 
     [SerializeField]
     private GrabAbility m_GrabAbility;
@@ -31,10 +31,7 @@ public class ShakeAbility : BaseAbility
 
     private void Awake()
     {
-        if (!m_EffectOwner.hasValue)
-        {
-            m_EffectOwner.value = GetComponentInParent<GameplayEffectOwner>();
-        }
+        m_EffectOwner.FetchFrom(gameObject);
     }
 
     protected override void AbilityEnabled()

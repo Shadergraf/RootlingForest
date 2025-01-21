@@ -5,15 +5,15 @@ using UnityEngine;
 namespace Manatea.GameplaySystem
 {
     [DisallowMultipleComponent]
-    [DefaultExecutionOrder(-98)]
+    [DefaultExecutionOrder(-97)]
     public class GameplayEffectOwner : MonoBehaviour
     {
         [SerializeField]
-        private Optional<GameplayTagOwner> m_TagOwner;
+        private Fetched<GameplayTagOwner> m_TagOwner = new(FetchingType.InParents);
         [SerializeField]
-        private Optional<GameplayAttributeOwner> m_AttributeOwner;
+        private Fetched<GameplayAttributeOwner> m_AttributeOwner = new(FetchingType.InParents);
         [SerializeField]
-        private Optional<GameplayEventReceiver> m_EventReceiver;
+        private Fetched<GameplayEventReceiver> m_EventReceiver = new(FetchingType.InParents);
 
         public GameplayTagOwner TagOwner => m_TagOwner.value;
         public GameplayAttributeOwner AttributeOwner => m_AttributeOwner.value;
@@ -26,18 +26,9 @@ namespace Manatea.GameplaySystem
 
         private void Awake()
         {
-            if (!m_TagOwner.hasValue)
-            {
-                m_TagOwner.value = GetComponentInParent<GameplayTagOwner>();
-            }
-            if (!m_AttributeOwner.hasValue)
-            {
-                m_AttributeOwner.value = GetComponentInParent<GameplayAttributeOwner>();
-            }
-            if (!m_EventReceiver.hasValue)
-            {
-                m_EventReceiver.value = GetComponentInParent<GameplayEventReceiver>();
-            }
+            m_TagOwner.FetchFrom(gameObject);
+            m_AttributeOwner.FetchFrom(gameObject);
+            m_EventReceiver.FetchFrom(gameObject);
         }
 
         private void FixedUpdate()

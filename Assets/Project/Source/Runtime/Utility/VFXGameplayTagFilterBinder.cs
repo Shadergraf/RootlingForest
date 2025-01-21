@@ -14,7 +14,7 @@ namespace UnityEngine.VFX.Utility
 
         [VFXPropertyBinding("System.Single"), SerializeField]
         protected ExposedProperty m_Property = "Attribute";
-        public Optional<GameplayTagOwner> TagOwner;
+        public Fetched<GameplayTagOwner> TagOwner = new(FetchingType.InParents);
         public GameplayTagFilter TagFilter;
         public bool InvertCondition;
 
@@ -26,11 +26,8 @@ namespace UnityEngine.VFX.Utility
         protected override void Awake()
         {
             base.Awake();
-            
-            if (!TagOwner.hasValue)
-            {
-                TagOwner.value = GetComponentInParent<GameplayTagOwner>();
-            }
+
+            TagOwner.FetchFrom(gameObject);
         }
 
         public override void UpdateBinding(VisualEffect component)

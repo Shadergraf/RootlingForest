@@ -76,6 +76,9 @@ public partial class CharacterMoveToObjectAction : Action
             return Status.Success;
         }
 
+        if (m_CornerIndex + 1 >= m_Corners.Length)
+            return Status.Success;
+
         m_Movement.Move((m_Corners[m_CornerIndex + 1] - Character.Value.transform.position).FlattenY().normalized);
 
         for (int i = 0; i < m_Corners.Length - 1; i++)

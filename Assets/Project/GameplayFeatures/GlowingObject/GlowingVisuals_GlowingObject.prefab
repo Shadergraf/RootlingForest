@@ -191,6 +191,9 @@ MonoBehaviour:
           m_StringArgument: ChargeUp_Weak
           m_BoolArgument: 0
         m_CallState: 2
+  m_PayloadResponse:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!114 &5897000809383933175
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -222,6 +225,9 @@ MonoBehaviour:
           m_StringArgument: ChargeUp_Strong
           m_BoolArgument: 0
         m_CallState: 2
+  m_PayloadResponse:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &4754289666017371191
 GameObject:
   m_ObjectHideFlags: 0
@@ -597,7 +603,7 @@ MonoBehaviour:
   m_Property:
     m_Name: BatteryCharge
   AttributeOwner:
-    hasValue: 0
+    fetchingType: 0
     value: {fileID: 0}
   Attribute: {fileID: 11400000, guid: a6039d8934647754f912b8e0cdec79ac, type: 2}
   MappingCurve:
@@ -625,6 +631,7 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   ValueMode: 1
+  ValueSmoothing: Infinity
 --- !u!114 &2547198059240614759
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -640,7 +647,7 @@ MonoBehaviour:
   m_VisualEffect: {fileID: 3664731561979480022}
   VFXEventName: Burst
   m_GameplayEventReceiver:
-    hasValue: 0
+    fetchingType: 2
     value: {fileID: 0}
   m_GameplayEvent: {fileID: 11400000, guid: 75ce2890dbddb9548a33f2d4d72fb0bf, type: 2}
 --- !u!114 &3529953880463418864
@@ -658,7 +665,7 @@ MonoBehaviour:
   m_Property:
     m_Name: Hide
   TagOwner:
-    hasValue: 0
+    fetchingType: 0
     value: {fileID: 0}
   TagFilter:
     RequireTags: []
@@ -843,6 +850,9 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  m_PayloadResponse:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!114 &834949981790704176
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -874,6 +884,9 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+  m_PayloadResponse:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &6836535347222151565
 GameObject:
   m_ObjectHideFlags: 0
@@ -1031,7 +1044,7 @@ MonoBehaviour:
   m_Property:
     m_Name: BatteryCharge
   AttributeOwner:
-    hasValue: 0
+    fetchingType: 0
     value: {fileID: 0}
   Attribute: {fileID: 11400000, guid: a6039d8934647754f912b8e0cdec79ac, type: 2}
   MappingCurve:
@@ -1059,6 +1072,7 @@ MonoBehaviour:
     m_PostInfinity: 2
     m_RotationOrder: 4
   ValueMode: 1
+  ValueSmoothing: Infinity
 --- !u!114 &5191634212636291821
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1074,7 +1088,7 @@ MonoBehaviour:
   m_VisualEffect: {fileID: 4433202230285962084}
   VFXEventName: Burst
   m_GameplayEventReceiver:
-    hasValue: 0
+    fetchingType: 2
     value: {fileID: 0}
   m_GameplayEvent: {fileID: 11400000, guid: 75ce2890dbddb9548a33f2d4d72fb0bf, type: 2}
 --- !u!1 &7486391463481686740

@@ -1,6 +1,5 @@
 ﻿using System.Collections;
 using UnityEngine;
-using UnityEngine.Events;
 using Manatea.GameplaySystem;
 
 namespace Manatea.RootlingForest
@@ -29,17 +28,30 @@ namespace Manatea.RootlingForest
         public Vector3 ContactImpulse => m_ContactImpulse;
         public Vector3 ContactVelocity => m_ContactVelocity;
 
-        public GameplayAttributeOwner AttributeOwner => m_AttributeOwner;
+        #endregion
+
+        #region Protected Vars
+
+        protected Rigidbody Rigidbody => m_Rigidbody;
+        protected GameplayAttributeOwner AttributeOwner => m_AttributeOwner;
+        protected GameplayTagOwner TagOwner => m_TagOwner;
+        protected GameplayEffectOwner EffectOwner => m_EffectOwner;
+        protected GameplayEventReceiver EventReceiver => m_EventReceiver;
+
+        protected Collision LastCollision => m_LastCollision;
+        protected bool ImpactRecordedThisFrame => m_ImpactRecordedThisFrame;
 
         #endregion
 
         #region Private Vars
 
         private Rigidbody m_Rigidbody;
-        private CollisionEventSender m_CollisionEventSender;
+        private OnCollisionEnterCallbackComponent m_CollisionEventSender;
 
         private GameplayAttributeOwner m_AttributeOwner;
         private GameplayTagOwner m_TagOwner;
+        private GameplayEffectOwner m_EffectOwner;
+        private GameplayEventReceiver m_EventReceiver;
 
         private Vector3 m_LastVelocity;
         private Vector3 m_Acceleration;
@@ -50,6 +62,8 @@ namespace Manatea.RootlingForest
         private Vector3 m_FinalForce;
 
         private Vector3 m_AccumulatedForces;
+
+        private Collision m_LastCollision;
 
         private bool m_DamageTimeout;
         private bool m_ImpactRecordedThisFrame;
@@ -62,9 +76,12 @@ namespace Manatea.RootlingForest
         protected virtual void Awake()
         {
             m_Rigidbody = GetComponentInParent<Rigidbody>();
-            m_CollisionEventSender = GetComponentInParent<CollisionEventSender>();
             m_AttributeOwner = GetComponentInParent<GameplayAttributeOwner>();
             m_TagOwner = GetComponentInParent<GameplayTagOwner>();
+            m_EffectOwner = GetComponentInParent<GameplayEffectOwner>();
+            m_EventReceiver = GetComponentInParent<GameplayEventReceiver>();
+
+            m_CollisionEventSender = m_Rigidbody.gameObject.AddComponent<OnCollisionEnterCallbackComponent>();
         }
         protected virtual void OnEnable()
         {
@@ -78,6 +95,11 @@ namespace Manatea.RootlingForest
         {
             if (m_CollisionEventSender)
                 m_CollisionEventSender.OnCollisionEnterEvent -= OnCollisionEnterEvent;
+        }
+        private void OnDestroy()
+        {
+            if (m_CollisionEventSender)
+                Destroy(m_CollisionEventSender);
         }
 
 
@@ -104,11 +126,7 @@ namespace Manatea.RootlingForest
             m_AccumulatedForces += m_ContactVelocity;
 
             // Persist the contact variables for one fixedUpdate step
-            if (m_ImpactRecordedThisFrame)
-            {
-                m_ImpactRecordedThisFrame = false;
-            }
-            else
+            if (!m_ImpactRecordedThisFrame)
             {
                 m_ContactImpulse = Vector3.zero;
                 m_ContactVelocity = Vector3.zero;
@@ -126,6 +144,11 @@ namespace Manatea.RootlingForest
             if (!m_DisableDetection && m_FinalForce.magnitude >= m_Config.MinImpulseMagnitude && m_FinalForce.magnitude < m_Config.MaxImpulseMagnitude)
             {
                 HandleForceDetected(m_FinalForce, m_Config.Timeout);
+            }
+
+            if (m_ImpactRecordedThisFrame)
+            {
+                m_ImpactRecordedThisFrame = false;
             }
         }
 
@@ -177,12 +200,17 @@ namespace Manatea.RootlingForest
                     m_ContactVelocity = newContactVelocity;
                 }
                 m_ImpactRecordedThisFrame = true;
+
+                m_LastCollision = collision;
             }
         }
 
         private void HandleForceDetected(Vector3 force, float timeout)
         {
             if (m_DamageTimeout)
+                return;
+
+            if (Config.OnlyTriggerOnCollision && !m_ImpactRecordedThisFrame)
                 return;
 
             if (!m_Filter.IsEmpty && !m_TagOwner.SatisfiesTagFilter(m_Filter))

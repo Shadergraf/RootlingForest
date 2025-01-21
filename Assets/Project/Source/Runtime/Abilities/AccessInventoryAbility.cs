@@ -11,7 +11,7 @@ namespace Manatea.RootlingForest
     public class AccessInventoryAbility : BaseAbility
     {
         [SerializeField]
-        private Optional<GameplayEffectOwner> m_EffectOwner;
+        private Fetched<GameplayEffectOwner> m_EffectOwner = new(FetchingType.InParents);
         [SerializeField]
         private WorldBagInventory m_Inventory;
         [SerializeField]
@@ -29,10 +29,7 @@ namespace Manatea.RootlingForest
 
         private void Awake()
         {
-            if (!m_EffectOwner.hasValue)
-            {
-                m_EffectOwner.value = GetComponentInParent<GameplayEffectOwner>();
-            }
+            m_EffectOwner.FetchFrom(gameObject);
         }
 
         protected override void AbilityEnabled()

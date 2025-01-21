@@ -8,6 +8,7 @@ using UnityEngine;
 namespace Manatea.GameplaySystem
 {
     [DisallowMultipleComponent]
+    [DefaultExecutionOrder(-100)]
     public class GameplayTagOwner : MonoBehaviour
     {
         [SerializeField]

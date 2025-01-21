@@ -6,6 +6,7 @@ using UnityEngine;
 namespace Manatea.GameplaySystem
 {
     [DisallowMultipleComponent]
+    [DefaultExecutionOrder(-98)]
     public class GameplayEventReceiver : MonoBehaviour
     {
         private Dictionary<GameplayEvent, List<Action<object>>> m_EventListeners = new();

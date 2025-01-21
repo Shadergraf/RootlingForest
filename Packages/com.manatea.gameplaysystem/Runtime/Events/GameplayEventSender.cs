@@ -5,7 +5,7 @@ namespace Manatea.GameplaySystem
     public class GameplayEventSender : MonoBehaviour
     {
         [SerializeField]
-        private Optional<GameplayEventReceiver> m_EventReceiver;
+        private Fetched<GameplayEventReceiver> m_EventReceiver = new(FetchingType.InParents);
         [SerializeField]
         private GameplayEvent m_Event;
         [SerializeField]
@@ -20,8 +20,7 @@ namespace Manatea.GameplaySystem
 
         private void Awake()
         {
-            if (!m_EventReceiver.hasValue)
-                m_EventReceiver.value = GetComponentInParent<GameplayEventReceiver>();
+            m_EventReceiver.FetchFrom(gameObject);
         }
 
         private void Start()

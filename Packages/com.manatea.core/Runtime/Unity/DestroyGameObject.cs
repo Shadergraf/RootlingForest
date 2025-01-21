@@ -1,18 +1,27 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.Serialization;
 
 namespace Manatea
 {
     public class DestroyGameObject : MonoBehaviour
     {
-        public GameObject objectToDestroy;
+        [FormerlySerializedAs("objectToDestroy")]
+        public GameObject Object;
+
+
+        private void OnEnable()
+        {
+            Destroy();
+        }
 
 
         public void Destroy()
         {
-            if (!objectToDestroy)
-                Debug.LogWarning("No object was set up for destruction.", gameObject);
-            Destroy(objectToDestroy);
+            GameObject go = gameObject;
+            if (Object)
+                go = Object;
+            Destroy(go);
         }
     }
 }

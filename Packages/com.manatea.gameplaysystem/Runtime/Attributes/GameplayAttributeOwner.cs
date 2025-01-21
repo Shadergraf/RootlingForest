@@ -122,9 +122,21 @@ namespace Manatea.GameplaySystem
 
         public bool TryGetAttributeBaseValue(GameplayAttribute attribute, out float baseValue)
         {
-            Debug.Assert(m_Initialized, "Attribute owner was not initialized!", gameObject);
-
             baseValue = 0;
+
+            if (!m_Initialized)
+            {
+                for (int i = 0; i < m_InitialAttributes.Length; i++)
+                {
+                    if (m_InitialAttributes[i].Attribute == attribute)
+                    {
+                        baseValue = m_InitialAttributes[i].BaseValue;
+                        return true;
+                    }
+                }
+                return false;
+            }
+
             for (int i = 0; i < m_AttributeInstances.Count; i++)
             {
                 if (m_AttributeInstances[i].Attribute == attribute)
@@ -137,12 +149,21 @@ namespace Manatea.GameplaySystem
         }
         public bool TryGetAttributeEvaluatedValue(GameplayAttribute attribute, out float evaluatedValue)
         {
-            Debug.Assert(m_Initialized, "Attribute owner was not initialized!", gameObject);
+            evaluatedValue = 0;
+
             if (!m_Initialized)
             {
-                System.Diagnostics.Debugger.Break();
+                for (int i = 0; i < m_InitialAttributes.Length; i++)
+                {
+                    if (m_InitialAttributes[i].Attribute == attribute)
+                    {
+                        evaluatedValue = m_InitialAttributes[i].BaseValue;
+                        return true;
+                    }
+                }
+                return false;
             }
-            evaluatedValue = 0;
+
             for (int i = 0; i < m_AttributeInstances.Count; i++)
             {
                 if (m_AttributeInstances[i].Attribute == attribute)

@@ -6,7 +6,7 @@ namespace Manatea.GameplaySystem.Modifiers
     public class AttributeNoiseModifier : MonoBehaviour
     {
         [SerializeField]
-        private Optional<GameplayAttributeOwner> m_AttributeOwner;
+        private Fetched<GameplayAttributeOwner> m_AttributeOwner = new(FetchingType.InParents);
         [SerializeField]
         private GameplayAttribute m_Attribute;
         [SerializeField]
@@ -29,8 +29,7 @@ namespace Manatea.GameplaySystem.Modifiers
 
         private void Awake()
         {
-            if (!m_AttributeOwner.hasValue)
-                m_AttributeOwner.value = GetComponentInParent<GameplayAttributeOwner>();
+            m_AttributeOwner.FetchFrom(gameObject);
 
             m_ModifierInst = new GameplayAttributeModifierInstance(m_ModificationType, 0);
 

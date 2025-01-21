@@ -5,15 +5,14 @@ using UnityEngine;
 public class GameplayFeaturePreference : MonoBehaviour
 {
     [SerializeField]
-    private Optional<GameplayTagOwner> m_TagOwner;
+    private Fetched<GameplayTagOwner> m_TagOwner = new(FetchingType.InParents);
     [SerializeField]
     private GameplayTag[] m_TagsToAdd;
 
 
     private void Awake()
     {
-        if (!m_TagOwner.value)
-            m_TagOwner.value = GetComponentInParent<GameplayTagOwner>();
+        m_TagOwner.FetchFrom(gameObject);
     }
 
     private void OnEnable()

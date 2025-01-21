@@ -5,6 +5,7 @@ namespace Manatea
 {
     public class AutoDestroy : MonoBehaviour
     {
+        public GameObject Object;
         public float time = 1;
         public UpdateCycle updateCycle = UpdateCycle.Update;
 
@@ -18,7 +19,7 @@ namespace Manatea
                 timer += Time.unscaledDeltaTime;
 
             if (timer >= time)
-                Destroy(gameObject);
+                Destroy(Object ? Object : gameObject);
         }
 
         private void LateUpdate()
@@ -29,7 +30,7 @@ namespace Manatea
                 timer += Time.unscaledDeltaTime;
 
             if (timer >= time)
-                Destroy(gameObject);
+                Destroy(Object ? Object : gameObject);
         }
 
         private void FixedUpdate()
@@ -40,7 +41,7 @@ namespace Manatea
                 timer += Time.unscaledDeltaTime;
 
             if (timer >= time)
-                Destroy(gameObject);
+                Destroy(Object ? Object : gameObject);
         }
     }
 }

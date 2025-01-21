@@ -12,7 +12,7 @@ namespace UnityEngine.VFX.Utility
         public string VFXEventName = "Event";
 
         [SerializeField]
-        protected Optional<GameplayEventReceiver> m_GameplayEventReceiver;
+        protected Fetched<GameplayEventReceiver> m_GameplayEventReceiver = new(FetchingType.InParents);
         [SerializeField]
         protected GameplayEvent m_GameplayEvent;
 
@@ -22,10 +22,7 @@ namespace UnityEngine.VFX.Utility
 
         private void Awake()
         {
-            if (!m_GameplayEventReceiver.hasValue)
-            {
-                m_GameplayEventReceiver.value = GetComponentInParent<GameplayEventReceiver>();
-            }
+            m_GameplayEventReceiver.FetchFrom(m_VisualEffect.gameObject);
         }
 
         protected virtual void OnEnable()

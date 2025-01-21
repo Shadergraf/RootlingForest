@@ -512,6 +512,11 @@ PrefabInstance:
       propertyPath: m_Color.r
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 7095682360585709564, guid: d62bf33f356aaad44b6590ec697f4088,
+        type: 3}
+      propertyPath: TagOwner.value
+      value: 
+      objectReference: {fileID: 2586612624432790721}
     - target: {fileID: 7998923081501755752, guid: d62bf33f356aaad44b6590ec697f4088,
         type: 3}
       propertyPath: m_PropertySheet.m_Vector4f.m_Array.Array.data[0].m_Value.x
@@ -580,6 +585,18 @@ MonoBehaviour:
   m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: f81fbd012d71834489105277a4e41c3f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &2586612624432790721 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 3148698363816533016, guid: d62bf33f356aaad44b6590ec697f4088,
+    type: 3}
+  m_PrefabInstance: {fileID: 600968868683849945}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5729036173562700150}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 87a03fefa4dbd7348b64c2e534204576, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!114 &3632849275683933407 stripped

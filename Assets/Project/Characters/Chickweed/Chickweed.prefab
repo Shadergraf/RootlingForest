@@ -1116,6 +1116,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1639097254875792144, guid: dfe9c81d534f97247bc24dc71b9a5f0f,
         type: 3}
+      propertyPath: managedReferences[1705121955613769930].Name
+      value: Self
+      objectReference: {fileID: 0}
+    - target: {fileID: 1639097254875792144, guid: dfe9c81d534f97247bc24dc71b9a5f0f,
+        type: 3}
       propertyPath: managedReferences[8882048506482655407].Name
       value: Agent
       objectReference: {fileID: 0}

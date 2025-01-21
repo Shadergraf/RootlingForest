@@ -13,8 +13,8 @@ GameObject:
   - component: {fileID: 5137507898606658623}
   - component: {fileID: 6251875238489936929}
   - component: {fileID: 5171198309114388193}
+  - component: {fileID: 1530211168954968395}
   - component: {fileID: 9136856744536620587}
-  - component: {fileID: 8182086880032516708}
   - component: {fileID: 5527935580620574358}
   m_Layer: 6
   m_Name: BaseCharacter
@@ -206,6 +206,18 @@ MonoBehaviour:
       data:
         Limiter: 0
         Value: 30
+--- !u!114 &1530211168954968395
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4226559076182182294}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b1b0fc1f288ddd4408d1b3265d9a6ee8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &9136856744536620587
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -219,27 +231,15 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_TagOwner:
-    hasValue: 0
+    fetchingType: 2
     value: {fileID: 0}
   m_AttributeOwner:
-    hasValue: 0
+    fetchingType: 2
     value: {fileID: 0}
   m_EventReceiver:
-    hasValue: 0
+    fetchingType: 2
     value: {fileID: 0}
   m_ActiveEffects: []
---- !u!114 &8182086880032516708
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4226559076182182294}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b1b0fc1f288ddd4408d1b3265d9a6ee8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!114 &5527935580620574358
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -265,6 +265,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: GlowableObject
       objectReference: {fileID: 0}
+    - target: {fileID: 3376564539394446876, guid: c46d570666e361e46b76092bfaf08df8,
+        type: 3}
+      propertyPath: TagOwner.value
+      value: 
+      objectReference: {fileID: 6251875238489936929}
     - target: {fileID: 6291445939558694714, guid: c46d570666e361e46b76092bfaf08df8,
         type: 3}
       propertyPath: m_LocalPosition.x
@@ -315,6 +320,16 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 7676766411220162277, guid: c46d570666e361e46b76092bfaf08df8,
+        type: 3}
+      propertyPath: AttributeOwner.value
+      value: 
+      objectReference: {fileID: 5171198309114388193}
+    - target: {fileID: 8964172251809651031, guid: c46d570666e361e46b76092bfaf08df8,
+        type: 3}
+      propertyPath: AttributeOwner.value
+      value: 
+      objectReference: {fileID: 5171198309114388193}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []

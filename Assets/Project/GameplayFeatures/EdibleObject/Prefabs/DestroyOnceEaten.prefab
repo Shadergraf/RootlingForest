@@ -40,12 +40,12 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6732833460446470899}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: c918b6e9f00cbe045914e9e0350fa146, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  objectToDestroy: {fileID: 0}
+  Object: {fileID: 0}
 --- !u!114 &7947376661165752989
 MonoBehaviour:
   m_ObjectHideFlags: 0

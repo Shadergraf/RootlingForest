@@ -7,7 +7,7 @@ namespace Manatea.GameplaySystem
     public class GameplayAttributeMapper : MonoBehaviour
     {
         [SerializeField]
-        private Optional<GameplayAttributeOwner> m_AttributeOwner;
+        private Fetched<GameplayAttributeOwner> m_AttributeOwner = new(FetchingType.InParents);
 
         [SerializeField]
         private GameplayAttribute m_Attribute;
@@ -24,10 +24,7 @@ namespace Manatea.GameplaySystem
 
         private void Awake()
         {
-            if (!m_AttributeOwner.hasValue)
-            {
-                m_AttributeOwner.value = GetComponentInParent<GameplayAttributeOwner>();
-            }
+            m_AttributeOwner.FetchFrom(gameObject);
         }
         private void OnEnable()
         {

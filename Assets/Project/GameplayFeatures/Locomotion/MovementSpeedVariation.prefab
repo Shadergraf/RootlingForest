@@ -45,7 +45,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_AttributeOwner:
-    hasValue: 0
+    fetchingType: 2
     value: {fileID: 0}
   m_Attribute: {fileID: 11400000, guid: b08ce0e4b3536694bbf575ddf6619fa5, type: 2}
   m_ModificationType: 1

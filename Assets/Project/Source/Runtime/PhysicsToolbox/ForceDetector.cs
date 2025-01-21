@@ -2,6 +2,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.Events;
 using Manatea.GameplaySystem;
+using UnityEngine.InputSystem.Utilities;
 
 namespace Manatea.RootlingForest
 {
@@ -32,17 +33,16 @@ namespace Manatea.RootlingForest
                 AttributeOwner.ChangeAttributeBaseValue(Config.HealthAttribute, v => v - 1);
             }
 
-            Rigidbody sourceRigid = GetComponent<Rigidbody>();
             for (int i = 0; i < m_SpawnObjects.Length; ++i)
             {
                 m_SpawnObjects[i].SetActive(true);
-                m_SpawnObjects[i].transform.SetParent(transform.parent);
+                m_SpawnObjects[i].transform.SetParent(null);
                 Rigidbody rigid = m_SpawnObjects[i].GetComponent<Rigidbody>();
-                rigid.linearVelocity = sourceRigid.linearVelocity;
-                rigid.angularVelocity = sourceRigid.angularVelocity;
+                rigid.linearVelocity = Rigidbody.linearVelocity;
+                rigid.angularVelocity = Rigidbody.angularVelocity;
 
                 Vector3 randomDir = Random.onUnitSphere;
-                Vector3 radialDir = rigid.position - sourceRigid.position;
+                Vector3 radialDir = rigid.position - Rigidbody.position;
                 if (radialDir.magnitude < 0.001f)
                 {
                     radialDir = randomDir;
@@ -54,8 +54,13 @@ namespace Manatea.RootlingForest
 
             if (m_DestroyObject)
             {
-                Destroy(gameObject);
+                Destroy(Rigidbody.gameObject);
             }
+        }
+
+        public void Break()
+        {
+            ForceDetected(transform.forward);
         }
     }
 }

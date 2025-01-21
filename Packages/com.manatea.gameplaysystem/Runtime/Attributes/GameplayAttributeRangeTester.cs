@@ -8,8 +8,8 @@ namespace Manatea.GameplaySystem
     public class GameplayAttributeRangeTester : MonoBehaviour
     {
         [SerializeField]
-        private Optional<GameplayAttributeOwner> m_AttributeOwner;
-
+        private Fetched<GameplayAttributeOwner> m_AttributeOwner = new(FetchingType.InParents);
+        
         [SerializeField]
         private GameplayAttribute m_Attribute;
         [SerializeField]
@@ -26,13 +26,12 @@ namespace Manatea.GameplaySystem
         private bool m_Triggered;
 
 
+        private void Awake()
+        {
+            m_AttributeOwner.FetchFrom(gameObject);
+        }
         private void Start()
         {
-            if (!m_AttributeOwner.hasValue)
-            {
-                m_AttributeOwner.value = GetComponentInParent<GameplayAttributeOwner>();
-            }
-
             if (m_AttributeOwner.value.TryGetAttributeEvaluatedValue(m_Attribute, out float value))
             {
                 m_Triggered = !DoComparison(m_Type, value, m_Range);

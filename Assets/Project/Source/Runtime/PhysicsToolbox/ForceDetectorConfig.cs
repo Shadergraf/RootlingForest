@@ -34,6 +34,8 @@ namespace Manatea.RootlingForest
         private GameplayTag m_SoftTag;
         [SerializeField]
         private float m_Timeout = 0.4f;
+        [SerializeField]
+        private bool m_OnlyTriggerOnCollision;
 
         public float MinImpulseMagnitude => m_MinImpulseMagnitude;
         public float MaxImpulseMagnitude => m_MaxImpulseMagnitude;
@@ -46,5 +48,6 @@ namespace Manatea.RootlingForest
         public GameplayTag ToughTag => m_ToughTag;
         public GameplayTag SoftTag => m_SoftTag;
         public float Timeout => m_Timeout;
+        public bool OnlyTriggerOnCollision => m_OnlyTriggerOnCollision;
     }
 }

@@ -1,5 +1,6 @@
 ﻿using Manatea;
 using Manatea.GameplaySystem;
+using System.ComponentModel;
 using UnityEngine.VFX;
 
 namespace UnityEngine.VFX.Utility
@@ -13,10 +14,14 @@ namespace UnityEngine.VFX.Utility
 
         [VFXPropertyBinding("System.Single"), SerializeField]
         protected ExposedProperty m_Property = "Attribute";
-        public Optional<GameplayAttributeOwner> AttributeOwner;
+        public Fetched<GameplayAttributeOwner> AttributeOwner = new(FetchingType.InParents);
         public GameplayAttribute Attribute = null;
         public AnimationCurve MappingCurve;
         public GameplayAttributeValueMode ValueMode = GameplayAttributeValueMode.EvaluatedValue;
+        public float ValueSmoothing = float.PositiveInfinity;
+
+        private float m_OldValue;
+
 
         public override bool IsValid(VisualEffect component)
         {
@@ -26,22 +31,26 @@ namespace UnityEngine.VFX.Utility
         protected override void Awake()
         {
             base.Awake();
-            
-            if (!AttributeOwner.hasValue)
-            {
-                AttributeOwner.value = GetComponentInParent<GameplayAttributeOwner>();
-            }
+
+            AttributeOwner.FetchFrom(gameObject);
         }
 
         public override void UpdateBinding(VisualEffect component)
         {
+            if (!AttributeOwner.value)
+                return;
+
             float value = 0;
+
             if (ValueMode == GameplayAttributeValueMode.EvaluatedValue)
                 AttributeOwner.value.TryGetAttributeEvaluatedValue(Attribute, out value);
             if (ValueMode == GameplayAttributeValueMode.BaseValue)
                 AttributeOwner.value.TryGetAttributeBaseValue(Attribute, out value);
 
-            component.SetFloat(m_Property, MappingCurve.Evaluate(value));
+            float smoothedValue = MMath.Damp(m_OldValue, value, ValueSmoothing, Time.deltaTime);
+            m_OldValue = smoothedValue;
+
+            component.SetFloat(m_Property, MappingCurve.Evaluate(smoothedValue));
         }
 
         public override string ToString()

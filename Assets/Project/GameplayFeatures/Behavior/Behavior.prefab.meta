@@ -1,5 +1,7 @@
 fileFormatVersion: 2
 guid: f0fbf8c6a3a7fa648942ea539933ee5f
+labels:
+- PhysicsObjectFeature
 PrefabImporter:
   externalObjects: {}
   userData: 
