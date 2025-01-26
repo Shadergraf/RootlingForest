@@ -16,4 +16,13 @@ namespace Manatea.RootlingForest
             OnCollisionEnterEvent?.Invoke(collision);
         }
     }
+    internal class OnTriggerEnterCallbackComponent : MonoBehaviour
+    {
+        public event Action<Collider> OnTriggerEnterEvent;
+
+        private void OnTriggerEnter(Collider collider)
+        {
+            OnTriggerEnterEvent?.Invoke(collider);
+        }
+    }
 }

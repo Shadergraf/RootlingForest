@@ -309,7 +309,7 @@ PrefabInstance:
     - target: {fileID: 919132149155446097, guid: 3bc815714b9f42d46a04f08e5c250c47,
         type: 3}
       propertyPath: m_Layer
-      value: 14
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 3451118302482216456, guid: 3bc815714b9f42d46a04f08e5c250c47,
         type: 3}
@@ -331,6 +331,10 @@ PrefabInstance:
         type: 3}
       insertIndex: -1
       addedObject: {fileID: 8818097626700030233}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 3bc815714b9f42d46a04f08e5c250c47,
+        type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 8628316221617542270}
   m_SourcePrefab: {fileID: 100100000, guid: 3bc815714b9f42d46a04f08e5c250c47, type: 3}
 --- !u!4 &2374362818539661992 stripped
 Transform:
@@ -357,6 +361,33 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Memory: {fileID: 721365966366164882}
+--- !u!54 &8628316221617542270
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3150477721994522642}
+  serializedVersion: 4
+  m_Mass: 1
+  m_Drag: 0
+  m_AngularDrag: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 1
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0
 --- !u!1001 &3677500219625406861
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1426,7 +1457,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_EventReceiver:
-    hasValue: 0
+    fetchingType: 2
     value: {fileID: 0}
   m_ListenToEvent: {fileID: 11400000, guid: 6524b9c8a1193a84998bf66a98b99006, type: 2}
   m_Response:
@@ -1444,6 +1475,9 @@ MonoBehaviour:
           m_StringArgument: Peck
           m_BoolArgument: 0
         m_CallState: 2
+  m_PayloadResponse:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!137 &8689766791555104407 stripped
 SkinnedMeshRenderer:
   m_CorrespondingSourceObject: {fileID: -8728017772867668637, guid: 6ac4719b4533ecc48ab90c9703421894,

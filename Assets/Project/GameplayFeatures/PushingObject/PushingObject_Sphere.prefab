@@ -16,7 +16,7 @@ PrefabInstance:
     - target: {fileID: 4882047251646108849, guid: 6d8debe5d3e26864fa401fc9939a676f,
         type: 3}
       propertyPath: m_Name
-      value: PushingObject_Sphere Variant
+      value: PushingObject_Sphere
       objectReference: {fileID: 0}
     - target: {fileID: 8723473705744561057, guid: 6d8debe5d3e26864fa401fc9939a676f,
         type: 3}

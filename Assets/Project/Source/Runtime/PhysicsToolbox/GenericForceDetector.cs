@@ -15,8 +15,6 @@ namespace Manatea.RootlingForest
 
         protected override void ForceDetected(Vector3 force)
         {
-            Debug.Log("Force Detected!", gameObject);
-
             if (m_EffectsToApply.Length > 0)
             {
                 if (EffectOwner)

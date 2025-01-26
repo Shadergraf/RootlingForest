@@ -2,7 +2,6 @@ using Manatea;
 using Manatea.GameplaySystem;
 using Manatea.RootlingForest;
 using NUnit.Framework;
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,7 +31,7 @@ public class TestOverlap : MonoBehaviour
     [SerializeField]
     private UnityEvent m_NoOverlapDetected;
 
-    private TriggerEventSender m_TriggerEventSender;
+    private OnTriggerEnterCallbackComponent m_OnTriggerEnterCallbackComponent;
     private List<Collider> m_TriggeredColliders = new List<Collider>();
 
 
@@ -42,7 +41,7 @@ public class TestOverlap : MonoBehaviour
 
         if (m_Rigidbody.value)
         {
-            m_TriggerEventSender = m_Rigidbody.value.gameObject.AddComponent<TriggerEventSender>();
+            m_OnTriggerEnterCallbackComponent = m_Rigidbody.value.gameObject.AddComponent<OnTriggerEnterCallbackComponent>();
         }
     }
     private void OnEnable()
@@ -54,7 +53,7 @@ public class TestOverlap : MonoBehaviour
             return;
         }
 
-        m_TriggerEventSender.OnTriggerEnterEvent += OnTriggerEnterEvent;
+        m_OnTriggerEnterCallbackComponent.OnTriggerEnterEvent += OnTriggerEnterEvent;
         StartCoroutine(TickLoop());
     }
     private void OnDisable()
@@ -65,13 +64,13 @@ public class TestOverlap : MonoBehaviour
         }
 
         StopAllCoroutines();
-        m_TriggerEventSender.OnTriggerEnterEvent -= OnTriggerEnterEvent;
+        m_OnTriggerEnterCallbackComponent.OnTriggerEnterEvent -= OnTriggerEnterEvent;
     }
     private void OnDestroy()
     {
-        if (m_TriggerEventSender)
+        if (m_OnTriggerEnterCallbackComponent)
         {
-            Destroy(m_TriggerEventSender);
+            Destroy(m_OnTriggerEnterCallbackComponent);
         }
     }
 
@@ -82,10 +81,14 @@ public class TestOverlap : MonoBehaviour
 
     private IEnumerator TickLoop()
     {
+        m_Rigidbody.value.detectCollisions = false;
+        yield return new WaitForSeconds(m_TickTime * Random.value);
+
         while (true)
         {
-            m_Rigidbody.value.detectCollisions = true;
             m_TriggeredColliders.Clear();
+
+            m_Rigidbody.value.detectCollisions = true;
             yield return new WaitForFixedUpdate();
             m_Rigidbody.value.detectCollisions = false;
 
@@ -120,15 +123,5 @@ public class TestOverlap : MonoBehaviour
         }
 
         return false;
-    }
-
-    private class TriggerEventSender : MonoBehaviour
-    {
-        public event Action<Collider> OnTriggerEnterEvent;
-
-        private void OnTriggerEnter(Collider collider)
-        {
-            OnTriggerEnterEvent?.Invoke(collider);
-        }
     }
 }

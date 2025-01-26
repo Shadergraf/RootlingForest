@@ -84,7 +84,10 @@ namespace Manatea.RootlingForest
                 {
                     Vector3 forceVector = rigid.position - explosionPosition;
 
-                    rigid.AddForceAtPosition(forceVector.normalized * m_Strength, explosionPosition, m_IgnoreMass ? ForceMode.VelocityChange : ForceMode.Impulse);
+                    // TODO bad, should be adjusted by exposed parameters instead of here
+                    forceVector = (forceVector * 5).ClampMagnitude(0, 1);
+
+                    rigid.AddForceAtPosition(forceVector * m_Strength, explosionPosition, m_IgnoreMass ? ForceMode.VelocityChange : ForceMode.Impulse);
                 }
 
                 // Time
