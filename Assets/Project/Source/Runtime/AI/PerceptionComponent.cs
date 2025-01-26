@@ -46,7 +46,7 @@ public class PerceptionComponent : MonoBehaviour
         m_Colliders.Add(other);
     }
 
-    private void Perceive(Collider collider)
+    public void Perceive(Collider collider)
     {
         // Can be null if objects are destroyed between perception ticks
         if (collider && collider.attachedRigidbody)

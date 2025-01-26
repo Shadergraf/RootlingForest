@@ -228,6 +228,8 @@ namespace Manatea.RootlingForest
                     Rigidbody rigid = Colliders[i].attachedRigidbody;
                     if (rigid == null)
                         continue;
+                    if (rigid == Self)
+                        continue;
                     GrabPreferences prefs = rigid.GetComponentInChildren<GrabPreferences>();
                     if (!prefs)
                         continue;

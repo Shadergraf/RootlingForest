@@ -27,7 +27,7 @@ public class TestOverlap : MonoBehaviour
     private List<GameplayTagOwner> m_IgnoreTagOwner;
     [Space]
     [SerializeField]
-    private UnityEvent m_OverlapDetected;
+    private UnityEvent<Collider> m_OverlapDetected;
     [SerializeField]
     private UnityEvent m_NoOverlapDetected;
 
@@ -92,9 +92,9 @@ public class TestOverlap : MonoBehaviour
             yield return new WaitForFixedUpdate();
             m_Rigidbody.value.detectCollisions = false;
 
-            bool detected = Test();
-            if (detected)
-                m_OverlapDetected.Invoke();
+            Collider detectedCollider = Test();
+            if (detectedCollider)
+                m_OverlapDetected.Invoke(detectedCollider);
             else
                 m_NoOverlapDetected.Invoke();
 
@@ -102,7 +102,7 @@ public class TestOverlap : MonoBehaviour
         }
     }
 
-    private bool Test()
+    private Collider Test()
     {
         foreach (Collider collider in m_TriggeredColliders)
         {
@@ -110,7 +110,7 @@ public class TestOverlap : MonoBehaviour
                 continue;
 
             if (m_Filter.IsEmpty)
-                return true;
+                return collider;
 
             var colliderTagOwner = collider.GetComponentInParent<GameplayTagOwner>();
             if (!colliderTagOwner)
@@ -119,9 +119,9 @@ public class TestOverlap : MonoBehaviour
                 continue;
             bool filterMatching = colliderTagOwner.SatisfiesTagFilter(m_Filter);
             if (filterMatching)
-                return true;
+                return collider;
         }
 
-        return false;
+        return null;
     }
 }
